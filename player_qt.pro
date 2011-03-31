@@ -6,21 +6,44 @@
 
 QT       += core gui network
 
-TARGET = player_qt
+TARGET = playerqt
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        form.cpp
+        form.cpp \
+    web.cpp \
+    qjson/serializerrunnable.cpp \
+    qjson/serializer.cpp \
+    qjson/qobjecthelper.cpp \
+    qjson/parserrunnable.cpp \
+    qjson/parser.cpp \
+    qjson/json_scanner.cpp \
+    qjson/json_parser.cc
 
-HEADERS  += form.h
+HEADERS  += form.h \
+    web.h \
+    task.h \
+    qjson/stack.hh \
+    qjson/serializerrunnable.h \
+    qjson/serializer.h \
+    qjson/qobjecthelper.h \
+    qjson/qjson_export.h \
+    qjson/qjson_debug.h \
+    qjson/position.hh \
+    qjson/parserrunnable.h \
+    qjson/parser.h \
+    qjson/parser_p.h \
+    qjson/location.hh \
+    qjson/json_scanner.h \
+    qjson/json_parser.hh
 
 FORMS    += form.ui
 
 CONFIG += mobility
 MOBILITY = 
 
-LIBS += -L../qjson-build-simulator/lib -lqjson
+#LIBS += -L../qjson-build-simulator/lib -lqjson
 
 symbian {
     TARGET.UID3 = 0xe7928591
