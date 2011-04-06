@@ -8,7 +8,7 @@ namespace Ui {
 }
 
 class QListWidgetItem;
-class QLabel;
+class InfoPage;
 class Web;
 
 class Form : public QMainWindow
@@ -24,6 +24,12 @@ private:
 	void requestPage();
 	//! Показать список с текущей страницы
 	void showStations();
+	//! Заполнить список стран на странице фильтров
+	void showCountries(QVariantList countries);
+	//! Заполнить список стран на странице фильтров
+	void showCities(QVariantList cities);
+	//! Заполнить список жанров на странице фильтров
+	void showGenres(QVariantList genres);
 
 	//! Отладочные сообщения
 	void log(QString text);
@@ -35,8 +41,14 @@ private:
 	QUrl firstUrl(QVariantMap station) const;
 
 private slots:
+	void on_pushButton_filter_apply_clicked();
 	void on_stations_itemDoubleClicked(QListWidgetItem* item);
- void on_pushButton_3_clicked();
+
+	//! Выбрана страна, запросить список городов
+	void on_comboBox_country_currentIndexChanged(int index);
+
+	//! Установить адрес сервера
+	void on_comboBox_server_currentIndexChanged(QString );
 
 	//! Открыть станцию
 	void on_actionOpenStation_triggered();
@@ -53,11 +65,14 @@ private slots:
 
 private:
 	Ui::Form *ui;
+
 	Web *m_web; //!< Веб запросы
 
 	int m_page; //!< Текущая страница
+	QVariantMap m_filter; //!< Параметры запроса
 	QVariantList m_stations; //!< Распарсенный список станций
-	QLabel *m_station_view;
+
+	InfoPage *m_station_view; //!< Информация о станции
 };
 
 #endif // FORM_H

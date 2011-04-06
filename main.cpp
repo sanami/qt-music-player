@@ -4,6 +4,7 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	a.setApplicationName("playerqt");
 
     Form w;
 #if defined(Q_WS_S60)

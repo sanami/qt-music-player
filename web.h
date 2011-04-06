@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QMap>
+#include <QString>
 #include "task.h"
 
 class QNetworkAccessManager;
@@ -20,11 +21,22 @@ public:
 	Web();
 	~Web();
 
-	// Список станций на странице
-	void requestStations(int page);
+	void setServer(QString server)
+	{
+		m_server = server;
+	}
 
-	// Общие запросы
-	Task *request(QUrl url, QVariantMap params = QVariantMap());
+	//! Список стран
+	void requestCountries();
+	//! Список городов в стране
+	void requestCities(int country_id);
+	//! Список жанров
+	void requestGenres();
+	//! Список станций на странице
+	void requestStations(int page, QVariantMap params = QVariantMap());
+
+	//! Общие запросы
+	Task *request(Task::Type type, QUrl url, QVariantMap params = QVariantMap());
 
 private slots:
 	//! Получен результат запроса
@@ -37,6 +49,7 @@ signals:
 
 private:
 	QNetworkAccessManager *m_network;
+	QString m_server; //!< Адрес сервера
 	QJson::Parser *m_json_parser;
 	QMap<QNetworkReply *, Task *> m_reply;
 };

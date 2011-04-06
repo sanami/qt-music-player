@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network phonon
 
 TARGET = playerqt
 TEMPLATE = app
@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     qjson/parserrunnable.cpp \
     qjson/parser.cpp \
     qjson/json_scanner.cpp \
-    qjson/json_parser.cc
+    qjson/json_parser.cc \
+    info_page.cpp \
+    media.cpp
 
 HEADERS  += form.h \
     web.h \
@@ -36,9 +38,12 @@ HEADERS  += form.h \
     qjson/parser_p.h \
     qjson/location.hh \
     qjson/json_scanner.h \
-    qjson/json_parser.hh
+    qjson/json_parser.hh \
+    info_page.h \
+    media.h
 
-FORMS    += form.ui
+FORMS    += form.ui \
+    info_page.ui
 
 CONFIG += mobility
 MOBILITY = 

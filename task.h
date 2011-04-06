@@ -6,7 +6,7 @@
 //! Задача на выполнение
 struct Task
 {
-	enum Type {General, Stations, Streams, Favorites, Filters} type;
+	enum Type {Unknown, Stations, Countries, Cities, Genres} type; //!< Тип запроса
 	QUrl url; //!< Адрес запроса
 	QVariantMap params; //!< Доп. информация
 	QVariant result; //!< Результат
