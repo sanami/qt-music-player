@@ -11,6 +11,7 @@ struct Task
 	QVariantMap params; //!< Доп. информация
 	QVariant result; //!< Результат
 	bool ok;
+	int error_code;
 	//TODO filter
 };
 

@@ -10,6 +10,7 @@ namespace Ui {
 class QListWidgetItem;
 class InfoPage;
 class Web;
+class Media;
 
 class Form : public QMainWindow
 {
@@ -23,7 +24,7 @@ private:
 	//! Запросить текущую страницу
 	void requestPage();
 	//! Показать список с текущей страницы
-	void showStations();
+	void showStations(QVariantMap stations);
 	//! Заполнить список стран на странице фильтров
 	void showCountries(QVariantList countries);
 	//! Заполнить список стран на странице фильтров
@@ -68,9 +69,10 @@ private:
 
 	Web *m_web; //!< Веб запросы
 
-	int m_page; //!< Текущая страница
+	int m_current_page; //!< Текущая страница
+	int m_num_pages;    //!< Общее кол-во страниц
+
 	QVariantMap m_filter; //!< Параметры запроса
-	QVariantList m_stations; //!< Распарсенный список станций
 
 	InfoPage *m_station_view; //!< Информация о станции
 };

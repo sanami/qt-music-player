@@ -21,6 +21,7 @@ public:
 	Web();
 	~Web();
 
+	//! Сервер для отправки запросов
 	void setServer(QString server)
 	{
 		m_server = server;

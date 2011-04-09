@@ -21,7 +21,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -81,6 +81,14 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>http://192.168.1.128:3000</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>http://192.168.2.14:3000</string>

@@ -10,11 +10,13 @@
 Form::Form(QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::Form)
+	, m_current_page(0)
+	, m_num_pages(0)
 {
 #ifdef Q_WS_MAEMO_5
 //	setAttribute(Qt::WA_Maemo5AutoOrientation, true);
 	setAttribute(Qt::WA_Maemo5PortraitOrientation, true);
-	setAttribute(Qt::WA_Maemo5StackedWindow);
+	setAttribute(Qt::WA_Maemo5StackedWindow); // Слайд между окнами
 #endif
     ui->setupUi(this);
 
@@ -26,15 +28,13 @@ Form::Form(QWidget *parent)
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), this, SLOT(on_web_finished(Task *)));
 
-	// Первая страница
-	m_page = 1;
+	QString server = ui->comboBox_server->currentText();
+	on_comboBox_server_currentIndexChanged(server);
+//	ui->comboBox_server->setCurrentIndex(-1);
+
+	// Запрос первой страницы
+	m_current_page = 1;
 	requestPage();
-
-	// Список стран в фильтр
-	m_web->requestCountries();
-
-	// Список жанров в фильтр
-	m_web->requestGenres();
 }
 
 Form::~Form()
@@ -53,9 +53,14 @@ void Form::toggleBusy(int check)
 #endif
 
 	// Блокировать если занят
-	ui->pushButton->setDisabled(busy);
-	ui->pushButton_2->setDisabled(busy);
 	ui->stations->setDisabled(busy);
+
+	// Управление навигацией
+	ui->pushButton->setEnabled(!busy && (m_current_page > 1));
+	ui->pushButton_2->setEnabled(!busy && (m_current_page < m_num_pages));
+
+	// Информация о страницах
+	ui->page->setText(QString("%1 / %2").arg(m_current_page).arg(m_num_pages));
 }
 
 void Form::log(QString text)
@@ -67,56 +72,65 @@ void Form::log(QString text)
 void Form::requestPage()
 {
 	// Отправить запроса на текущую страницу
-	m_web->requestStations(m_page, m_filter);
-	ui->page->setText(QString::number(m_page));
+	m_web->requestStations(m_current_page, m_filter);
 
-	// В списке сообщение о работае
+	// В списке сообщение о работе
 	ui->stations->clear();
 	ui->stations->addItem("Loading...");
 	toggleBusy(Qt::Checked);
 
-	log(QString("showPage %1").arg(m_page));
+	log(QString("showPage %1").arg(m_current_page));
 }
 
 void Form::on_web_finished(Task *task)
 {
 	qDebug() << Q_FUNC_INFO;
 
-	switch(task->type)
+	if (task->ok)
 	{
-	case Task::Stations:
-		// Получены данные о списке станций
-		m_stations = task->result.toList();
-		showStations();
-		break;
-	case Task::Countries:
-		// Список стран
-		showCountries(task->result.toList());
-		break;
-	case Task::Cities:
-		// Список городов
-		showCities(task->result.toList());
-		break;
-	case Task::Genres:
-		// Список жанров
-		showGenres(task->result.toList());
-		break;
+		switch(task->type)
+		{
+		case Task::Stations:
+			// Получены данные о списке станций
+			showStations(task->result.toMap());
+			break;
+		case Task::Countries:
+			// Список стран
+			showCountries(task->result.toList());
+			break;
+		case Task::Cities:
+			// Список городов
+			showCities(task->result.toList());
+			break;
+		case Task::Genres:
+			// Список жанров
+			showGenres(task->result.toList());
+			break;
 
-	default:
-		qDebug() << "Unknown task type:" << task->type;
-		Q_ASSERT( 0 );
+		default:
+			qDebug() << "Unknown task type:" << task->type;
+			Q_ASSERT( 0 );
+		}
+	}
+	else
+	{
+		qDebug() << "Error code:" << task->error_code << "for task type:" << task->type;
 	}
 
 	delete task;
 }
 
-void Form::showStations()
+void Form::showStations(QVariantMap result)
 {
+	m_current_page = result["current_page"].toInt();
+	m_num_pages = result["num_pages"].toInt();
+
 	toggleBusy(Qt::Unchecked);
 
 	// Отобразить список
 	ui->stations->clear();
-	foreach(QVariant station_var, m_stations)
+	QVariantList stations = result["stations"].toList();
+	foreach(QVariant station_var, stations)
 	{
 		QVariantMap station = station_var.toMap().value("station").toMap();
 		//qDebug() << station;
@@ -125,6 +139,11 @@ void Form::showStations()
 		QListWidgetItem *it = new QListWidgetItem(name);
 		it->setData(StationRole, station);
 		ui->stations->addItem(it);
+	}
+	// Пустой список
+	if (stations.isEmpty())
+	{
+		ui->stations->addItem("Not found");
 	}
 }
 
@@ -180,19 +199,21 @@ void Form::showGenres(QVariantList genres)
 void Form::on_pushButton_clicked()
 {
 	// <<
-	if (m_page > 1)
+	if (m_current_page > 1)
 	{
-		m_page--;
+		m_current_page--;
 		requestPage();
 	}
-
 }
 
 void Form::on_pushButton_2_clicked()
 {
 	// >>
-	m_page++;
-	requestPage();
+	if (m_current_page < m_num_pages)
+	{
+		m_current_page++;
+		requestPage();
+	}
 }
 
 QUrl Form::firstUrl(QVariantMap station) const
@@ -206,7 +227,7 @@ QUrl Form::firstUrl(QVariantMap station) const
 	return url;
 }
 
-void Form::on_stations_currentItemChanged(QListWidgetItem* it, QListWidgetItem* previous)
+void Form::on_stations_currentItemChanged(QListWidgetItem* it, QListWidgetItem* /*previous*/)
 {
 	if (it)
 	{
@@ -241,6 +262,12 @@ void Form::on_stations_itemDoubleClicked(QListWidgetItem* it)
 void Form::on_comboBox_server_currentIndexChanged(QString server)
 {
 	m_web->setServer(server);
+
+	// Список стран в фильтр
+	m_web->requestCountries();
+
+	// Список жанров в фильтр
+	m_web->requestGenres();
 }
 
 void Form::on_comboBox_country_currentIndexChanged(int index)
@@ -293,7 +320,7 @@ void Form::on_pushButton_filter_apply_clicked()
 		m_filter["genre"] = genre_id;
 	}
 
-	m_page = 1;
+	m_current_page = 1;
 	requestPage();
 
 	// Переключится на список станций

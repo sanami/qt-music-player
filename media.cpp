@@ -26,6 +26,7 @@ Media::~Media()
 
 void Media::open(QString url)
 {
+	qDebug() << Q_FUNC_INFO << url;
 	QDesktopServices::openUrl(QUrl(url));
 
 	return;
@@ -37,8 +38,6 @@ void Media::open(QString url)
 
 //	m_mediaObject->setCurrentSource(*m_source);
 	m_mediaObject->play();
-
-	qDebug() << Q_FUNC_INFO << url;
 }
 
 void Media::on_stateChanged(Phonon::State newstate, Phonon::State oldstate)

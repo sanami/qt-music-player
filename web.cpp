@@ -69,16 +69,26 @@ Task *Web::request(Task::Type type, QUrl url, QVariantMap params)
 
 void Web::on_replyFinished(QNetworkReply *reply)
 {
-	qDebug() << Q_FUNC_INFO << reply->bytesAvailable();
+	qDebug() << Q_FUNC_INFO << reply->error() << reply->bytesAvailable();
 	if (m_reply.contains(reply))
 	{
 		Task *task = m_reply.take(reply);
 
-		QByteArray json = reply->readAll();
+		// Нет ошибок
+		if (reply->error() == QNetworkReply::NoError)
+		{
+			QByteArray json = reply->readAll();
 
-		bool ok;
-		task->result = m_json_parser->parse(json, &ok);
-		task->ok = ok;
+			bool ok;
+			task->result = m_json_parser->parse(json, &ok);
+			task->ok = ok;
+		}
+		else
+		{
+			// Ошибка загрузки данных
+			task->error_code = (int)reply->error();
+			task->ok = false;
+		}
 		emit sig_finished(task);
 	}
 	else
