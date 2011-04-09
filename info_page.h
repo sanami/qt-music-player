@@ -21,10 +21,13 @@ public:
 	//! Показать данные станции
 	void setStation(QVariantMap station);
 
+	void showMessage(QString str);
+
+signals:
+	void sig_openStream(QString stream);
+
 private:
     Ui::InfoPage *ui;
-
-	class Media *m_media; //!< Плеер
 
 private slots:
 	void on_streams_itemDoubleClicked(QTreeWidgetItem* item);

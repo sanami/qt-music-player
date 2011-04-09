@@ -1,8 +1,7 @@
-#ifndef MEDIA_H
-#define MEDIA_H
-
+#pragma once
 #include <QObject>
-#include <Phonon>
+
+class MPlayerControl;
 
 class Media : public QObject
 {
@@ -13,14 +12,10 @@ public:
 
 	void open(QString url);
 
-private slots:
-	void on_stateChanged(Phonon::State newstate, Phonon::State oldstate);
-	void on_bufferStatus(int percentFilled);
+signals:
+	//! Сообщения от плееров
+	void sig_messages(QString str);
 
 private:
-	Phonon::AudioOutput *m_audioOutput;
-	Phonon::MediaObject *m_mediaObject;
-	Phonon::MediaSource *m_source;
+	MPlayerControl *m_mplayer; //!< Управление внешним mplayer
 };
-
-#endif // MEDIA_H

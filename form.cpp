@@ -4,6 +4,7 @@
 #include "web.h"
 #include "ui_form.h"
 #include "info_page.h"
+#include "media.h"
 
 #define StationRole (Qt::UserRole + 1)
 
@@ -22,19 +23,33 @@ Form::Form(QWidget *parent)
 
 	m_station_view = new InfoPage(this);
 	m_station_view->hide();
+	connect(m_station_view, SIGNAL(sig_openStream(QString)), SLOT(on_openStream(QString)));
 
 	ui->stations->addAction(ui->actionOpenStation);
+
+	m_media = new Media(this);
+	connect(m_media, SIGNAL(sig_messages(QString)), SLOT(on_media_messages(QString)));
 
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), this, SLOT(on_web_finished(Task *)));
 
-	QString server = ui->comboBox_server->currentText();
-	on_comboBox_server_currentIndexChanged(server);
-//	ui->comboBox_server->setCurrentIndex(-1);
+//	QString str = m_settings.server();
+//	int server_index = ui->comboBox_server->findText(str);
 
-	// Запрос первой страницы
-	m_current_page = 1;
-	requestPage();
+	if (m_settings.server() != "")
+	{
+		int server_index = ui->comboBox_server->findText(m_settings.server());
+		if (server_index > 0)
+		{
+			ui->comboBox_server->setCurrentIndex(server_index);
+
+			// Запрос первой страницы
+			m_current_page = 1;
+			requestPage();
+		}
+	}
+//	QString server = ui->comboBox_server->currentText();
+//	on_comboBox_server_currentIndexChanged(server);
 }
 
 Form::~Form()
@@ -42,6 +57,7 @@ Form::~Form()
     delete ui;
 	delete m_station_view;
 	delete m_web;
+	delete m_media;
 }
 
 void Form::toggleBusy(int check)
@@ -261,6 +277,8 @@ void Form::on_stations_itemDoubleClicked(QListWidgetItem* it)
 
 void Form::on_comboBox_server_currentIndexChanged(QString server)
 {
+	m_settings.setServer(server);
+
 	m_web->setServer(server);
 
 	// Список стран в фильтр
@@ -325,4 +343,15 @@ void Form::on_pushButton_filter_apply_clicked()
 
 	// Переключится на список станций
 	ui->tabWidget->setCurrentIndex(0);
+}
+
+void Form::on_openStream(QString stream)
+{
+	m_media->open(stream);
+//	m_media->open("http://broadcast.infomaniak.net:80/funradiobe-high.mp3");
+}
+
+void Form::on_media_messages(QString str)
+{
+	m_station_view->showMessage(str);
 }

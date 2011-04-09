@@ -1,6 +1,5 @@
 #include "info_page.h"
 #include "ui_info_page.h"
-#include "media.h"
 
 InfoPage::InfoPage(QWidget *parent)
 	: QWidget(parent, Qt::Window)
@@ -10,16 +9,12 @@ InfoPage::InfoPage(QWidget *parent)
 
 #ifdef Q_WS_MAEMO_5
 	setAttribute(Qt::WA_Maemo5StackedWindow);
-//	setWindowFlags(windowFlags() | Qt::Window);
 #endif
-
-	m_media = new Media(this);
 }
 
 InfoPage::~InfoPage()
 {
     delete ui;
-	delete m_media;
 }
 
 void InfoPage::setStation(QVariantMap station)
@@ -58,5 +53,11 @@ void InfoPage::setStation(QVariantMap station)
 void InfoPage::on_streams_itemDoubleClicked(QTreeWidgetItem* it)
 {
 	QString url = it->text(1); // URL в колонке
-	m_media->open(url);
+	emit sig_openStream(url);
+}
+
+void InfoPage::showMessage(QString str)
+{
+	ui->messages->appendPlainText(str);
+	ui->messages->ensureCursorVisible();
 }

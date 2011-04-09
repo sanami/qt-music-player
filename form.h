@@ -2,6 +2,7 @@
 #define FORM_H
 #include <QMainWindow>
 #include "task.h"
+#include "settings.h"
 
 namespace Ui {
     class Form;
@@ -64,17 +65,22 @@ private slots:
 	//! Получен результат запроса
 	void on_web_finished(Task *task);
 
+	//! Начать проигрывание аудиопотока
+	void on_openStream(QString stream);
+	//! Сообщения от плееров
+	void on_media_messages(QString str);
+
 private:
 	Ui::Form *ui;
 
 	Web *m_web; //!< Веб запросы
-
-	int m_current_page; //!< Текущая страница
-	int m_num_pages;    //!< Общее кол-во страниц
-
 	QVariantMap m_filter; //!< Параметры запроса
+	int m_current_page;   //!< Текущая страница
+	int m_num_pages;      //!< Общее кол-во страниц
 
 	InfoPage *m_station_view; //!< Информация о станции
+	Media *m_media; //!< Плеер
+	Settings m_settings;
 };
 
 #endif // FORM_H

@@ -4,11 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network phonon
-
-TARGET = playerqt
 TEMPLATE = app
+TARGET = playerqt
 
+QT       += core gui network phonon
+CONFIG += precompile_header mobility
+MOBILITY = 
+
+#LIBS += -L../qjson-build-simulator/lib -lqjson
+
+# Use Precompiled headers (PCH)
+PRECOMPILED_HEADER = pch.h
 
 SOURCES += main.cpp\
         form.cpp \
@@ -21,7 +27,9 @@ SOURCES += main.cpp\
     qjson/json_scanner.cpp \
     qjson/json_parser.cc \
     info_page.cpp \
-    media.cpp
+    media.cpp \
+	mplayer_control.cpp \
+    settings.cpp
 
 HEADERS  += form.h \
     web.h \
@@ -40,15 +48,12 @@ HEADERS  += form.h \
     qjson/json_scanner.h \
     qjson/json_parser.hh \
     info_page.h \
-    media.h
+    media.h \
+	mplayer_control.h \
+    settings.h
 
 FORMS    += form.ui \
     info_page.ui
-
-CONFIG += mobility
-MOBILITY = 
-
-#LIBS += -L../qjson-build-simulator/lib -lqjson
 
 symbian {
     TARGET.UID3 = 0xe7928591
