@@ -21,16 +21,18 @@ public:
 	//! Показать данные станции
 	void setStation(QVariantMap station);
 
-	void showMessage(QString str);
-
 signals:
-	void sig_openStream(QString stream);
+	void sig_openStream(QVariantMap station, QString stream);
 
 private:
     Ui::InfoPage *ui;
+	QVariantMap m_station; //!< Текущая станция
 
 private slots:
 	void on_streams_itemDoubleClicked(QTreeWidgetItem* item);
+
+	//! Сообщения от плееров
+	void on_media_messages(QString str);
 };
 
 #endif // INFO_PAGE_H

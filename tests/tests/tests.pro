@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core testlib
-
-QT       -= gui
+QT       += testlib core gui network
 
 TARGET = tests
 CONFIG   += precompile_header console 
@@ -19,8 +17,15 @@ PRECOMPILED_HEADER = ../../pch.h
 
 SOURCES += \
     test.cpp \
-    ../../player_control.cpp
+	../../mplayer_control.cpp \
+    ../../settings.cpp \
+    ../../cookiejar.cpp \
+    ../../web.cpp
 
 HEADERS += \
     test.h \
-    ../../player_control.h
+	../../mplayer_control.h \
+    ../../settings.h \
+    ../../cookiejar.h \
+    ../../pch.h \
+    ../../web.h

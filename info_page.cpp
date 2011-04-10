@@ -19,6 +19,9 @@ InfoPage::~InfoPage()
 
 void InfoPage::setStation(QVariantMap station)
 {
+	// Сохранить данные
+	m_station = station;
+
 	ui->streams->clear();
 	QStringList info;
 	foreach(QString name, station.keys())
@@ -53,10 +56,10 @@ void InfoPage::setStation(QVariantMap station)
 void InfoPage::on_streams_itemDoubleClicked(QTreeWidgetItem* it)
 {
 	QString url = it->text(1); // URL в колонке
-	emit sig_openStream(url);
+	emit sig_openStream(m_station, url);
 }
 
-void InfoPage::showMessage(QString str)
+void InfoPage::on_media_messages(QString str)
 {
 	ui->messages->appendPlainText(str);
 	ui->messages->ensureCursorVisible();

@@ -31,6 +31,7 @@ public:
     void seek(int pos);
     void cmd(QString str, bool show = true);
 
+	//! Остановить процесс плеера
     void close();
 
 private:

@@ -4,6 +4,8 @@
 #include "web.h"
 #include "ui_form.h"
 #include "info_page.h"
+#include "player_page.h"
+#include "log_page.h"
 #include "media.h"
 
 #define StationRole (Qt::UserRole + 1)
@@ -21,33 +23,40 @@ Form::Form(QWidget *parent)
 #endif
     ui->setupUi(this);
 
+//	menuBar()->addAction(ui->actionPlayer);
+	menuBar()->addAction(ui->actionLog);
+
+	m_log_page = new LogPage(this);
+	m_log_page->hide();
+	connect(this, SIGNAL(sig_log(QString)), m_log_page, SLOT(addLog(QString)));
+
 	m_station_view = new InfoPage(this);
 	m_station_view->hide();
-	connect(m_station_view, SIGNAL(sig_openStream(QString)), SLOT(on_openStream(QString)));
-
-	ui->stations->addAction(ui->actionOpenStation);
+	connect(m_station_view, SIGNAL(sig_openStream(QVariantMap, QString)), SLOT(on_openStream(QVariantMap, QString)));
 
 	m_media = new Media(this);
-	connect(m_media, SIGNAL(sig_messages(QString)), SLOT(on_media_messages(QString)));
+	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
+
+	m_player_page = new PlayerPage(m_media, this);
+	connect(m_player_page, SIGNAL(sig_showStationPage(QVariantMap)), SLOT(on_showStationPage(QVariantMap)));
+	ui->tabWidget->addTab(m_player_page, "Player");
+//	m_player_page->hide();
+
+	ui->stations->addAction(ui->actionOpenStation);
 
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), this, SLOT(on_web_finished(Task *)));
 
-//	QString str = m_settings.server();
-//	int server_index = ui->comboBox_server->findText(str);
-
-	if (m_settings.server() != "")
+	int server_index = ui->comboBox_server->findText(m_settings.server());
+	if (server_index >= 0)
 	{
-		int server_index = ui->comboBox_server->findText(m_settings.server());
-		if (server_index > 0)
-		{
-			ui->comboBox_server->setCurrentIndex(server_index);
+		ui->comboBox_server->setCurrentIndex(server_index);
 
-			// Запрос первой страницы
-			m_current_page = 1;
-			requestPage();
-		}
+		// Запрос первой страницы
+//		m_current_page = 1;
+//		requestPage();
 	}
+
 //	QString server = ui->comboBox_server->currentText();
 //	on_comboBox_server_currentIndexChanged(server);
 }
@@ -56,6 +65,7 @@ Form::~Form()
 {
     delete ui;
 	delete m_station_view;
+	delete m_player_page;
 	delete m_web;
 	delete m_media;
 }
@@ -81,8 +91,7 @@ void Form::toggleBusy(int check)
 
 void Form::log(QString text)
 {
-	qDebug() << Q_FUNC_INFO << text;
-	ui->plainTextEdit->appendPlainText(text);
+	emit sig_log(text);
 }
 
 void Form::requestPage()
@@ -106,6 +115,12 @@ void Form::on_web_finished(Task *task)
 	{
 		switch(task->type)
 		{
+		case Task::Cookies:
+			// Список стран в фильтр
+			m_web->requestCountries();
+			// Список жанров в фильтр
+			m_web->requestGenres();
+			break;
 		case Task::Stations:
 			// Получены данные о списке станций
 			showStations(task->result.toMap());
@@ -130,7 +145,15 @@ void Form::on_web_finished(Task *task)
 	}
 	else
 	{
-		qDebug() << "Error code:" << task->error_code << "for task type:" << task->type;
+		switch(task->type)
+		{
+		case Task::Cookies:
+			// Ошибка подключения к серверу
+			qDebug() << "Bad server:" << m_web->server();
+			break;
+		default:
+			qDebug() << "Error code:" << task->error_code << "for task type:" << task->type;
+		}
 	}
 
 	delete task;
@@ -232,28 +255,6 @@ void Form::on_pushButton_2_clicked()
 	}
 }
 
-QUrl Form::firstUrl(QVariantMap station) const
-{
-	QUrl url;
-	QVariantList streams = station["streams"].toList();
-	if (!streams.isEmpty())
-	{
-		url = streams[0].toMap()["stream"].toMap()["url"].toString();
-	}
-	return url;
-}
-
-void Form::on_stations_currentItemChanged(QListWidgetItem* it, QListWidgetItem* /*previous*/)
-{
-	if (it)
-	{
-		QVariantMap station = it->data(StationRole).toMap();
-		//qDebug() << station;
-		//qDebug() << station["streams"].toList()[0].toMap()["stream"].toMap()["url"];
-		log(firstUrl(station).toString());
-	}
-}
-
 void Form::on_actionOpenStation_triggered()
 {
 	qDebug() << Q_FUNC_INFO;
@@ -271,6 +272,11 @@ void Form::on_stations_itemDoubleClicked(QListWidgetItem* it)
 	QVariantMap station = it->data(StationRole).toMap();
 
 	// Показать детали станции
+	on_showStationPage(station);
+}
+
+void Form::on_showStationPage(QVariantMap station)
+{
 	m_station_view->setStation(station);
 	m_station_view->show();
 }
@@ -281,11 +287,8 @@ void Form::on_comboBox_server_currentIndexChanged(QString server)
 
 	m_web->setServer(server);
 
-	// Список стран в фильтр
-	m_web->requestCountries();
-
-	// Список жанров в фильтр
-	m_web->requestGenres();
+	// Первый запрос установит cookies с сервера
+	m_web->requestCookies();
 }
 
 void Form::on_comboBox_country_currentIndexChanged(int index)
@@ -345,13 +348,19 @@ void Form::on_pushButton_filter_apply_clicked()
 	ui->tabWidget->setCurrentIndex(0);
 }
 
-void Form::on_openStream(QString stream)
+void Form::on_openStream(QVariantMap station, QString stream)
 {
+	log(stream);
+	m_player_page->showStationInfo(station);
 	m_media->open(stream);
-//	m_media->open("http://broadcast.infomaniak.net:80/funradiobe-high.mp3");
 }
 
-void Form::on_media_messages(QString str)
+//void Form::on_actionPlayer_triggered()
+//{
+//	m_player_page->show();
+//}
+
+void Form::on_actionLog_triggered()
 {
-	m_station_view->showMessage(str);
+	m_log_page->show();
 }

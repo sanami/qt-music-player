@@ -1,13 +1,13 @@
 #include "settings.h"
 
 Settings::Settings()
-	: m_settings("player_qt", "settings")
+	: m_settings()
 {
 }
 
 QString Settings::server()
 {
-	m_settings.value("server").toString();
+	return m_settings.value("server", "").toString();
 }
 
 void Settings::setServer(QString server)

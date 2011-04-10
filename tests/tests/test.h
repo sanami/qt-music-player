@@ -20,4 +20,6 @@ private slots:
 	void test_settings();
 
 	void test_mplayer();
+
+	void test_cookie_jar();
 };

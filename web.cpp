@@ -6,6 +6,7 @@
 //#include "../qjson/src/parser.h"
 #include "qjson/parser.h"
 #include "web.h"
+#include "cookie_jar.h"
 
 Web::Web()
 	: QObject(NULL)
@@ -15,12 +16,22 @@ Web::Web()
 
 	m_network = new QNetworkAccessManager(this);
 	connect(m_network, SIGNAL(finished(QNetworkReply *)), this, SLOT(on_replyFinished(QNetworkReply *)));
+
+	m_network->setCookieJar(new CookieJar(this));
+//	m_network->setCookieJar(new QNetworkCookieJar(this));
+
 }
 
 Web::~Web()
 {
 	delete m_json_parser;
 	delete m_network;
+}
+
+void Web::requestCookies()
+{
+	QString url = QString("%1/info/cookies").arg(m_server);
+	request(Task::Cookies, url);
 }
 
 void Web::requestCountries()
@@ -70,6 +81,13 @@ Task *Web::request(Task::Type type, QUrl url, QVariantMap params)
 void Web::on_replyFinished(QNetworkReply *reply)
 {
 	qDebug() << Q_FUNC_INFO << reply->error() << reply->bytesAvailable();
+
+//	qDebug() << "replay" << reply->header(QNetworkRequest::CookieHeader);
+//	qDebug() << m_network->cookieJar()->cookiesForUrl(QUrl(m_server));
+
+//	CookieJar *jar = qobject_cast<CookieJar *>(m_network->cookieJar());
+//	qDebug() << "jar" << jar->all();
+
 	if (m_reply.contains(reply))
 	{
 		Task *task = m_reply.take(reply);
@@ -77,11 +95,20 @@ void Web::on_replyFinished(QNetworkReply *reply)
 		// Нет ошибок
 		if (reply->error() == QNetworkReply::NoError)
 		{
-			QByteArray json = reply->readAll();
+			switch(task->type)
+			{
+			case Task::Cookies:
+				// m_network установит данные в cookieJar
+				task->ok = true;
+				break;
+			default:
+				{
+					QByteArray json = reply->readAll();
 
-			bool ok;
-			task->result = m_json_parser->parse(json, &ok);
-			task->ok = ok;
+					task->result = m_json_parser->parse(json, &task->ok);
+				}
+			}
+
 		}
 		else
 		{

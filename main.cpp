@@ -3,8 +3,11 @@
 
 int main(int argc, char *argv[])
 {
+	QCoreApplication::setOrganizationName("playerqt");
+	QCoreApplication::setApplicationName("playerqt");
+//    QCoreApplication::setApplicationVersion("0.0.1");
+
 	QApplication a(argc, argv);
-	a.setApplicationName("playerqt");
 
     Form w;
 #if defined(Q_WS_S60)

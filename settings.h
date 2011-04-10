@@ -2,6 +2,7 @@
 #define SETTINGS_H
 #include <QSettings>
 
+//! Сохраняется в $HOME/.config/player_qt/settings.conf
 class Settings
 {
 public:

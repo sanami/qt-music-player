@@ -25,6 +25,7 @@ void MPlayerControl::close()
 	if (!m_proc.isNull())
 	{
 		cmd("quit");
+		sleep(1);
 		m_proc->waitForBytesWritten();
 		m_proc->close();
 
@@ -207,17 +208,17 @@ void MPlayerControl::startProcess(QString url)
     arguments << "-nojoystick";
     arguments << "-nolirc";
     //arguments << "-framedrop"; //Skip displaying some frames to maintain A/V sync on slow systems. Video filters are not applied to such frames. For B-frames								//even decoding is skipped completely.
-    arguments << "-loop" << "0";
+	arguments << "-loop" << "1"; // Пробовать только один раз
     //arguments << "-osdlevel" << "0";
     //arguments << "-idx";
     //arguments << "-quiet";
     arguments << "-msglevel" << "all=4";
     //arguments << "-vo" << "gl";
-//    arguments << "-vo" << "xv";
+	arguments << "-vo" << "null"; // Нет видео
 
-    arguments << url;// the file name you want to play (with path)
+	arguments << url; // the file name you want to play (with path)
 
-    qDebug() << arguments;
+	qDebug() << Q_FUNC_INFO << arguments;
     emit sig_videoOutput(arguments.join("\n"));
 
     m_proc = new QProcess(this);

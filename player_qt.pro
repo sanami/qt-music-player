@@ -29,7 +29,10 @@ SOURCES += main.cpp\
     info_page.cpp \
     media.cpp \
 	mplayer_control.cpp \
-    settings.cpp
+    settings.cpp \
+    player_page.cpp \
+    cookie_jar.cpp \
+    log_page.cpp
 
 HEADERS  += form.h \
     web.h \
@@ -50,10 +53,15 @@ HEADERS  += form.h \
     info_page.h \
     media.h \
 	mplayer_control.h \
-    settings.h
+    settings.h \
+    player_page.h \
+    cookie_jar.h \
+    log_page.h
 
 FORMS    += form.ui \
-    info_page.ui
+    info_page.ui \
+    player_page.ui \
+    log_page.ui
 
 symbian {
     TARGET.UID3 = 0xe7928591

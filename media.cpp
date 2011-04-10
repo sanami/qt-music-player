@@ -25,3 +25,16 @@ void Media::open(QString url)
 	// Открыть в mplayer
 	m_mplayer->open(url);
 }
+
+void Media::switch_play_state()
+{
+	qDebug() << Q_FUNC_INFO;
+
+	bool play_state = m_mplayer->isPlaying();
+	m_mplayer->play(!play_state);
+}
+
+void Media::close_player()
+{
+	m_mplayer->close();
+}

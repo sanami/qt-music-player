@@ -10,6 +10,8 @@ namespace Ui {
 
 class QListWidgetItem;
 class InfoPage;
+class PlayerPage;
+class LogPage;
 class Web;
 class Media;
 
@@ -39,11 +41,18 @@ private:
 	//! Индикатор загрузки
 	void toggleBusy(int check);
 
-	//! Первая ссылка из данных станции
-	QUrl firstUrl(QVariantMap station) const;
+signals:
+	//! Сообщения в окно лога
+	void sig_log(QString str);
 
 private slots:
+	void on_actionLog_triggered();
+//	void on_actionPlayer_triggered();
+
+	//! Поиск станций по фильтру
 	void on_pushButton_filter_apply_clicked();
+
+	//! Перейти на страницу станции
 	void on_stations_itemDoubleClicked(QListWidgetItem* item);
 
 	//! Выбрана страна, запросить список городов
@@ -54,8 +63,6 @@ private slots:
 
 	//! Открыть станцию
 	void on_actionOpenStation_triggered();
-	//! Выбрана станция
-	void on_stations_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
 
 	//! Следующая страница
 	void on_pushButton_2_clicked();
@@ -66,9 +73,10 @@ private slots:
 	void on_web_finished(Task *task);
 
 	//! Начать проигрывание аудиопотока
-	void on_openStream(QString stream);
-	//! Сообщения от плееров
-	void on_media_messages(QString str);
+	void on_openStream(QVariantMap station, QString stream);
+
+	//! Показать детали станции
+	void on_showStationPage(QVariantMap station);
 
 private:
 	Ui::Form *ui;
@@ -78,7 +86,9 @@ private:
 	int m_current_page;   //!< Текущая страница
 	int m_num_pages;      //!< Общее кол-во страниц
 
-	InfoPage *m_station_view; //!< Информация о станции
+	InfoPage *m_station_view;  //!< Информация о станции
+	PlayerPage *m_player_page; //!< Страница плеера
+	LogPage *m_log_page; //!< Страница сообщений
 	Media *m_media; //!< Плеер
 	Settings m_settings;
 };

@@ -22,10 +22,11 @@ public:
 	~Web();
 
 	//! Сервер для отправки запросов
-	void setServer(QString server)
-	{
-		m_server = server;
-	}
+	QString server() const { return m_server; }
+	void setServer(QString server) { m_server = server; }
+
+	//! Запрос на HTML страницу, это установит cookies
+	void requestCookies();
 
 	//! Список стран
 	void requestCountries();
@@ -50,6 +51,7 @@ signals:
 
 private:
 	QNetworkAccessManager *m_network;
+
 	QString m_server; //!< Адрес сервера
 	QJson::Parser *m_json_parser;
 	QMap<QNetworkReply *, Task *> m_reply;
