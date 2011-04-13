@@ -19,6 +19,6 @@ LogPage::~LogPage()
 
 void LogPage::addLog(QString text)
 {
-	qDebug() << Q_FUNC_INFO << text;
+//	qDebug() << Q_FUNC_INFO << text;
 	ui->log->appendPlainText(text);
 }

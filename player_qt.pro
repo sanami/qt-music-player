@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     settings.cpp \
     player_page.cpp \
     cookie_jar.cpp \
-    log_page.cpp
+    log_page.cpp \
+    logger.cpp
 
 HEADERS  += form.h \
     web.h \
@@ -56,7 +57,8 @@ HEADERS  += form.h \
     settings.h \
     player_page.h \
     cookie_jar.h \
-    log_page.h
+    log_page.h \
+    logger.h
 
 FORMS    += form.ui \
     info_page.ui \
@@ -68,4 +70,17 @@ symbian {
     # TARGET.CAPABILITY += 
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x800000
+}
+
+OTHER_FILES += \
+    qtc_packaging/debian_fremantle/rules \
+    qtc_packaging/debian_fremantle/README \
+    qtc_packaging/debian_fremantle/copyright \
+    qtc_packaging/debian_fremantle/control \
+    qtc_packaging/debian_fremantle/compat \
+    qtc_packaging/debian_fremantle/changelog
+
+maemo5 {
+    target.path = /opt/player_qt/bin
+    INSTALLS += target
 }

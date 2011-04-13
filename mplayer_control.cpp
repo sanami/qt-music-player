@@ -221,6 +221,9 @@ void MPlayerControl::startProcess(QString url)
 	qDebug() << Q_FUNC_INFO << arguments;
     emit sig_videoOutput(arguments.join("\n"));
 
+//	arguments.clear();
+//	arguments << "http://www.100p.nl/media/audio/100pnl.pls";
+
     m_proc = new QProcess(this);
     connect( m_proc, SIGNAL( finished(int, QProcess::ExitStatus) ), this, SLOT( on_finished(int, QProcess::ExitStatus) ) );
     connect( m_proc, SIGNAL( error(QProcess::ProcessError) ), this, SLOT( on_error(QProcess::ProcessError) ) );
@@ -229,5 +232,9 @@ void MPlayerControl::startProcess(QString url)
     connect( m_proc, SIGNAL( readyReadStandardOutput() ), this, SLOT( on_readyReadStandardOutput() ) );
 
     m_proc->start("mplayer", arguments);
-    //m_proc->start("C:/Program Files/MPlayer for Windows/MPlayer.exe", arguments);
+//    //m_proc->start("C:/Program Files/MPlayer for Windows/MPlayer.exe", arguments);
+
+//	qDebug() << m_proc->pid();
+
+//	QProcess::startDetached("mplayer", arguments);
 }

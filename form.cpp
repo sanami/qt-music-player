@@ -7,6 +7,7 @@
 #include "player_page.h"
 #include "log_page.h"
 #include "media.h"
+#include "logger.h"
 
 #define StationRole (Qt::UserRole + 1)
 
@@ -29,6 +30,7 @@ Form::Form(QWidget *parent)
 	m_log_page = new LogPage(this);
 	m_log_page->hide();
 	connect(this, SIGNAL(sig_log(QString)), m_log_page, SLOT(addLog(QString)));
+	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
 
 	m_station_view = new InfoPage(this);
 	m_station_view->hide();
