@@ -3,7 +3,8 @@
 #include "test.h"
 #include "../../settings.h"
 #include "../../mplayer_control.h"
-#include "../../cookiejar.h"
+#include "../../cookie_jar.h"
+#include "../../web.h"
 
 
 Test::Test(QObject *parent)
@@ -53,14 +54,29 @@ void Test::test_mplayer()
 
 void Test::test_cookie_jar()
 {
-	QNetworkAccessManager *network = new QNetworkAccessManager();
-	network->setCookieJar(new CookieJar(this));
+//	QNetworkAccessManager *network = new QNetworkAccessManager();
+//	network->setCookieJar(new CookieJar(this));
 
-	network->get("http://localhost:3000/stations/1440");
+//	network->get("http://localhost:3000/stations/1440");
 
 
-	delete network;
+//	delete network;
 
+}
+
+void Test::test_convert_variant_map_to_post_params()
+{
+	Web web;
+
+	QVariantMap params;
+	QVariantMap playlist;
+	playlist["playlist_type_id"] = 2;
+	playlist["station_id"] = 11;
+	params["playlist"] = playlist;
+	QByteArray result = web.toParams(params);
+
+	qDebug() << result;
+	QVERIFY( result == "playlist[playlist_type_id]=2&playlist[station_id]=11" );
 }
 
 QTEST_MAIN(Test);

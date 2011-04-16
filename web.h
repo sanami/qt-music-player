@@ -16,6 +16,7 @@ namespace QJson
 class Web : public QObject
 {
 	Q_OBJECT
+	friend class Test;
 
 public:
 	Web();
@@ -27,6 +28,10 @@ public:
 
 	//! Запрос на HTML страницу, это установит cookies
 	void requestCookies();
+	//! Добавить запись в плейлист пользователя
+	void addStationToPlaylist(QVariantMap station, QVariantMap playlist = QVariantMap());
+	//! Запрос информации о списке
+	void requestPlaylist(int playlist_id);
 
 	//! Список стран
 	void requestCountries();
@@ -36,18 +41,24 @@ public:
 	void requestGenres();
 	//! Список станций на странице
 	void requestStations(int page, QVariantMap params = QVariantMap());
+	//! Запрос данных одной станции
+	void requestStation(int station_id);
 
-	//! Общие запросы
-	Task *request(Task::Type type, QUrl url, QVariantMap params = QVariantMap());
+signals:
+	//! Завершенная задача
+	void sig_finished(Task *task);
 
 private slots:
 	//! Получен результат запроса
 	void on_replyFinished(QNetworkReply *reply);
 	void on_replyProgress(qint64 bytesReceived, qint64 bytesTotal);
 
-signals:
-	//! Завершенная задача
-	void sig_finished(Task *task);
+private:
+	//! Общие запросы
+	Task *request(Task::Type type, QUrl url, QVariantMap params = QVariantMap());
+
+	//! Преобразовать QVariantMap в данные для POST
+	QByteArray toParams(QVariantMap params) const;
 
 private:
 	QNetworkAccessManager *m_network;

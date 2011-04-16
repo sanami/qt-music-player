@@ -18,8 +18,7 @@ private slots:
 //	cleanup() will be called after every testfunction.
 
 	void test_settings();
-
 	void test_mplayer();
-
 	void test_cookie_jar();
+	void test_convert_variant_map_to_post_params();
 };

@@ -197,32 +197,34 @@ void MPlayerControl::setFullScreen(bool on)
 void MPlayerControl::startProcess(QString url)
 {
     QStringList arguments;
-
-    arguments << "-nogui";
-    arguments << "-nomouseinput";
-//    arguments << "-wid" << m_winId;
-    arguments << "-slave";
-    arguments << "-idle";
-//    arguments << "-dr"; //direct rendering
-//    arguments << "-nodouble"; // no double buffering because direct rendering is enabled
-    arguments << "-nojoystick";
-    arguments << "-nolirc";
-    //arguments << "-framedrop"; //Skip displaying some frames to maintain A/V sync on slow systems. Video filters are not applied to such frames. For B-frames								//even decoding is skipped completely.
+	arguments << "-quiet";
+	arguments << "-slave";
+	arguments << "-noconsolecontrols";
+	arguments << "-nojoystick";
+	arguments << "-nolirc";
+	arguments << "-nomouseinput";
+	arguments << "-idle";
+	arguments << "-osdlevel" << "0";
+	arguments << "-idx";
+//	arguments << "-cache" << "256" << "-cache-min" << "50"; # Медленно
+	arguments << "-identify";
+	arguments << "-novideo";
+	arguments << "-ao" << "pulse";
 	arguments << "-loop" << "1"; // Пробовать только один раз
-    //arguments << "-osdlevel" << "0";
-    //arguments << "-idx";
-    //arguments << "-quiet";
-    arguments << "-msglevel" << "all=4";
-    //arguments << "-vo" << "gl";
-	arguments << "-vo" << "null"; // Нет видео
+
+	//arguments << "-wid" << m_winId;
+	//arguments << "-dr"; //direct rendering
+	//arguments << "-nodouble"; // no double buffering because direct rendering is enabled
+	//arguments << "-framedrop"; //Skip displaying some frames to maintain A/V sync on slow systems.
+	//arguments << "-loop" << "1"; // Пробовать только один раз
+	//arguments << "-msglevel" << "all=4";
+	//arguments << "-vo" << "gl";
+	//arguments << "-vo" << "null"; // Нет видео
 
 	arguments << url; // the file name you want to play (with path)
 
-	qDebug() << Q_FUNC_INFO << arguments;
+	qDebug() << Q_FUNC_INFO << arguments.join(" ");
     emit sig_videoOutput(arguments.join("\n"));
-
-//	arguments.clear();
-//	arguments << "http://www.100p.nl/media/audio/100pnl.pls";
 
     m_proc = new QProcess(this);
     connect( m_proc, SIGNAL( finished(int, QProcess::ExitStatus) ), this, SLOT( on_finished(int, QProcess::ExitStatus) ) );
@@ -231,10 +233,13 @@ void MPlayerControl::startProcess(QString url)
     connect( m_proc, SIGNAL( readyReadStandardError() ), this, SLOT( on_readyReadStandardError() ) );
     connect( m_proc, SIGNAL( readyReadStandardOutput() ), this, SLOT( on_readyReadStandardOutput() ) );
 
-    m_proc->start("mplayer", arguments);
-//    //m_proc->start("C:/Program Files/MPlayer for Windows/MPlayer.exe", arguments);
+	// Запуск в shell
+//	QStringList args;
+//	args << "-c";
+//	args << "/usr/bin/mplayer" + " " + arguments.join(" ");
+//	m_proc->start("/bin/sh", args);
 
-//	qDebug() << m_proc->pid();
-
-//	QProcess::startDetached("mplayer", arguments);
+	m_proc->start("mplayer", arguments);
+	//m_proc->start("C:/Program Files/MPlayer for Windows/MPlayer.exe", arguments);
+	//QProcess::startDetached("mplayer", arguments);
 }

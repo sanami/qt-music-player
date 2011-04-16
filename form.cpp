@@ -8,8 +8,10 @@
 #include "log_page.h"
 #include "media.h"
 #include "logger.h"
+#include "playlist.h"
 
-#define StationRole (Qt::UserRole + 1)
+#define StationRole  (Qt::UserRole + 1)
+#define PlaylistRole (Qt::UserRole + 2)
 
 Form::Form(QWidget *parent)
 	: QMainWindow(parent)
@@ -91,57 +93,57 @@ void Form::toggleBusy(int check)
 	ui->page->setText(QString("%1 / %2").arg(m_current_page).arg(m_num_pages));
 }
 
-void Form::log(QString text)
-{
-	emit sig_log(text);
-}
-
-void Form::requestPage()
-{
-	// Отправить запроса на текущую страницу
-	m_web->requestStations(m_current_page, m_filter);
-
-	// В списке сообщение о работе
-	ui->stations->clear();
-	ui->stations->addItem("Loading...");
-	toggleBusy(Qt::Checked);
-
-	log(QString("showPage %1").arg(m_current_page));
-}
-
 void Form::on_web_finished(Task *task)
 {
-	qDebug() << Q_FUNC_INFO;
+	qDebug() << Q_FUNC_INFO << task->type << task->ok << task->json_ok;
 
 	if (task->ok)
 	{
 		switch(task->type)
 		{
 		case Task::Cookies:
+			{
+				QVariantMap playlist = task->json.toMap()["root"].toMap();
+				showPlaylist(playlist);
+			}
 			// Список стран в фильтр
 			m_web->requestCountries();
 			// Список жанров в фильтр
 			m_web->requestGenres();
 			break;
+		case Task::Playlist:
+			showPlaylist(task->json.toMap());
+			break;
+		case Task::AddToPlaylist:
+			qDebug() << "task->result" << task->result;
+			break;
+
+		case Task::Station:
+			// Данные одной станции
+			{
+				QVariantMap station = task->json.toMap()["station"].toMap();
+				on_showStationPage(station);
+			}
+			break;
 		case Task::Stations:
 			// Получены данные о списке станций
-			showStations(task->result.toMap());
+			showStations(task->json.toMap());
 			break;
 		case Task::Countries:
 			// Список стран
-			showCountries(task->result.toList());
+			showCountries(task->json.toList());
 			break;
 		case Task::Cities:
 			// Список городов
-			showCities(task->result.toList());
+			showCities(task->json.toList());
 			break;
 		case Task::Genres:
 			// Список жанров
-			showGenres(task->result.toList());
+			showGenres(task->json.toList());
 			break;
 
 		default:
-			qDebug() << "Unknown task type:" << task->type;
+			qDebug() << "Unknown task type:" << task->type << task->result;
 			Q_ASSERT( 0 );
 		}
 	}
@@ -159,6 +161,62 @@ void Form::on_web_finished(Task *task)
 	}
 
 	delete task;
+}
+
+void Form::showPlaylist(QVariantMap result)
+{
+	qDebug() << Q_FUNC_INFO << result;
+	ui->playlist->clear();
+
+	// Данные самого списка
+	QVariantMap playlist = result["playlist"].toMap();
+
+	if (!playlist["parent_id"].isNull())
+	{
+		// Переход на родителя
+		int parent_id = playlist["parent_id"].toInt();
+		QVariantMap parent;
+		parent["id"] = parent_id;
+		QListWidgetItem *it = new QListWidgetItem("[..]");
+		it->setData(PlaylistRole, parent);
+		ui->playlist->addItem(it);
+	}
+
+	// Данные о под-списках
+	QVariantList children = result["children"].toList();
+	foreach(QVariant item_var, children)
+	{
+		QVariantMap item = item_var.toMap();
+		QVariantMap info = item["playlist"].toMap();
+
+		QString name = info["id"].toString() + " ";
+		switch (info["playlist_type_id"].toInt())
+		{
+		case Playlist::Item:
+			name += info["name"].toString();
+			break;
+		default:
+			name += "[" + info["name"].toString() + "]";
+		}
+
+		QListWidgetItem *it = new QListWidgetItem(name);
+		it->setData(PlaylistRole, info);
+		ui->playlist->addItem(it);
+	}
+}
+
+void Form::on_playlist_itemDoubleClicked(QListWidgetItem* it)
+{
+	QVariantMap playlist = it->data(PlaylistRole).toMap();
+	qDebug() << Q_FUNC_INFO << playlist;
+	switch (playlist["playlist_type_id"].toInt())
+	{
+	case Playlist::Item:
+		m_web->requestStation(playlist["station_id"].toInt());
+		break;
+	default:
+		m_web->requestPlaylist(playlist["id"].toInt());
+	}
 }
 
 void Form::showStations(QVariantMap result)
@@ -355,6 +413,8 @@ void Form::on_openStream(QVariantMap station, QString stream)
 	log(stream);
 	m_player_page->showStationInfo(station);
 	m_media->open(stream);
+
+	m_web->addStationToPlaylist(station);
 }
 
 //void Form::on_actionPlayer_triggered()
@@ -365,4 +425,22 @@ void Form::on_openStream(QVariantMap station, QString stream)
 void Form::on_actionLog_triggered()
 {
 	m_log_page->show();
+}
+
+void Form::log(QString text)
+{
+	emit sig_log(text);
+}
+
+void Form::requestPage()
+{
+	// Отправить запроса на текущую страницу
+	m_web->requestStations(m_current_page, m_filter);
+
+	// В списке сообщение о работе
+	ui->stations->clear();
+	ui->stations->addItem("Loading...");
+	toggleBusy(Qt::Checked);
+
+	log(QString("showPage %1").arg(m_current_page));
 }

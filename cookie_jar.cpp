@@ -2,7 +2,7 @@
 #include <QDataStream>
 #include "cookie_jar.h"
 
-static const unsigned int JAR_VERSION = 11;
+static const unsigned int JAR_VERSION = 1;
 
 QT_BEGIN_NAMESPACE
 QDataStream &operator<<(QDataStream &stream, const QList<QNetworkCookie> &list)
@@ -66,7 +66,8 @@ void CookieJar::load()
 	QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie> >(settings.value("Web/Cookies"));
     setAllCookies(cookies);
 
-	qDebug() << Q_FUNC_INFO << cookies;
+	qDebug() << Q_FUNC_INFO;
+	qDebug() << cookies;
 }
 
 void CookieJar::save() const
@@ -79,5 +80,6 @@ void CookieJar::save() const
     }
 	settings.setValue("Web/Cookies", qVariantFromValue<QList<QNetworkCookie> >(cookies));
 
-	qDebug() << Q_FUNC_INFO << cookies;
+	qDebug() << Q_FUNC_INFO;
+	qDebug() << cookies;
 }

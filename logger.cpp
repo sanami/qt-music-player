@@ -24,13 +24,13 @@ static void conMessageOutput(QtMsgType type, const char *raw_msg)
 
 	// Удаление излишней информации
 	msg.remove("__thiscall ");
-	if (msg.contains("::") && g_rxMethodParams.indexIn(msg) > 0) // Параметры метода (в скобках)
-	{
-		int pos = g_rxMethodParams.pos(0)+1;
-		int length = g_rxMethodParams.matchedLength() - 2;
-		//msg.remove(pos, length);
-		msg.replace(pos, length, "|");
-	}
+//	if (msg.contains("::") && g_rxMethodParams.indexIn(msg) > 0) // Параметры метода (в скобках)
+//	{
+//		int pos = g_rxMethodParams.pos(0)+1;
+//		int length = g_rxMethodParams.matchedLength() - 2;
+//		//msg.remove(pos, length);
+//		msg.replace(pos, length, "|");
+//	}
 
 	//QTextCodec *codec = QTextCodec::codecForName("IBM 866");
 	//_cprintf(codec->fromUnicode(msg).constData());

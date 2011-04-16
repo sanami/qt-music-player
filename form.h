@@ -35,6 +35,9 @@ private:
 	//! Заполнить список жанров на странице фильтров
 	void showGenres(QVariantList genres);
 
+	//! Показать список
+	void showPlaylist(QVariantMap playlist);
+
 	//! Отладочные сообщения
 	void log(QString text);
 
@@ -77,6 +80,8 @@ private slots:
 
 	//! Показать детали станции
 	void on_showStationPage(QVariantMap station);
+
+	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
 
 private:
 	Ui::Form *ui;

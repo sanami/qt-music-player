@@ -7,6 +7,7 @@
 #include "qjson/parser.h"
 #include "web.h"
 #include "cookie_jar.h"
+#include "playlist.h"
 
 Web::Web()
 	: QObject(NULL)
@@ -30,8 +31,32 @@ Web::~Web()
 
 void Web::requestCookies()
 {
-	QString url = QString("%1/info/cookies").arg(m_server);
+//	QString url = QString("%1/info/cookies").arg(m_server);
+	QString url = QString("%1/me.json").arg(m_server);
 	request(Task::Cookies, url);
+}
+
+void Web::requestPlaylist(int playlist_id)
+{
+	QString url = QString("%1/playlists/%2.json").arg(m_server).arg(playlist_id);
+	request(Task::Playlist, url);
+}
+
+void Web::addStationToPlaylist(QVariantMap station, QVariantMap playlist)
+{
+	QString url = QString("%1/playlists").arg(m_server);
+
+	QVariantMap params;
+	{
+		QVariantMap e;
+		e["playlist_type_id"] = Playlist::Item;
+		e["station_id"] = station["id"];
+		e["parent_id"] = playlist["id"];
+		e["name"] = station["name"];
+		params["playlist"] = e;
+	}
+
+	request(Task::AddToPlaylist, url, params);
 }
 
 void Web::requestCountries()
@@ -52,6 +77,12 @@ void Web::requestCities(int country_id)
 	request(Task::Cities, url);
 }
 
+void Web::requestStation(int station_id)
+{
+	QString url = QString("%1/stations/%2.json").arg(m_server).arg(station_id);
+	request(Task::Station, url);
+}
+
 void Web::requestStations(int page, QVariantMap params)
 {
 	QString url = QString("%1/stations.json?page=%2").arg(m_server).arg(page);
@@ -63,6 +94,7 @@ void Web::requestStations(int page, QVariantMap params)
 	request(Task::Stations, url);
 }
 
+
 Task *Web::request(Task::Type type, QUrl url, QVariantMap params)
 {
 	qDebug() << Q_FUNC_INFO << url;
@@ -72,10 +104,53 @@ Task *Web::request(Task::Type type, QUrl url, QVariantMap params)
 	task->params = params;
 	task->ok = false;
 
-	QNetworkReply *reply = m_network->get(QNetworkRequest(url));
+	QNetworkReply *reply;
+	QNetworkRequest request(url);
+
+//	request.setAttribute(QNetworkRequest::CookieLoadControlAttribute, QNetworkRequest::Manual);
+//	CookieJar *jar = qobject_cast<CookieJar *>(m_network->cookieJar());
+//	qDebug() << "***************************************************";
+//	qDebug() << jar->all();
+//	request.setHeader(QNetworkRequest::CookieHeader, QVariant::fromValue(jar->all()));
+
+	if (params.isEmpty())
+	{
+		reply = m_network->get(request);
+	}
+	else
+	{
+		reply = m_network->post(request, toParams(params));
+	}
+
 	//connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(on_replyProgress(qint64, qint64)));
 	m_reply[reply] = task;
 	return task;
+}
+
+QByteArray Web::toParams(QVariantMap params) const
+{
+	QStringList args;
+	foreach(QString key, params.keys())
+	{
+		QVariant value = params[key];
+		switch (value.type())
+		{
+		case QVariant::Map:
+			{
+				QVariantMap sub_params = value.toMap();
+				foreach(QString sub_key, sub_params.keys())
+				{
+					QString sub_value = sub_params[sub_key].toString();
+					args << QString("%1[%2]=%3").arg(key, sub_key, sub_value);
+				}
+			}
+			break;
+		default:
+			args << QString("%1=%2").arg(key, value.toString());
+		}
+	}
+
+	return args.join("&").toUtf8();
 }
 
 void Web::on_replyFinished(QNetworkReply *reply)
@@ -95,26 +170,15 @@ void Web::on_replyFinished(QNetworkReply *reply)
 		// Нет ошибок
 		if (reply->error() == QNetworkReply::NoError)
 		{
-			switch(task->type)
-			{
-			case Task::Cookies:
-				// m_network установит данные в cookieJar
-				task->ok = true;
-				break;
-			default:
-				{
-					QByteArray json = reply->readAll();
-
-					task->result = m_json_parser->parse(json, &task->ok);
-				}
-			}
-
+			task->ok = true;
+			task->result = reply->readAll();
+			task->json = m_json_parser->parse(task->result, &task->json_ok);
 		}
 		else
 		{
 			// Ошибка загрузки данных
-			task->error_code = (int)reply->error();
 			task->ok = false;
+			task->error_code = (int)reply->error();
 		}
 		emit sig_finished(task);
 	}
@@ -123,6 +187,7 @@ void Web::on_replyFinished(QNetworkReply *reply)
 		Q_ASSERT( 0 );
 		qDebug() << "!!uknown replay";
 	}
+
 	// Do not directly delete it inside the slot
 	reply->deleteLater();
 }
