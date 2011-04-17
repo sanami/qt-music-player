@@ -49,8 +49,8 @@ signals:
 	void sig_log(QString str);
 
 private slots:
+	//! Показать окно с детальным логом
 	void on_actionLog_triggered();
-//	void on_actionPlayer_triggered();
 
 	//! Поиск станций по фильтру
 	void on_pushButton_filter_apply_clicked();
@@ -81,7 +81,14 @@ private slots:
 	//! Показать детали станции
 	void on_showStationPage(QVariantMap station);
 
+	//! Двойной клик на запись в списке
 	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
+
+	//! Удалить запись из списка
+	void on_actionDeletePlaylist_triggered();
+
+	//! Результат попытки подключения к станции
+	void on_media_status(QVariantMap station, QString url, bool ok);
 
 private:
 	Ui::Form *ui;

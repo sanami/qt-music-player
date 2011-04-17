@@ -38,6 +38,9 @@ void MPlayerControl::open(QString url)
 {
     qDebug() << Q_FUNC_INFO << url;
 
+	// Очистить текущий
+	m_current_url.clear();
+
 	if (m_proc.isNull())
     {
         startProcess(url);
@@ -126,8 +129,7 @@ void MPlayerControl::on_readyReadStandardError()
 
 	QString err_str = QString::fromUtf8(m_proc->readAllStandardError());
 	err_str = err_str.trimmed();
-	qDebug() << err_str;
-	emit sig_videoOutput(err_str);
+	processOutput(err_str);
 }
 
 void MPlayerControl::on_readyReadStandardOutput()
@@ -149,9 +151,7 @@ void MPlayerControl::on_readyReadStandardOutput()
             }
             else
             {
-                //qDebug() << Q_FUNC_INFO;
-                qDebug() << "\t" << line;
-                emit sig_videoOutput(line);
+				processOutput(line);
             }
         }
     }
@@ -242,4 +242,30 @@ void MPlayerControl::startProcess(QString url)
 	m_proc->start("mplayer", arguments);
 	//m_proc->start("C:/Program Files/MPlayer for Windows/MPlayer.exe", arguments);
 	//QProcess::startDetached("mplayer", arguments);
+}
+
+void MPlayerControl::processOutput(QString line)
+{
+//	qDebug() << Q_FUNC_INFO;
+	qDebug() << "\t" << line;
+
+	static QRegExp rx_playing("^Playing (.+)\\.$");
+//	static QRegExp rx_playing_ok("^Playing (.+)\.$");
+
+	if (rx_playing.exactMatch(line))
+	{
+		// Установить только в первый раз
+		if (m_current_url.isEmpty())
+		{
+			m_current_url = rx_playing.cap(1);
+			qDebug() << "---" << m_current_url;
+		}
+	}
+	else if (line == "Starting playback...")
+	{
+		qDebug() << "+++";
+		emit sig_urlStatus(m_current_url, true);
+	}
+
+	emit sig_videoOutput(line);
 }

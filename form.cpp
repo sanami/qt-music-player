@@ -40,6 +40,7 @@ Form::Form(QWidget *parent)
 
 	m_media = new Media(this);
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
+	connect(m_media, SIGNAL(sig_status(QVariantMap, QString, bool)), SLOT(on_media_status(QVariantMap, QString, bool)));
 
 	m_player_page = new PlayerPage(m_media, this);
 	connect(m_player_page, SIGNAL(sig_showStationPage(QVariantMap)), SLOT(on_showStationPage(QVariantMap)));
@@ -47,6 +48,8 @@ Form::Form(QWidget *parent)
 //	m_player_page->hide();
 
 	ui->stations->addAction(ui->actionOpenStation);
+
+	ui->playlist->addAction(ui->actionDeletePlaylist);
 
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), this, SLOT(on_web_finished(Task *)));
@@ -115,6 +118,7 @@ void Form::on_web_finished(Task *task)
 			showPlaylist(task->json.toMap());
 			break;
 		case Task::AddToPlaylist:
+		case Task::PlaylistDestroy:
 			qDebug() << "task->result" << task->result;
 			break;
 
@@ -412,15 +416,19 @@ void Form::on_openStream(QVariantMap station, QString stream)
 {
 	log(stream);
 	m_player_page->showStationInfo(station);
-	m_media->open(stream);
-
-	m_web->addStationToPlaylist(station);
+	m_media->open(station, stream);
 }
 
-//void Form::on_actionPlayer_triggered()
-//{
-//	m_player_page->show();
-//}
+void Form::on_media_status(QVariantMap station, QString url, bool ok)
+{
+	qDebug() << Q_FUNC_INFO << ok << url;
+	if (ok)
+	{
+		//qDebug() << station;
+		// Удалось подключится, добавить в историю
+		m_web->addStationToPlaylist(station);
+	}
+}
 
 void Form::on_actionLog_triggered()
 {
@@ -443,4 +451,15 @@ void Form::requestPage()
 	toggleBusy(Qt::Checked);
 
 	log(QString("showPage %1").arg(m_current_page));
+}
+
+void Form::on_actionDeletePlaylist_triggered()
+{
+	QListWidgetItem* it = ui->playlist->currentItem();
+	if (it)
+	{
+		QVariantMap playlist = it->data(PlaylistRole).toMap();
+		int playlist_id = playlist["id"].toInt();
+		m_web->destroyPlaylist(playlist_id);
+	}
 }

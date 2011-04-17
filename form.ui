@@ -21,7 +21,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -225,7 +225,11 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QListWidget" name="playlist"/>
+         <widget class="QListWidget" name="playlist">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -238,14 +242,14 @@
     <string>OpenStation</string>
    </property>
   </action>
-  <action name="actionPlayer">
-   <property name="text">
-    <string>Player</string>
-   </property>
-  </action>
   <action name="actionLog">
    <property name="text">
     <string>Log</string>
+   </property>
+  </action>
+  <action name="actionDeletePlaylist">
+   <property name="text">
+    <string>Delete</string>
    </property>
   </action>
  </widget>

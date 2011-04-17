@@ -32,6 +32,8 @@ public:
 	void addStationToPlaylist(QVariantMap station, QVariantMap playlist = QVariantMap());
 	//! Запрос информации о списке
 	void requestPlaylist(int playlist_id);
+	//! Удалить список
+	void destroyPlaylist(int playlist_id);
 
 	//! Список стран
 	void requestCountries();
@@ -55,7 +57,7 @@ private slots:
 
 private:
 	//! Общие запросы
-	Task *request(Task::Type type, QUrl url, QVariantMap params = QVariantMap());
+	Task *request(Task::Type type, QUrl url, Task::Op op = Task::Get,  QVariantMap params = QVariantMap());
 
 	//! Преобразовать QVariantMap в данные для POST
 	QByteArray toParams(QVariantMap params) const;

@@ -42,9 +42,15 @@ void Web::requestPlaylist(int playlist_id)
 	request(Task::Playlist, url);
 }
 
+void Web::destroyPlaylist(int playlist_id)
+{
+	QString url = QString("%1/playlists/%2.json").arg(m_server).arg(playlist_id);
+	request(Task::PlaylistDestroy, url, Task::Delete);
+}
+
 void Web::addStationToPlaylist(QVariantMap station, QVariantMap playlist)
 {
-	QString url = QString("%1/playlists").arg(m_server);
+	QString url = QString("%1/playlists.json").arg(m_server);
 
 	QVariantMap params;
 	{
@@ -56,7 +62,7 @@ void Web::addStationToPlaylist(QVariantMap station, QVariantMap playlist)
 		params["playlist"] = e;
 	}
 
-	request(Task::AddToPlaylist, url, params);
+	request(Task::AddToPlaylist, url, Task::Post, params);
 }
 
 void Web::requestCountries()
@@ -95,7 +101,7 @@ void Web::requestStations(int page, QVariantMap params)
 }
 
 
-Task *Web::request(Task::Type type, QUrl url, QVariantMap params)
+Task *Web::request(Task::Type type, QUrl url, Task::Op op, QVariantMap params)
 {
 	qDebug() << Q_FUNC_INFO << url;
 	Task *task = new Task();
@@ -113,13 +119,20 @@ Task *Web::request(Task::Type type, QUrl url, QVariantMap params)
 //	qDebug() << jar->all();
 //	request.setHeader(QNetworkRequest::CookieHeader, QVariant::fromValue(jar->all()));
 
-	if (params.isEmpty())
+	switch (op)
 	{
+	case Task::Get:
 		reply = m_network->get(request);
-	}
-	else
-	{
+		break;
+	case Task::Post:
+		Q_ASSERT( !params.isEmpty() );
 		reply = m_network->post(request, toParams(params));
+		break;
+	case Task::Delete:
+		reply = m_network->deleteResource(request);
+		break;
+	default:
+		Q_ASSERT( 0 );
 	}
 
 	//connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(on_replyProgress(qint64, qint64)));
