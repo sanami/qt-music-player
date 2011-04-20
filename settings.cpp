@@ -5,7 +5,7 @@ Settings::Settings()
 {
 }
 
-QString Settings::server()
+QString Settings::server() const
 {
 	return m_settings.value("server", "").toString();
 }

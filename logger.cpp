@@ -78,8 +78,7 @@ void Logger::init()
 	setCodec("UTF-8");
 
 	qInstallMsgHandler(conMessageOutput);
-	qDebug() << "йцук";
-//	qDebug() << "123";
+	qDebug() << "Старт" << QDateTime::currentDateTime();
 }
 
 Logger *Logger::logger()

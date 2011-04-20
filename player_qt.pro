@@ -33,7 +33,9 @@ SOURCES += main.cpp\
     player_page.cpp \
     cookie_jar.cpp \
     log_page.cpp \
-    logger.cpp
+    logger.cpp \
+    stations_page.cpp \
+    filter_page.cpp
 
 HEADERS  += form.h \
     web.h \
@@ -59,12 +61,16 @@ HEADERS  += form.h \
     cookie_jar.h \
     log_page.h \
     logger.h \
-    playlist.h
+    playlist.h \
+    stations_page.h \
+    filter_page.h
 
 FORMS    += form.ui \
     info_page.ui \
     player_page.ui \
-    log_page.ui
+    log_page.ui \
+    stations_page.ui \
+    filter_page.ui
 
 symbian {
     TARGET.UID3 = 0xe7928591

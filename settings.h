@@ -8,7 +8,7 @@ class Settings
 public:
     Settings();
 
-	QString server();
+	QString server() const;
 	void setServer(QString server);
 
 private:
