@@ -23,16 +23,18 @@ public:
 
 signals:
 	void sig_openStream(QVariantMap station, QString stream);
-
-private:
-    Ui::InfoPage *ui;
-	QVariantMap m_station; //!< Текущая станция
+	void sig_addToFavorites(QVariantMap station);
 
 private slots:
 	void on_streams_itemDoubleClicked(QTreeWidgetItem* item);
 
 	//! Сообщения от плееров
 	void on_media_messages(QString str);
+	void on_addToFavorites_clicked();
+
+private:
+	Ui::InfoPage *ui;
+	QVariantMap m_station; //!< Текущая станция
 };
 
 #endif // INFO_PAGE_H

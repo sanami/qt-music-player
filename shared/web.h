@@ -29,7 +29,7 @@ public:
 	//! Запрос на HTML страницу, это установит cookies
 	void requestCookies();
 	//! Добавить запись в плейлист пользователя
-	void addStationToPlaylist(QVariantMap station, QVariantMap playlist = QVariantMap());
+	void addStationToPlaylist(QVariantMap station, int parent_id = -1);
 
 	//! Список стран
 	void requestCountries();
@@ -48,6 +48,8 @@ public slots:
 	void requestPlaylist(int playlist_id);
 	//! Удалить список
 	void destroyPlaylist(int playlist_id);
+	//! Создать новый плейлист
+	void createPlaylist(QString name, int parent_id);
 
 signals:
 	//! Завершенная задача

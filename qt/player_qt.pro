@@ -67,7 +67,8 @@ HEADERS  += form.h \
     ../shared/cookie_jar.h \
     ../shared/logger.h \
     ../shared/playlist.h \
-    playlist_page.h
+    playlist_page.h \
+    pch.h
 
 FORMS    += form.ui \
     info_page.ui \
@@ -91,7 +92,8 @@ OTHER_FILES += \
     qtc_packaging/debian_fremantle/control \
     qtc_packaging/debian_fremantle/compat \
     qtc_packaging/debian_fremantle/changelog \
-    doc/TODO
+    doc/TODO \
+    ../doc/TODO
 
 maemo5 {
     target.path = /opt/player_qt/bin

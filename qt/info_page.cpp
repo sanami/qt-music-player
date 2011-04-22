@@ -46,7 +46,10 @@ void InfoPage::setStation(QVariantMap station)
 		else
 		{
 			// Текстом
-			info << QString("%1: %2").arg(name).arg(station[name].toString());
+			if (name == "name" || name == "id")
+			{
+				info << QString("%1: %2").arg(name).arg(station[name].toString());
+			}
 		}
 	}
 
@@ -63,4 +66,9 @@ void InfoPage::on_media_messages(QString str)
 {
 	ui->messages->appendPlainText(str);
 	ui->messages->ensureCursorVisible();
+}
+
+void InfoPage::on_addToFavorites_clicked()
+{
+	emit sig_addToFavorites(m_station);
 }

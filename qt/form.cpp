@@ -27,17 +27,18 @@ Form::Form(QWidget *parent)
 #endif
     ui->setupUi(this);
 
+	// Веб-запросы
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
 	connect(m_web, SIGNAL(sig_busy(bool)), SLOT(showBusy(bool)));
 
-	// Добавить страницы
+	// Отладочные сообщения
 	m_log_page = new LogPage(this);
 	m_log_page->hide();
-	connect(this, SIGNAL(sig_log(QString)), m_log_page, SLOT(addLog(QString)));
 	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
 	menuBar()->addAction(ui->actionLog);
 
+	// Добавить страницы
 	m_stations_page = new StationsPage(this);
 	connect(m_stations_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
 	connect(m_stations_page, SIGNAL(sig_showStation(QVariantMap)), SLOT(on_showStationPage(QVariantMap)));
@@ -53,6 +54,7 @@ Form::Form(QWidget *parent)
 	m_station_view = new InfoPage(this);
 	m_station_view->hide();
 	connect(m_station_view, SIGNAL(sig_openStream(QVariantMap, QString)), SLOT(on_openStream(QVariantMap, QString)));
+	connect(m_station_view, SIGNAL(sig_addToFavorites(QVariantMap)), SLOT(on_addStationToFavorites(QVariantMap)));
 
 	m_media = new Media(this);
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
@@ -66,6 +68,7 @@ Form::Form(QWidget *parent)
 	connect(m_playlist_page, SIGNAL(sig_requestStation(int)), m_web, SLOT(requestStation(int)));
 	connect(m_playlist_page, SIGNAL(sig_requestPlaylist(int)), m_web, SLOT(requestPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), m_web, SLOT(destroyPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_createPlaylist(QString, int)), m_web, SLOT(createPlaylist(QString, int)));
 //	connect(m_playlist_page, SIGNAL(), m_web, SLOT());
 	ui->tabWidget->addTab(m_playlist_page, "Playlist");
 
@@ -98,15 +101,14 @@ void Form::showBusy(bool busy)
 #endif
 }
 
-void Form::showMessage(QString msg)
+void Form::showMessage(QString msg, int timeout)
 {
 #ifdef Q_WS_MAEMO_5
-	QMaemo5InformationBox::information(this, msg);
+	QMaemo5InformationBox::information(this, msg, timeout);
 #else
 	Q_UNUSED(msg);
 #endif
 }
-
 
 void Form::on_web_finished(Task *task)
 {
@@ -132,6 +134,10 @@ void Form::on_web_finished(Task *task)
 		case Task::AddToPlaylist:
 		case Task::PlaylistDestroy:
 			qDebug() << "task->result" << task->result;
+			if (task->result == "ok")
+				showMessage("OK", 500);
+			else
+				showMessage("FAIL", 500);
 			break;
 
 		case Task::Station:
@@ -150,12 +156,15 @@ void Form::on_web_finished(Task *task)
 			{
 				// Пустой результат поиска
 				if (m_stations_page->isEmpty())
-					showMessage("Not found");
+				{
+					showMessage("Not found", 1000);
+				}
 				else
+				{
+					// Переключится на список станций
 					ui->tabWidget->setCurrentWidget(m_stations_page);
+				}
 			}
-			//TODO Переключится на список станций
-			//ui->tabWidget->setCurrentIndex(0);
 
 			break;
 		case Task::Countries:
@@ -213,7 +222,7 @@ void Form::on_media_status(QVariantMap station, QString url, bool ok)
 		// Удалось подключится, добавить в историю
 		m_web->addStationToPlaylist(station);
 
-		QString msg = QString("Playback started: %1").arg(station["name"].toString());
+		QString msg = QString("Playing: %1").arg(station["name"].toString());
 		showMessage(msg);
 	}
 }
@@ -233,6 +242,27 @@ void Form::on_setServer(QString server)
 {
 	m_web->setServer(server);
 
+	// Очистить список избранных
+	m_playlist_page->reset();
+
 	// Первый запрос установит cookies с сервера
 	m_web->requestCookies();
+}
+
+void Form::on_addStationToFavorites(QVariantMap station)
+{
+	// Список избранных
+	QStringList items;
+	foreach(QVariantMap favorite, m_playlist_page->all())
+	{
+		items << favorite["id"].toString() + " " + favorite["name"].toString();
+	}
+
+	bool ok;
+	QString parent = QInputDialog::getItem(this, "Add to Favorites", "Choose:", items, 0, false, &ok);
+	if (ok)
+	{
+		int parent_id = parent.section(' ', 0, 0).toInt();
+		m_web->addStationToPlaylist(station, parent_id);
+	}
 }

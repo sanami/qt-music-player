@@ -10,13 +10,21 @@ PlaylistPage::PlaylistPage(QWidget *parent) :
 {
     ui->setupUi(this);
 
-	ui->playlist->addAction(ui->actionDeletePlaylist);
+	connect(ui->create, SIGNAL(clicked()), ui->actionCreatePlaylist, SLOT(trigger()));
 
+	// Контекстное меню списка
+	ui->playlist->addAction(ui->actionDeletePlaylist);
+	ui->playlist->addAction(ui->actionCreatePlaylist);
 }
 
 PlaylistPage::~PlaylistPage()
 {
     delete ui;
+}
+
+void PlaylistPage::reset()
+{
+	m_all_playlists.clear();
 }
 
 void PlaylistPage::showPlaylist(QVariantMap result)
@@ -26,6 +34,7 @@ void PlaylistPage::showPlaylist(QVariantMap result)
 
 	// Данные самого списка
 	QVariantMap playlist = result["playlist"].toMap();
+	m_current_playlist = playlist;
 
 	if (!playlist["parent_id"].isNull())
 	{
@@ -53,6 +62,9 @@ void PlaylistPage::showPlaylist(QVariantMap result)
 			break;
 		default:
 			name += "[" + info["name"].toString() + "]";
+
+			// Сохранить в список всех избранных
+			m_all_playlists[info["id"].toInt()] = info;
 		}
 
 		QListWidgetItem *it = new QListWidgetItem(name);
@@ -83,5 +95,18 @@ void PlaylistPage::on_actionDeletePlaylist_triggered()
 		QVariantMap playlist = it->data(PlaylistRole).toMap();
 		int playlist_id = playlist["id"].toInt();
 		emit sig_destroyPlaylist(playlist_id);
+	}
+}
+
+void PlaylistPage::on_actionCreatePlaylist_triggered()
+{
+	QString name = QInputDialog::getText(this, "Create playlist", "Name:");
+	if (!name.isEmpty())
+	{
+		// Текущий список будет родителем
+		int parent_id = m_current_playlist["id"].toInt();
+
+		// Отправить запрос на создание
+		emit sig_createPlaylist(name, parent_id);
 	}
 }

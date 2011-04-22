@@ -30,7 +30,7 @@ public slots:
 	void showBusy(bool busy);
 
 	//! Всплывающее сообщение
-	void showMessage(QString msg);
+	void showMessage(QString msg, int timeout = 3000);
 
 private:
 	//! Запросить текущую страницу
@@ -51,6 +51,9 @@ private slots:
 
 	//! Показать детали станции
 	void on_showStationPage(QVariantMap station);
+
+	//! Добавление станции в избранное
+	void on_addStationToFavorites(QVariantMap station);
 
 	//! Результат попытки подключения к станции
 	void on_media_status(QVariantMap station, QString url, bool ok);

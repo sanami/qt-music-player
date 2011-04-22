@@ -48,7 +48,23 @@ void Web::destroyPlaylist(int playlist_id)
 	request(Task::PlaylistDestroy, url, Task::Delete);
 }
 
-void Web::addStationToPlaylist(QVariantMap station, QVariantMap playlist)
+void Web::createPlaylist(QString name, int parent_id)
+{
+	QString url = QString("%1/playlists.json").arg(m_server);
+
+	QVariantMap params;
+	{
+		QVariantMap e;
+		e["playlist_type_id"] = Playlist::Favorites;
+		e["parent_id"] = parent_id;
+		e["name"] = name;
+		params["playlist"] = e;
+	}
+
+	request(Task::AddToPlaylist, url, Task::Post, params);
+}
+
+void Web::addStationToPlaylist(QVariantMap station, int parent_id)
 {
 	QString url = QString("%1/playlists.json").arg(m_server);
 
@@ -57,8 +73,11 @@ void Web::addStationToPlaylist(QVariantMap station, QVariantMap playlist)
 		QVariantMap e;
 		e["playlist_type_id"] = Playlist::Item;
 		e["station_id"] = station["id"];
-		e["parent_id"] = playlist["id"];
 		e["name"] = station["name"];
+
+		if (parent_id > 0)
+			e["parent_id"] = parent_id;
+
 		params["playlist"] = e;
 	}
 
