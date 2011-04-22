@@ -107,6 +107,7 @@ void Form::showMessage(QString msg, int timeout)
 	QMaemo5InformationBox::information(this, msg, timeout);
 #else
 	Q_UNUSED(msg);
+	Q_UNUSED(timeout);
 #endif
 }
 
