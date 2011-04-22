@@ -11,7 +11,7 @@ QT       += core gui network phonon
 CONFIG += precompile_header mobility
 MOBILITY = 
 
-#LIBS += -L../qjson-build-simulator/lib -lqjson
+INCLUDE += ../shared ..
 
 # Use Precompiled headers (PCH)
 PRECOMPILED_HEADER = pch.h
