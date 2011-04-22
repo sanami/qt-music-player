@@ -44,6 +44,11 @@ void StationsPage::showStations(QVariantMap result)
 	}
 }
 
+bool StationsPage::isEmpty() const
+{
+	return m_num_pages == 0;
+}
+
 void StationsPage::on_pushButton_clicked()
 {
 	// <<

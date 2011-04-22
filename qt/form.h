@@ -12,6 +12,7 @@ class StationsPage;
 class FilterPage;
 class InfoPage;
 class PlayerPage;
+class PlaylistPage;
 class LogPage;
 class Web;
 class Media;
@@ -24,25 +25,18 @@ public:
     explicit Form(QWidget *parent = 0);
     ~Form();
 
+public slots:
+	//! Индикатор загрузки
+	void showBusy(bool busy);
+
+	//! Всплывающее сообщение
+	void showMessage(QString msg);
+
 private:
 	//! Запросить текущую страницу
 	void requestPage();
 
-	//! Показать список
-	void showPlaylist(QVariantMap playlist);
-
-	//! Отладочные сообщения
-	void log(QString text);
-
-	//! Индикатор загрузки
-	void toggleBusy(int check);
-
-signals:
-	//! Сообщения в окно лога
-	void sig_log(QString str);
-
 private slots:
-	void on_requestCities(int country_id);
 	void on_setServer(QString server);
 	void on_requestPage(int page);
 
@@ -58,12 +52,6 @@ private slots:
 	//! Показать детали станции
 	void on_showStationPage(QVariantMap station);
 
-	//! Двойной клик на запись в списке
-	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
-
-	//! Удалить запись из списка
-	void on_actionDeletePlaylist_triggered();
-
 	//! Результат попытки подключения к станции
 	void on_media_status(QVariantMap station, QString url, bool ok);
 
@@ -71,13 +59,14 @@ private:
 	Ui::Form *ui;
 
 	Web *m_web; //!< Веб запросы
+	Media *m_media; //!< Плеер
 
 	StationsPage *m_stations_page; //!< Список станций
 	FilterPage *m_filter_page; //!< Фильтрация станций
 	InfoPage *m_station_view;  //!< Информация о станции
 	PlayerPage *m_player_page; //!< Страница плеера
+	PlaylistPage *m_playlist_page; //!< Списки
 	LogPage *m_log_page; //!< Страница сообщений
-	Media *m_media; //!< Плеер
 };
 
 #endif // FORM_H

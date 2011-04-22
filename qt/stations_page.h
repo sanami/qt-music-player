@@ -19,6 +19,9 @@ public:
 	//! Показать список с текущей страницы
 	void showStations(QVariantMap stations);
 
+	//! Есть ли записи в списке
+	bool isEmpty() const;
+
 signals:
 	void sig_showStation(QVariantMap station);
 	void sig_requestPage(int page);

@@ -1,5 +1,8 @@
 #include <QDebug>
 #include <QFile>
+#ifdef Q_WS_MAEMO_5
+#include <QMaemo5InformationBox>
+#endif
 #include "form.h"
 #include "web.h"
 #include "ui_form.h"
@@ -11,8 +14,7 @@
 #include "media.h"
 #include "logger.h"
 #include "playlist.h"
-
-#define PlaylistRole (Qt::UserRole + 2)
+#include "playlist_page.h"
 
 Form::Form(QWidget *parent)
 	: QMainWindow(parent)
@@ -25,12 +27,16 @@ Form::Form(QWidget *parent)
 #endif
     ui->setupUi(this);
 
-	menuBar()->addAction(ui->actionLog);
+	m_web = new Web();
+	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
+	connect(m_web, SIGNAL(sig_busy(bool)), SLOT(showBusy(bool)));
 
+	// Добавить страницы
 	m_log_page = new LogPage(this);
 	m_log_page->hide();
 	connect(this, SIGNAL(sig_log(QString)), m_log_page, SLOT(addLog(QString)));
 	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
+	menuBar()->addAction(ui->actionLog);
 
 	m_stations_page = new StationsPage(this);
 	connect(m_stations_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
@@ -39,7 +45,7 @@ Form::Form(QWidget *parent)
 
 	m_filter_page = new FilterPage(this);
 	connect(m_filter_page, SIGNAL(sig_setServer(QString)), SLOT(on_setServer(QString)));
-	connect(m_filter_page, SIGNAL(sig_requestCities(int)), SLOT(on_requestCities(int)));
+	connect(m_filter_page, SIGNAL(sig_requestCities(int)), m_web, SLOT(requestCities(int)));
 	connect(m_filter_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
 //	connect(m_filter_page, SIGNAL(), SLOT());
 	ui->tabWidget->addTab(m_filter_page, "Filter");
@@ -55,12 +61,17 @@ Form::Form(QWidget *parent)
 	m_player_page = new PlayerPage(m_media, this);
 	connect(m_player_page, SIGNAL(sig_showStationPage(QVariantMap)), SLOT(on_showStationPage(QVariantMap)));
 	ui->tabWidget->addTab(m_player_page, "Player");
-//	m_player_page->hide();
 
-	ui->playlist->addAction(ui->actionDeletePlaylist);
+	m_playlist_page = new PlaylistPage(this);
+	connect(m_playlist_page, SIGNAL(sig_requestStation(int)), m_web, SLOT(requestStation(int)));
+	connect(m_playlist_page, SIGNAL(sig_requestPlaylist(int)), m_web, SLOT(requestPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), m_web, SLOT(destroyPlaylist(int)));
+//	connect(m_playlist_page, SIGNAL(), m_web, SLOT());
+	ui->tabWidget->addTab(m_playlist_page, "Playlist");
 
-	m_web = new Web();
-	connect(m_web, SIGNAL(sig_finished(Task *)), this, SLOT(on_web_finished(Task *)));
+	ui->tabWidget->setCurrentIndex(1);
+
+	// Сделать запрос на сервер
 	on_setServer(m_filter_page->server());
 }
 
@@ -71,18 +82,31 @@ Form::~Form()
 	delete m_filter_page;
 	delete m_station_view;
 	delete m_player_page;
+	delete m_playlist_page;
+	delete m_log_page;
 	delete m_web;
 	delete m_media;
 }
 
-void Form::toggleBusy(int check)
+void Form::showBusy(bool busy)
 {
-	bool busy = (check == Qt::Checked);
 #ifdef Q_WS_MAEMO_5
 	// Индикатор работы
 	setAttribute(Qt::WA_Maemo5ShowProgressIndicator, busy);
+#else
+	Q_UNUSED(busy);
 #endif
 }
+
+void Form::showMessage(QString msg)
+{
+#ifdef Q_WS_MAEMO_5
+	QMaemo5InformationBox::information(this, msg);
+#else
+	Q_UNUSED(msg);
+#endif
+}
+
 
 void Form::on_web_finished(Task *task)
 {
@@ -95,7 +119,7 @@ void Form::on_web_finished(Task *task)
 		case Task::Cookies:
 			{
 				QVariantMap playlist = task->json.toMap()["root"].toMap();
-				showPlaylist(playlist);
+				m_playlist_page->showPlaylist(playlist);
 			}
 			// Список стран в фильтр
 			m_web->requestCountries();
@@ -103,7 +127,7 @@ void Form::on_web_finished(Task *task)
 			m_web->requestGenres();
 			break;
 		case Task::Playlist:
-			showPlaylist(task->json.toMap());
+			m_playlist_page->showPlaylist(task->json.toMap());
 			break;
 		case Task::AddToPlaylist:
 		case Task::PlaylistDestroy:
@@ -122,6 +146,14 @@ void Form::on_web_finished(Task *task)
 			// Получены данные о списке станций
 			m_stations_page->showStations(task->json.toMap());
 
+			if (ui->tabWidget->currentWidget() != m_stations_page)
+			{
+				// Пустой результат поиска
+				if (m_stations_page->isEmpty())
+					showMessage("Not found");
+				else
+					ui->tabWidget->setCurrentWidget(m_stations_page);
+			}
 			//TODO Переключится на список станций
 			//ui->tabWidget->setCurrentIndex(0);
 
@@ -160,61 +192,6 @@ void Form::on_web_finished(Task *task)
 	delete task;
 }
 
-void Form::showPlaylist(QVariantMap result)
-{
-	qDebug() << Q_FUNC_INFO << result;
-	ui->playlist->clear();
-
-	// Данные самого списка
-	QVariantMap playlist = result["playlist"].toMap();
-
-	if (!playlist["parent_id"].isNull())
-	{
-		// Переход на родителя
-		int parent_id = playlist["parent_id"].toInt();
-		QVariantMap parent;
-		parent["id"] = parent_id;
-		QListWidgetItem *it = new QListWidgetItem("[..]");
-		it->setData(PlaylistRole, parent);
-		ui->playlist->addItem(it);
-	}
-
-	// Данные о под-списках
-	QVariantList children = result["children"].toList();
-	foreach(QVariant item_var, children)
-	{
-		QVariantMap item = item_var.toMap();
-		QVariantMap info = item["playlist"].toMap();
-
-		QString name = info["id"].toString() + " ";
-		switch (info["playlist_type_id"].toInt())
-		{
-		case Playlist::Item:
-			name += info["name"].toString();
-			break;
-		default:
-			name += "[" + info["name"].toString() + "]";
-		}
-
-		QListWidgetItem *it = new QListWidgetItem(name);
-		it->setData(PlaylistRole, info);
-		ui->playlist->addItem(it);
-	}
-}
-
-void Form::on_playlist_itemDoubleClicked(QListWidgetItem* it)
-{
-	QVariantMap playlist = it->data(PlaylistRole).toMap();
-	qDebug() << Q_FUNC_INFO << playlist;
-	switch (playlist["playlist_type_id"].toInt())
-	{
-	case Playlist::Item:
-		m_web->requestStation(playlist["station_id"].toInt());
-		break;
-	default:
-		m_web->requestPlaylist(playlist["id"].toInt());
-	}
-}
 
 void Form::on_showStationPage(QVariantMap station)
 {
@@ -224,7 +201,6 @@ void Form::on_showStationPage(QVariantMap station)
 
 void Form::on_openStream(QVariantMap station, QString stream)
 {
-	log(stream);
 	m_player_page->showStationInfo(station);
 	m_media->open(station, stream);
 }
@@ -234,31 +210,17 @@ void Form::on_media_status(QVariantMap station, QString url, bool ok)
 	qDebug() << Q_FUNC_INFO << ok << url;
 	if (ok)
 	{
-		//qDebug() << station;
 		// Удалось подключится, добавить в историю
 		m_web->addStationToPlaylist(station);
+
+		QString msg = QString("Playback started: %1").arg(station["name"].toString());
+		showMessage(msg);
 	}
 }
 
 void Form::on_actionLog_triggered()
 {
 	m_log_page->show();
-}
-
-void Form::log(QString text)
-{
-	emit sig_log(text);
-}
-
-void Form::on_actionDeletePlaylist_triggered()
-{
-	QListWidgetItem* it = ui->playlist->currentItem();
-	if (it)
-	{
-		QVariantMap playlist = it->data(PlaylistRole).toMap();
-		int playlist_id = playlist["id"].toInt();
-		m_web->destroyPlaylist(playlist_id);
-	}
 }
 
 void Form::on_requestPage(int page)
@@ -273,10 +235,4 @@ void Form::on_setServer(QString server)
 
 	// Первый запрос установит cookies с сервера
 	m_web->requestCookies();
-}
-
-void Form::on_requestCities(int country_id)
-{
-	// Список городов в фильтр
-	m_web->requestCities(country_id);
 }

@@ -30,25 +30,31 @@ public:
 	void requestCookies();
 	//! Добавить запись в плейлист пользователя
 	void addStationToPlaylist(QVariantMap station, QVariantMap playlist = QVariantMap());
+
+	//! Список стран
+	void requestCountries();
+	//! Список жанров
+	void requestGenres();
+	//! Список станций на странице
+	void requestStations(int page, QVariantMap params = QVariantMap());
+
+public slots:
+	//! Список городов в стране
+	void requestCities(int country_id);
+
+	//! Запрос данных одной станции
+	void requestStation(int station_id);
 	//! Запрос информации о списке
 	void requestPlaylist(int playlist_id);
 	//! Удалить список
 	void destroyPlaylist(int playlist_id);
 
-	//! Список стран
-	void requestCountries();
-	//! Список городов в стране
-	void requestCities(int country_id);
-	//! Список жанров
-	void requestGenres();
-	//! Список станций на странице
-	void requestStations(int page, QVariantMap params = QVariantMap());
-	//! Запрос данных одной станции
-	void requestStation(int station_id);
-
 signals:
 	//! Завершенная задача
 	void sig_finished(Task *task);
+
+	//! Информация о занятости, если отправленные задачи, или нет
+	void sig_busy(bool busy);
 
 private slots:
 	//! Получен результат запроса

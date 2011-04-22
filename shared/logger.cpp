@@ -19,7 +19,7 @@ static void conMessageOutput(QtMsgType type, const char *raw_msg)
 	++line;
 	QString msg = QString("%1 %2: %3")
 		.arg(line, 4, 10, QChar('0'))
-		.arg(QThread::currentThreadId(), 0, 16, QChar('0'))
+		.arg((quint32)QThread::currentThreadId(), 0, 16, QChar('0'))
 		.arg(raw_msg);
 
 	// Удаление излишней информации

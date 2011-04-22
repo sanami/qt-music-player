@@ -12,8 +12,8 @@ struct Task
 	QVariantMap params; //!< Доп. информация
 	QByteArray result;  //!< Результат, без обработки
 	QVariant json;      //!< Результат в формате JSON
-	bool json_ok;       //!< Распарсен в JSON без ошибок
 	bool ok;
+	bool json_ok;       //!< Распарсен в JSON без ошибок
 	int error_code;
 	//TODO filter
 

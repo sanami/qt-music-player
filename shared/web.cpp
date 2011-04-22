@@ -110,7 +110,7 @@ Task *Web::request(Task::Type type, QUrl url, Task::Op op, QVariantMap params)
 	task->params = params;
 	task->ok = false;
 
-	QNetworkReply *reply;
+	QNetworkReply *reply = FALSE;
 	QNetworkRequest request(url);
 
 //	request.setAttribute(QNetworkRequest::CookieLoadControlAttribute, QNetworkRequest::Manual);
@@ -135,9 +135,19 @@ Task *Web::request(Task::Type type, QUrl url, Task::Op op, QVariantMap params)
 		Q_ASSERT( 0 );
 	}
 
-	//connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(on_replyProgress(qint64, qint64)));
-	m_reply[reply] = task;
-	return task;
+	if (reply)
+	{
+		// Занят
+		emit sig_busy(true);
+
+		//connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(on_replyProgress(qint64, qint64)));
+		m_reply[reply] = task;
+		return task;
+	}
+
+	// Ошибка
+	delete task;
+	return NULL;
 }
 
 QByteArray Web::toParams(QVariantMap params) const
@@ -199,6 +209,12 @@ void Web::on_replyFinished(QNetworkReply *reply)
 	{
 		Q_ASSERT( 0 );
 		qDebug() << "!!uknown replay";
+	}
+
+	if (m_reply.isEmpty())
+	{
+		// Задач в запросе больше нет
+		emit sig_busy(false);
 	}
 
 	// Do not directly delete it inside the slot

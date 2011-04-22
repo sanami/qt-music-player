@@ -11,66 +11,71 @@ QT       += core gui network phonon
 CONFIG += precompile_header mobility
 MOBILITY = 
 
-INCLUDE += ../shared ..
+QT += maemo5
+
+INCLUDEPATH += ../shared
 
 # Use Precompiled headers (PCH)
 PRECOMPILED_HEADER = pch.h
 
 SOURCES += main.cpp\
         form.cpp \
-    web.cpp \
-    qjson/serializerrunnable.cpp \
-    qjson/serializer.cpp \
-    qjson/qobjecthelper.cpp \
-    qjson/parserrunnable.cpp \
-    qjson/parser.cpp \
-    qjson/json_scanner.cpp \
-    qjson/json_parser.cc \
+    ../shared/web.cpp \
+    ../shared/qjson/serializerrunnable.cpp \
+    ../shared/qjson/serializer.cpp \
+    ../shared/qjson/qobjecthelper.cpp \
+    ../shared/qjson/parserrunnable.cpp \
+    ../shared/qjson/parser.cpp \
+    ../shared/qjson/json_scanner.cpp \
+    ../shared/qjson/json_parser.cc \
     info_page.cpp \
-    media.cpp \
-	mplayer_control.cpp \
-    settings.cpp \
+    ../shared/media.cpp \
+    ../shared/mplayer_control.cpp \
+    ../shared/settings.cpp \
     player_page.cpp \
-    cookie_jar.cpp \
+    ../shared/cookie_jar.cpp \
     log_page.cpp \
-    logger.cpp \
+    ../shared/logger.cpp \
     stations_page.cpp \
-    filter_page.cpp
+    filter_page.cpp \
+    playlist_page.cpp
 
 HEADERS  += form.h \
-    web.h \
-    task.h \
-    qjson/stack.hh \
-    qjson/serializerrunnable.h \
-    qjson/serializer.h \
-    qjson/qobjecthelper.h \
-    qjson/qjson_export.h \
-    qjson/qjson_debug.h \
-    qjson/position.hh \
-    qjson/parserrunnable.h \
-    qjson/parser.h \
-    qjson/parser_p.h \
-    qjson/location.hh \
-    qjson/json_scanner.h \
-    qjson/json_parser.hh \
     info_page.h \
-    media.h \
-	mplayer_control.h \
-    settings.h \
     player_page.h \
-    cookie_jar.h \
     log_page.h \
-    logger.h \
-    playlist.h \
     stations_page.h \
-    filter_page.h
+    filter_page.h \
+    ../shared/web.h \
+    ../shared/task.h \
+    ../shared/qjson/stack.hh \
+    ../shared/qjson/serializerrunnable.h \
+    ../shared/qjson/serializer.h \
+    ../shared/qjson/qobjecthelper.h \
+    ../shared/qjson/qjson_export.h \
+    ../shared/qjson/qjson_debug.h \
+    ../shared/qjson/position.hh \
+    ../shared/qjson/parserrunnable.h \
+    ../shared/qjson/parser.h \
+    ../shared/qjson/parser_p.h \
+    ../shared/qjson/location.hh \
+    ../shared/qjson/json_scanner.h \
+    ../shared/qjson/json_parser.hh \
+    ../shared/media.h \
+    ../shared/mplayer_control.h \
+    ../shared/settings.h \
+    ../shared/cookie_jar.h \
+    ../shared/logger.h \
+    ../shared/playlist.h \
+    playlist_page.h
 
 FORMS    += form.ui \
     info_page.ui \
     player_page.ui \
     log_page.ui \
     stations_page.ui \
-    filter_page.ui
+    filter_page.ui \
+    playlist_page.ui
 
 symbian {
     TARGET.UID3 = 0xe7928591
