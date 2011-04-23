@@ -30,7 +30,10 @@ SOURCES += main.cpp \
     ../../shared/qjson/json_scanner.cpp \
     ../../shared/qjson/json_parser.cc \
     main_page.cpp \
-    stations_page.cpp
+    stations_page.cpp \
+    filter_page.cpp \
+    log_page.cpp \
+    app_window.cpp
 
 HEADERS += \
     app.h \
@@ -57,7 +60,10 @@ HEADERS += \
     ../../shared/qjson/json_scanner.h \
     ../../shared/qjson/json_parser.hh \
     main_page.h \
-    stations_page.h
+    stations_page.h \
+    filter_page.h \
+    log_page.h \
+    app_window.h
 
 MAKE_CLEAN += $$OBJECTS_DIR/*.o
 MAKE_DISTCLEAN += \

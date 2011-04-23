@@ -16,4 +16,10 @@
 #include <MButton>
 #include <MButtonGroup>
 #include <MSceneManager>
+#include <MToolBar>
+#include <MAction>
+#include <MComboBox>
+#include <MAbstractCellCreator>
+#include <MContentItem>
+#include <MList>
 #endif

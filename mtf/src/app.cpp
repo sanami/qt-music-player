@@ -1,34 +1,55 @@
 #include "app.h"
+#include "app_window.h"
 #include "web.h"
 #include "media.h"
 #include "logger.h"
 #include "main_page.h"
+#include "log_page.h"
 #include "stations_page.h"
+#include "filter_page.h"
 
-App::App(QObject *parent) :
-    QObject(parent)
+App::App(QObject *parent)
+	: QObject(parent)
 {
+	// Отладочные сообщения
+	m_log_page = new LogPage();
+	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
+
 	// Веб-запросы
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
 	connect(m_web, SIGNAL(sig_busy(bool)), SLOT(showBusy(bool)));
 
+	// Управление плеером
 	m_media = new Media(this);
 //	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
 	connect(m_media, SIGNAL(sig_status(QVariantMap, QString, bool)), SLOT(on_media_status(QVariantMap, QString, bool)));
 
-	m_app_window = new MApplicationWindow();
-	m_app_window->setObjectName("AppWindow");
-	m_app_window->show();
-
 	// Добавить страницы
 	m_main_page = new MainPage();
 	connect(m_main_page, SIGNAL(sig_showPage(int)), SLOT(on_showPage(int)));
-	m_main_page->appear();
+//	m_main_page->appear(m_app_window);
+
+	m_filter_page = new FilterPage();
+	connect(m_filter_page, SIGNAL(sig_setServer(QString)), SLOT(on_setServer(QString)));
+	connect(m_filter_page, SIGNAL(sig_requestCities(int)), m_web, SLOT(requestCities(int)));
+	connect(m_filter_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
+
+	m_stations_page = new StationsPage();
+
+	// Окно приложения
+	m_app_window = new AppWindow();
+	m_app_window->addPage(m_stations_page);
+	m_app_window->addPage(m_filter_page);
+	m_app_window->addPage(m_log_page);
+	m_app_window->show();
 
 //	m_settings.server();
 	// Сделать запрос на сервер
-	on_setServer("http://localhost:3000");
+//	on_setServer("http://localhost:3000");
+
+	m_filter_page->appear(m_app_window);
+	on_requestPage(1);
 }
 
 App::~App()
@@ -37,6 +58,10 @@ App::~App()
 	delete m_media;
 
 	delete m_main_page;
+	delete m_log_page;
+	delete m_filter_page;
+	delete m_stations_page;
+
 	delete m_app_window;
 }
 
@@ -91,8 +116,9 @@ void App::on_web_finished(Task *task)
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
-//			m_stations_page->showStations(task->json.toMap());
+			m_stations_page->showStations(task->json.toMap());
 
+			m_stations_page->appear(m_app_window);
 //			if (ui->tabWidget->currentWidget() != m_stations_page)
 //			{
 //				// Пустой результат поиска
@@ -110,15 +136,15 @@ void App::on_web_finished(Task *task)
 			break;
 		case Task::Countries:
 			// Список стран
-//			m_filter_page->showCountries(task->json.toList());
+			m_filter_page->showCountries(task->json.toList());
 			break;
 		case Task::Cities:
 			// Список городов
-//			m_filter_page->showCities(task->json.toList());
+			m_filter_page->showCities(task->json.toList());
 			break;
 		case Task::Genres:
 			// Список жанров
-//			m_filter_page->showGenres(task->json.toList());
+			m_filter_page->showGenres(task->json.toList());
 			break;
 
 		default:
@@ -142,6 +168,12 @@ void App::on_web_finished(Task *task)
 	delete task;
 }
 
+//void Form::on_openStream(QVariantMap station, QString stream)
+//{
+//	m_player_page->showStationInfo(station);
+//	m_media->open(station, stream);
+//}
+
 void App::on_media_status(QVariantMap station, QString url, bool ok)
 {
 	qDebug() << Q_FUNC_INFO << ok << url;
@@ -153,6 +185,12 @@ void App::on_media_status(QVariantMap station, QString url, bool ok)
 		QString msg = QString("Playing: %1").arg(station["name"].toString());
 		showMessage(msg);
 	}
+}
+
+void App::on_requestPage(int page)
+{
+	// Отправить запроса на текущую страницу
+	m_web->requestStations(page, m_filter_page->filter());
 }
 
 void App::on_setServer(QString server)
@@ -169,11 +207,19 @@ void App::on_setServer(QString server)
 void App::on_showPage(int page_id)
 {
 	qDebug() << Q_FUNC_INFO << page_id;
-	StationsPage *page = new StationsPage();
+	switch(page_id)
+	{
+	case 0:
+		m_stations_page->appear(m_app_window);
+		break;
+	case 1:
+		m_filter_page->appear(m_app_window);
+		break;
+	case 2:
+		m_log_page->appear(m_app_window);
+		break;
+	default:
+		Q_ASSERT( 0 );
+	}
 
-	// When the back button is pressed, the page gets dismissed.
-	// By setting MSceneWindow::DestroyWhenDismissed we don't have to
-	// keep tabs on this page since it will be automatically destroyed
-	// after the dismissal.
-	page->appear();//, MSceneWindow::DestroyWhenDismissed);
 }

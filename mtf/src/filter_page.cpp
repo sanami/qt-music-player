@@ -1,0 +1,214 @@
+#include "filter_page.h"
+
+struct Ui
+{
+	MComboBox *comboBox_server;
+	MComboBox *comboBox_country;
+	QVector<QVariant> comboBox_country_itemData;
+	MComboBox *comboBox_city;
+	QVector<QVariant> comboBox_city_itemData;
+	MComboBox *comboBox_genre;
+	QVector<QVariant> comboBox_genre_itemData;
+};
+
+FilterPage::FilterPage()
+	: ui(new Ui)
+{
+	setObjectName("FilterPage");
+	setTitle("Filter");
+
+}
+
+void FilterPage::createContent()
+{
+	//QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+	QGraphicsGridLayout *layout = new QGraphicsGridLayout;
+	layout->setSpacing(10);
+
+	int row = 0;
+	//layout->addItem(new MLabel("Server"), row, 0);
+	{
+		MComboBox *combobox = new MComboBox();
+		combobox->setTitle("Server");
+		connect(combobox, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboBox_server_currentIndexChanged(QString)));
+		QStringList stringList;
+		stringList << "http://localhost:3000" << "http://music.heroku.com";
+		combobox->addItems(stringList);
+		for(int i=0; combobox->count(); ++i)
+		{
+			if (combobox->itemText(i) == m_settings.server())
+			{
+				combobox->setCurrentIndex(i);
+				break;
+			}
+		}
+		layout->addItem(combobox, row, 0);
+		ui->comboBox_server = combobox;
+	}
+	++row;
+	//layout->addItem(new MLabel("Country"), row, 0);
+	{
+		MComboBox *combobox = new MComboBox();
+		combobox->setTitle("Country");
+		connect(combobox, SIGNAL(currentIndexChanged(int)), SLOT(on_comboBox_country_currentIndexChanged(int)));
+		layout->addItem(combobox, row, 0);
+		ui->comboBox_country = combobox;
+	}
+	++row;
+	//layout->addItem(new MLabel("City"), row, 0);
+	{
+		MComboBox *combobox = new MComboBox();
+		combobox->setTitle("City");
+		layout->addItem(combobox, row, 0);
+		ui->comboBox_city = combobox;
+	}
+//	++row;
+//	layout->addItem(new MLabel("Search"), row, 0);
+//	{
+//		MTextEdit *edit = new MTextEdit();
+//		layout->addItem(edit, row, 0);
+//	}
+	++row;
+	//layout->addItem(new MLabel("Genre"), row, 0);
+	{
+		MComboBox *combobox = new MComboBox();
+		combobox->setTitle("Genre");
+		layout->addItem(combobox, row, 0);
+		ui->comboBox_genre = combobox;
+	}
+	++row;
+	{
+		MButton *btn = new MButton("Apply");
+		connect(btn, SIGNAL(clicked()), SLOT(on_pushButton_filter_apply_clicked()));
+		layout->addItem(btn, row, 0);
+	}
+
+	centralWidget()->setLayout(layout);
+}
+
+void FilterPage::showCountries(QVariantList countries)
+{
+	ui->comboBox_country->clear();
+	// Первый элемент, все страны
+	ui->comboBox_country->addItem("All");
+
+	// Данные элементов
+	ui->comboBox_country_itemData.fill(0, countries.size()+1);
+	int i = 1; // Первый 'All'
+
+	foreach(QVariant country_var, countries)
+	{
+		QVariantMap country = country_var.toMap().value("location").toMap();
+		QString name = country["name"].toString();
+
+		// С привязкой к id
+//		ui->comboBox_country->addItem(name, country["id"]);
+		ui->comboBox_country->addItem(name);
+		ui->comboBox_country_itemData[i++] = country["id"];
+	}
+}
+
+void FilterPage::showCities(QVariantList cities)
+{
+	ui->comboBox_city->clear();
+	// Первый элемент, все города
+	ui->comboBox_city->addItem("All");
+	ui->comboBox_city->setEnabled(true);
+
+	// Данные элементов
+	ui->comboBox_city_itemData.fill(0, cities.size()+1);
+	int i = 1; // Первый 'All'
+
+	foreach(QVariant city_var, cities)
+	{
+		QVariantMap city = city_var.toMap().value("location").toMap();
+		QString name = city["name"].toString();
+
+		// С привязкой к id
+//		ui->comboBox_city->addItem(name, city["id"]);
+		ui->comboBox_city->addItem(name);
+		ui->comboBox_city_itemData[i++] = city["id"];
+	}
+}
+
+void FilterPage::showGenres(QVariantList genres)
+{
+	ui->comboBox_genre->clear();
+	// Первый элемент, все жанры
+	ui->comboBox_genre->addItem("All");
+
+	// Данные элементов
+	ui->comboBox_genre_itemData.fill(0, genres.size()+1);
+	int i = 1; // Первый 'All'
+
+	foreach(QVariant genre_var, genres)
+	{
+		QVariantMap genre = genre_var.toMap().value("genre").toMap();
+		QString name = genre["name"].toString();
+
+		// С привязкой к id
+//		ui->comboBox_genre->addItem(name, genre["id"]);
+		ui->comboBox_genre->addItem(name);
+		ui->comboBox_genre_itemData[i++] = genre["id"];
+	}
+}
+
+void FilterPage::on_comboBox_server_currentIndexChanged(const QString &server)
+{
+	m_settings.setServer(server);
+	emit sig_setServer(server);
+}
+
+void FilterPage::on_comboBox_country_currentIndexChanged(int index)
+{
+	ui->comboBox_city->clear();
+	ui->comboBox_city->setEnabled(false);
+
+	int country_id = ui->comboBox_country_itemData[index].toInt();
+	if (country_id > 0)
+	{
+		// Список городов в фильтр
+		ui->comboBox_city->addItem("Loading...");
+		emit sig_requestCities(country_id);
+	}
+	else
+	{
+		ui->comboBox_city->addItem("All");
+	}
+}
+
+void FilterPage::on_pushButton_filter_apply_clicked()
+{
+	m_filter.clear();
+
+//	// Строка поиска
+//	QStringList search = ui->comboBox_search->currentText().split(QRegExp("\\s+"), QString::SkipEmptyParts);
+//	if (!search.isEmpty())
+//	{
+//		m_filter["name"] = search.join("+");
+//	}
+
+	// Локация
+	int city_id = ui->comboBox_city->currentIndex() >= 0 ? ui->comboBox_city_itemData[ui->comboBox_city->currentIndex()].toInt() : 0;
+	if (city_id > 0)
+	{
+		m_filter["location"] = city_id;
+	}
+	else
+	{
+		int country_id = ui->comboBox_country->currentIndex() >= 0 ? ui->comboBox_country_itemData[ui->comboBox_country->currentIndex()].toInt() : 0;
+
+		if (country_id > 0)
+			m_filter["location"] = country_id;
+	}
+
+	// Жанр
+	int genre_id = ui->comboBox_genre->currentIndex() >= 0 ? ui->comboBox_genre_itemData[ui->comboBox_genre->currentIndex()].toInt() : 0;
+	if (genre_id > 0)
+	{
+		m_filter["genre"] = genre_id;
+	}
+
+	// Новый поиск с 1 страницы
+	emit sig_requestPage(1);
+}

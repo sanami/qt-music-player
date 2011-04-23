@@ -1,6 +1,7 @@
 #MainPage {
     horizontal-align: center;
     vertical-align: center;
+    text-color: white;
 }
 #MainMessage {
     background-image: none;
