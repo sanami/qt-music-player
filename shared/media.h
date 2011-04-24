@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QVariant>
+#include "data.h"
 
 class MPlayerControl;
 
@@ -12,7 +13,7 @@ public:
 	~Media();
 
 	//! Начать проигрывание
-	void open(QVariantMap station, QString url);
+	void open(Station station, QString url);
 
 	//! Переключить состояние проигрывания
 	void switch_play_state();
@@ -25,7 +26,7 @@ signals:
 	void sig_messages(QString str);
 
 	//! Результат открытия аудиопотока
-	void sig_status(QVariantMap station, QString url, bool ok);
+	void sig_status(Station station, QString url, bool ok);
 
 private slots:
 	//! Обработка сообщений от плеера
@@ -33,5 +34,5 @@ private slots:
 
 private:
 	MPlayerControl *m_mplayer; //!< Управление внешним mplayer
-	QMap<QString, QVariantMap> m_stations; //!< Открытые станции
+	QMap<QString, Station> m_stations; //!< Открытые станции
 };

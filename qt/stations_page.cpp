@@ -17,7 +17,7 @@ StationsPage::~StationsPage()
     delete ui;
 }
 
-void StationsPage::showStations(QVariantMap result)
+void StationsPage::showStations(Station::List stations, QVariantMap result)
 {
 	m_current_page = result["current_page"].toInt();
 	m_num_pages = result["num_pages"].toInt();
@@ -26,15 +26,10 @@ void StationsPage::showStations(QVariantMap result)
 
 	// Отобразить список
 	ui->stations->clear();
-	QVariantList stations = result["stations"].toList();
-	foreach(QVariant station_var, stations)
+	foreach(Station station, stations)
 	{
-		QVariantMap station = station_var.toMap().value("station").toMap();
-		//qDebug() << station;
-		QString name = station["name"].toString();
-
-		QListWidgetItem *it = new QListWidgetItem(name);
-		it->setData(StationRole, station);
+		QListWidgetItem *it = new QListWidgetItem(station.name());
+		it->setData(StationRole, station.data); //TODO
 		ui->stations->addItem(it);
 	}
 	// Пустой список

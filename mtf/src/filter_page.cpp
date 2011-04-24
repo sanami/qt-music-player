@@ -18,7 +18,6 @@ FilterPage::FilterPage()
 {
 	setObjectName("FilterPage");
 	setTitle("Filter");
-
 }
 
 void FilterPage::createContent()

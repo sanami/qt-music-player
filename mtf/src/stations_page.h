@@ -1,4 +1,7 @@
 #pragma once
+#include "data.h"
+
+class StationsModel;
 
 class StationsPage : public MApplicationPage
 {
@@ -6,16 +9,25 @@ class StationsPage : public MApplicationPage
 
 public:
     StationsPage();
+	~StationsPage();
 
 	//! Показать список с текущей страницы
-	void showStations(QVariantMap stations);
+	void showStations(Station::List stations, QVariantMap result);
 
 	//! Есть ли записи в списке
 	bool isEmpty() const;
 
 signals:
-	void sig_showStation(QVariantMap station);
+	void sig_showStation(Station station);
 	void sig_requestPage(int page);
+
+private slots:
+	//! Поворот экрана
+	void on_orientationChanged(M::Orientation orientation);
+	void on_prevPage_clicked();
+	void on_nextPage_clicked();
+	//! Клик на элемент списка
+	void on_list_itemClicked(const QModelIndex &index);
 
 protected:
 	virtual void createContent();
@@ -27,6 +39,9 @@ private:
 	void requestPage();
 
 private:
+	StationsModel *m_model; //!< Модель для отображения
+	MList *m_list; //!< Список станций
+
 	int m_current_page;   //!< Текущая страница
 	int m_num_pages;      //!< Общее кол-во страниц
 };

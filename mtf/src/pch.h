@@ -22,4 +22,5 @@
 #include <MAbstractCellCreator>
 #include <MContentItem>
 #include <MList>
+#include <MBanner>
 #endif

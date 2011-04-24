@@ -29,11 +29,12 @@ SOURCES += main.cpp \
     ../../shared/qjson/parser.cpp \
     ../../shared/qjson/json_scanner.cpp \
     ../../shared/qjson/json_parser.cc \
-    main_page.cpp \
     stations_page.cpp \
     filter_page.cpp \
     log_page.cpp \
-    app_window.cpp
+    app_window.cpp \
+    stations_model.cpp \
+    station_page.cpp
 
 HEADERS += \
     app.h \
@@ -59,12 +60,13 @@ HEADERS += \
     ../../shared/qjson/location.hh \
     ../../shared/qjson/json_scanner.h \
     ../../shared/qjson/json_parser.hh \
-    main_page.h \
     stations_page.h \
     filter_page.h \
     log_page.h \
     app_window.h \
-    ../../shared/data.h
+    ../../shared/data.h \
+    stations_model.h \
+    station_page.h
 
 MAKE_CLEAN += $$OBJECTS_DIR/*.o
 MAKE_DISTCLEAN += \

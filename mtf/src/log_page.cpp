@@ -25,6 +25,7 @@ void LogPage::createContent()
 		m_messages = new MTextEdit(MTextEditModel::MultiLine);
 		setObjectName("messages");
 		m_messages->setReadOnly(true);
+		m_messages->setMaxLength(1000);
 		layout->addItem(m_messages);
 	}
 }

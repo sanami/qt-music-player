@@ -151,7 +151,10 @@ void Form::on_web_finished(Task *task)
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
-			m_stations_page->showStations(task->json.toMap());
+			{
+				QVariantMap result = task->json.toMap();
+				m_stations_page->showStations(Station::List(result["stations"]), result);
+			}
 
 			if (ui->tabWidget->currentWidget() != m_stations_page)
 			{
@@ -201,7 +204,6 @@ void Form::on_web_finished(Task *task)
 
 	delete task;
 }
-
 
 void Form::on_showStationPage(QVariantMap station)
 {

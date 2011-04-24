@@ -1,33 +1,5 @@
 #include "stations_page.h"
-
-QStringList g_stations;
-
-class StationsModel : public QAbstractListModel
-{
-public:
-	StationsModel()
-	{
-	}
-
-protected:
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
-	{
-		return g_stations.size();
-	}
-
-	QVariant data(const QModelIndex &index, int role) const
-	{
-		if (role == Qt::DisplayRole)
-		{
-			QStringList rowData;
-			rowData << g_stations[index.row()];
-//			rowData << "Angelina"; // first name
-//			rowData << "Joli"; // last name
-			return QVariant(rowData);
-		}
-		return QVariant();
-	}
-};
+#include "stations_model.h"
 
 class MContentItemCreator : public MAbstractCellCreator<MContentItem>
 {
@@ -43,65 +15,62 @@ public:
 };
 
 StationsPage::StationsPage()
-	: m_current_page(0)
+	: m_model(NULL)
+	, m_current_page(0)
 	, m_num_pages(0)
 {
 	setObjectName("StationsPage");
 	setTitle("Stations");
+
+	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+	centralWidget()->setLayout(layout);
+
+	// Кнопки
+	QGraphicsLinearLayout *layout2 = new QGraphicsLinearLayout(Qt::Horizontal);
+	{
+		MButton *btn = new MButton("<<");
+		connect(btn, SIGNAL(clicked()), SLOT(on_prevPage_clicked()));
+		layout2->addItem(btn);
+	}
+	{
+		MButton *btn = new MButton(">>");
+		connect(btn, SIGNAL(clicked()), SLOT(on_nextPage_clicked()));
+		layout2->addItem(btn);
+	}
+	layout->addItem(layout2);
+
+	//layout->addItem(new MLabel("Stations:"));
+	m_list = new MList();
+	MContentItemCreator *cellCreator = new MContentItemCreator();
+	m_list->setCellCreator(cellCreator);
+	m_model = new StationsModel;
+	m_list->setItemModel(m_model);
+	m_list->setColumns(2); //TODO
+	connect(m_list, SIGNAL(itemClicked(QModelIndex)), SLOT(on_list_itemClicked(QModelIndex)));
+	layout->addItem(m_list);
+}
+
+StationsPage::~StationsPage()
+{
+	delete m_model;
 }
 
 void StationsPage::createContent()
 {
 	qDebug() << Q_FUNC_INFO;
-	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
-	centralWidget()->setLayout(layout);
-
-	// Items in a vertical layout are arranged from top to bottom.
-	layout->addItem(new MLabel("Stations:"));
-
-
-	MList * list = new MList();
-	MContentItemCreator *cellCreator = new MContentItemCreator;
-	list->setCellCreator(cellCreator);
-	StationsModel *model = new StationsModel;
-	list->setItemModel(model);
-
-	list->setColumns(2);
-
-
-	layout->addItem(list);
-
 }
 
-void StationsPage::showStations(QVariantMap result)
+void StationsPage::showStations(Station::List stations, QVariantMap result)
 {
+	qDebug() << Q_FUNC_INFO << stations.size();
 	m_current_page = result["current_page"].toInt();
 	m_num_pages = result["num_pages"].toInt();
 
-//	updateControls(true);
+	updateControls(true);
 
-	g_stations.clear();
-
-//	// Отобразить список
-//	ui->stations->clear();
-	QVariantList stations = result["stations"].toList();
-	foreach(QVariant station_var, stations)
-	{
-		QVariantMap station = station_var.toMap().value("station").toMap();
-		//qDebug() << station;
-		QString name = station["name"].toString();
-
-		g_stations << name;
-
-//		QListWidgetItem *it = new QListWidgetItem(name);
-//		it->setData(StationRole, station);
-//		ui->stations->addItem(it);
-	}
-//	// Пустой список
-//	if (stations.isEmpty())
-//	{
-//		ui->stations->addItem("Not found");
-//	}
+	// Отобразить список
+	m_model->setStations(stations);
+	m_list->update();
 }
 
 bool StationsPage::isEmpty() const
@@ -109,25 +78,25 @@ bool StationsPage::isEmpty() const
 	return m_num_pages == 0;
 }
 
-//void StationsPage::on_pushButton_clicked()
-//{
-//	// <<
-//	if (m_current_page > 1)
-//	{
-//		m_current_page--;
-//		requestPage();
-//	}
-//}
+void StationsPage::on_prevPage_clicked()
+{
+	// <<
+	if (m_current_page > 1)
+	{
+		m_current_page--;
+		requestPage();
+	}
+}
 
-//void StationsPage::on_pushButton_2_clicked()
-//{
-//	// >>
-//	if (m_current_page < m_num_pages)
-//	{
-//		m_current_page++;
-//		requestPage();
-//	}
-//}
+void StationsPage::on_nextPage_clicked()
+{
+	// >>
+	if (m_current_page < m_num_pages)
+	{
+		m_current_page++;
+		requestPage();
+	}
+}
 
 //void StationsPage::on_stations_itemDoubleClicked(QListWidgetItem* it)
 //{
@@ -137,19 +106,21 @@ bool StationsPage::isEmpty() const
 //	emit sig_showStation(station);
 //}
 
-//void StationsPage::requestPage()
-//{
-//	// В списке сообщение о работе
+void StationsPage::requestPage()
+{
+	// В списке сообщение о работе
 //	ui->stations->clear();
 //	ui->stations->addItem("Loading...");
-//	updateControls(false);
 
-//	// Отправить запрос на текущую страницу
-//	emit sig_requestPage(m_current_page);
-//}
+	m_model->reset("Loading...");
+	updateControls(false);
 
-//void StationsPage::updateControls(bool enable)
-//{
+	// Отправить запрос на текущую страницу
+	emit sig_requestPage(m_current_page);
+}
+
+void StationsPage::updateControls(bool enable)
+{
 //	// Блокировать если занят
 //	ui->stations->setEnabled(enable);
 
@@ -160,4 +131,22 @@ bool StationsPage::isEmpty() const
 //	// Информация о страницах
 //	ui->page->setText(QString("%1 / %2").arg(m_current_page).arg(m_num_pages));
 
-//}
+}
+
+void StationsPage::on_orientationChanged(M::Orientation orientation)
+{
+	qDebug() << Q_FUNC_INFO << orientation;
+	if (orientation == M::Landscape)
+		m_list->setColumns(2);
+	else
+		m_list->setColumns(1);
+}
+
+void StationsPage::on_list_itemClicked(const QModelIndex &index)
+{
+	const Station *station = m_model->station(index);
+	if (station)
+	{
+		emit sig_showStation(*station);
+	}
+}

@@ -3,9 +3,9 @@
 #include "web.h"
 #include "media.h"
 #include "logger.h"
-#include "main_page.h"
 #include "log_page.h"
 #include "stations_page.h"
+#include "station_page.h"
 #include "filter_page.h"
 
 App::App(QObject *parent)
@@ -22,23 +22,27 @@ App::App(QObject *parent)
 
 	// Управление плеером
 	m_media = new Media(this);
-//	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
 	connect(m_media, SIGNAL(sig_status(QVariantMap, QString, bool)), SLOT(on_media_status(QVariantMap, QString, bool)));
 
-	// Добавить страницы
-	m_main_page = new MainPage();
-	connect(m_main_page, SIGNAL(sig_showPage(int)), SLOT(on_showPage(int)));
-//	m_main_page->appear(m_app_window);
+	// Окно приложения
+	m_app_window = new AppWindow();
 
+	// Добавить страницы
 	m_filter_page = new FilterPage();
 	connect(m_filter_page, SIGNAL(sig_setServer(QString)), SLOT(on_setServer(QString)));
 	connect(m_filter_page, SIGNAL(sig_requestCities(int)), m_web, SLOT(requestCities(int)));
 	connect(m_filter_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
 
 	m_stations_page = new StationsPage();
+	connect(m_app_window, SIGNAL(orientationChanged(M::Orientation)), m_stations_page, SLOT(on_orientationChanged(M::Orientation)));
+	connect(m_stations_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
+	connect(m_stations_page, SIGNAL(sig_showStation(Station)), SLOT(on_showStationPage(Station)));
 
-	// Окно приложения
-	m_app_window = new AppWindow();
+	m_station_page = new StationPage();
+	connect(m_station_page, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
+//	connect(m_station_page, SIGNAL(sig_addToFavorites(QVariantMap)), SLOT(on_addStationToFavorites(QVariantMap)));
+	connect(m_media, SIGNAL(sig_messages(QString)), m_station_page, SLOT(on_media_messages(QString)));
+
 	m_app_window->addPage(m_stations_page);
 	m_app_window->addPage(m_filter_page);
 	m_app_window->addPage(m_log_page);
@@ -57,10 +61,10 @@ App::~App()
 	delete m_web;
 	delete m_media;
 
-	delete m_main_page;
 	delete m_log_page;
 	delete m_filter_page;
 	delete m_stations_page;
+	delete m_station_page;
 
 	delete m_app_window;
 }
@@ -68,12 +72,21 @@ App::~App()
 void App::showBusy(bool busy)
 {
 	Q_UNUSED(busy);
+	//TODO индикатор рабочих запросов
+	//MProgressIndicator *spinner = new MProgressIndicator(NULL, MProgressIndicator::spinnerType);
+	//spinner->setUnknownDuration(true);
 }
 
 void App::showMessage(QString msg, int timeout)
 {
-	Q_UNUSED(msg);
 	Q_UNUSED(timeout);
+
+	MBanner *infoBanner = new MBanner();
+	infoBanner->setStyleName("InformationBanner");
+	infoBanner->setTitle(msg);
+	infoBanner->appear(m_app_window, MSceneWindow::DestroyWhenDone);
+	// Не работает, делается через CSS для #InformationBanner
+	//infoBanner->style()->setProperty("disappear-timeout", 100);
 }
 
 void App::on_web_finished(Task *task)
@@ -116,22 +129,21 @@ void App::on_web_finished(Task *task)
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
-			m_stations_page->showStations(task->json.toMap());
+			{
+				QVariantMap result = task->json.toMap();
+				m_stations_page->showStations(Station::List(result["stations"]), result);
+			}
 
-			m_stations_page->appear(m_app_window);
-//			if (ui->tabWidget->currentWidget() != m_stations_page)
-//			{
-//				// Пустой результат поиска
-//				if (m_stations_page->isEmpty())
-//				{
-//					showMessage("Not found", 1000);
-//				}
-//				else
-//				{
-//					// Переключится на список станций
-//					ui->tabWidget->setCurrentWidget(m_stations_page);
-//				}
-//			}
+			// Пустой результат поиска
+			if (m_stations_page->isEmpty())
+			{
+				showMessage("Not found", 1000);
+			}
+			else
+			{
+				// Переключится на список станций
+				m_stations_page->appear(m_app_window);
+			}
 
 			break;
 		case Task::Countries:
@@ -168,11 +180,17 @@ void App::on_web_finished(Task *task)
 	delete task;
 }
 
-//void Form::on_openStream(QVariantMap station, QString stream)
-//{
+void App::on_showStationPage(Station station)
+{
+	m_station_page->setStation(station);
+	m_station_page->appear(m_app_window);
+}
+
+void App::on_openStream(Station station, QString stream)
+{
 //	m_player_page->showStationInfo(station);
-//	m_media->open(station, stream);
-//}
+	m_media->open(station, stream);
+}
 
 void App::on_media_status(QVariantMap station, QString url, bool ok)
 {
@@ -202,24 +220,4 @@ void App::on_setServer(QString server)
 
 	// Первый запрос установит cookies с сервера
 	m_web->requestCookies();
-}
-
-void App::on_showPage(int page_id)
-{
-	qDebug() << Q_FUNC_INFO << page_id;
-	switch(page_id)
-	{
-	case 0:
-		m_stations_page->appear(m_app_window);
-		break;
-	case 1:
-		m_filter_page->appear(m_app_window);
-		break;
-	case 2:
-		m_log_page->appear(m_app_window);
-		break;
-	default:
-		Q_ASSERT( 0 );
-	}
-
 }

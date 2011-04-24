@@ -17,7 +17,7 @@ Media::~Media()
 	delete m_mplayer;
 }
 
-void Media::open(QVariantMap station, QString url)
+void Media::open(Station station, QString url)
 {
 	qDebug() << Q_FUNC_INFO << url;
 	// Открыть в системе

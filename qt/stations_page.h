@@ -1,7 +1,6 @@
-#ifndef STATIONS_PAGE_H
-#define STATIONS_PAGE_H
-
+#pragma once
 #include <QWidget>
+#include "data.h"
 
 namespace Ui {
     class StationsPage;
@@ -17,7 +16,7 @@ public:
     ~StationsPage();
 
 	//! Показать список с текущей страницы
-	void showStations(QVariantMap stations);
+	void showStations(Station::List stations, QVariantMap result);
 
 	//! Есть ли записи в списке
 	bool isEmpty() const;
@@ -47,5 +46,3 @@ private:
 	int m_current_page;   //!< Текущая страница
 	int m_num_pages;      //!< Общее кол-во страниц
 };
-
-#endif // STATIONS_PAGE_H

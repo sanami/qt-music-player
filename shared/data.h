@@ -8,7 +8,7 @@ template<class T>
 struct AsList : public QList<T>
 {
 public:
-	AsList(QVariant var_list)
+	explicit AsList(QVariant var_list)
 	{
 		foreach(QVariant var, var_list.toList())
 		{
@@ -23,7 +23,7 @@ struct Genre
 	typedef AsList<Genre> List;
 
 	QVariantMap data;
-	Genre(QVariant var)
+	explicit Genre(QVariant var)
 	{
 		data = var.toMap().value("genre").toMap();
 	}
@@ -39,7 +39,7 @@ struct Location
 	typedef AsList<Location> List;
 
 	QVariantMap data;
-	Location(QVariant var)
+	explicit Location(QVariant var)
 	{
 		data = var.toMap().value("location").toMap();
 	}
@@ -47,4 +47,54 @@ struct Location
 	//! Определения рабочих полей
 	FIELD_INT(id);
 	FIELD_STRING(name);
+};
+
+//! Аудиопотоки
+struct Stream
+{
+	typedef AsList<Stream> List;
+
+	QVariantMap data;
+	explicit Stream(QVariant var)
+	{
+		data = var.toMap().value("stream").toMap();
+	}
+
+	//! Определения рабочих полей
+	FIELD_INT(id);
+	FIELD_STRING(url);
+	FIELD_STRING(bitrate);
+	FIELD_STRING(codec);
+};
+
+//! Станция
+struct Station
+{
+	typedef AsList<Station> List;
+
+	Station()
+	{
+	}
+
+	Station(const Station &that)
+		: data(that.data)
+	{
+	}
+
+	explicit Station(QVariant var)
+	{
+		data = var.toMap().value("station").toMap();
+	}
+
+	Stream::List streams()
+	{
+		return Stream::List(data["streams"]);
+	}
+
+	//! Определения рабочих полей
+	FIELD_INT(id);
+	FIELD_STRING(name);
+
+	//! Все данные
+	QVariantMap data;
 };
