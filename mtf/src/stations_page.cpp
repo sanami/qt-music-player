@@ -48,6 +48,9 @@ StationsPage::StationsPage()
 	m_list->setColumns(2); //TODO
 	connect(m_list, SIGNAL(itemClicked(QModelIndex)), SLOT(on_list_itemClicked(QModelIndex)));
 	layout->addItem(m_list);
+
+//	MAction * action = new MAction("Pictures", this);
+//	action->setLocation(MAction::ApplicationMenuLocation);
 }
 
 StationsPage::~StationsPage()
@@ -110,9 +113,6 @@ void StationsPage::on_list_itemClicked(const QModelIndex &index)
 void StationsPage::requestPage()
 {
 	// В списке сообщение о работе
-//	ui->stations->clear();
-//	ui->stations->addItem("Loading...");
-
 	m_model->reset("Loading...");
 	updateControls(false);
 
@@ -131,7 +131,6 @@ void StationsPage::updateControls(bool enable)
 
 //	// Информация о страницах
 //	ui->page->setText(QString("%1 / %2").arg(m_current_page).arg(m_num_pages));
-
 }
 
 void StationsPage::on_orientationChanged(M::Orientation orientation)

@@ -3,6 +3,7 @@
 
 class StationsModel;
 
+//! Список станций
 class StationsPage : public MApplicationPage
 {
 	Q_OBJECT

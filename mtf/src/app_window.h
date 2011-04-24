@@ -9,7 +9,7 @@ public:
 	void addPage(MApplicationPage *page);
 
 signals:
-
+	void sig_showLogPage();
 
 public slots:
 

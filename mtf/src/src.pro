@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     log_page.cpp \
     app_window.cpp \
     stations_model.cpp \
-    station_page.cpp
+    station_page.cpp \
+    player_page.cpp
 
 HEADERS += \
     app.h \
@@ -66,7 +67,8 @@ HEADERS += \
     app_window.h \
     ../../shared/data.h \
     stations_model.h \
-    station_page.h
+    station_page.h \
+    player_page.h
 
 MAKE_CLEAN += $$OBJECTS_DIR/*.o
 MAKE_DISTCLEAN += \

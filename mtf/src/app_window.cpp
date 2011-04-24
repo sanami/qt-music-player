@@ -10,6 +10,20 @@ AppWindow::AppWindow()
 	actionGroup = new QActionGroup(this);
 	actionGroup->setExclusive(true);
 	connect(actionGroup, SIGNAL(triggered(QAction*)), SLOT(showPageForAction(QAction*)));
+
+	// Пункты меню
+	{
+		MAction *action = new MAction("Log", this);
+		action->setLocation(MAction::ApplicationMenuLocation);
+		connect(action, SIGNAL(triggered()), SIGNAL(sig_showLogPage()));
+		addAction(action);
+	}
+	{
+		MAction *action = new MAction("Quit", this);
+		action->setLocation(MAction::ApplicationMenuLocation);
+		connect(action, SIGNAL(triggered()), SLOT(close()));
+		addAction(action);
+	}
 }
 
 void AppWindow::addPage(MApplicationPage *page)

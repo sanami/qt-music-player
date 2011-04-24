@@ -7,6 +7,7 @@
 #include "stations_page.h"
 #include "station_page.h"
 #include "filter_page.h"
+#include "player_page.h"
 
 App::App(QObject *parent)
 	: QObject(parent)
@@ -26,6 +27,7 @@ App::App(QObject *parent)
 
 	// Окно приложения
 	m_app_window = new AppWindow();
+	connect(m_app_window, SIGNAL(sig_showLogPage()), SLOT(on_actionLog_triggered()));
 
 	// Добавить страницы
 	m_filter_page = new FilterPage();
@@ -43,9 +45,13 @@ App::App(QObject *parent)
 //	connect(m_station_page, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_page, SLOT(on_media_messages(QString)));
 
+	m_player_page = new PlayerPage(m_media);
+	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
+
 	m_app_window->addPage(m_stations_page);
 	m_app_window->addPage(m_filter_page);
-	m_app_window->addPage(m_log_page);
+	m_app_window->addPage(m_player_page);
+	//m_app_window->addPage(m_log_page); // В пункте меню
 	m_app_window->show();
 
 //	m_settings.server();
@@ -65,6 +71,7 @@ App::~App()
 	delete m_filter_page;
 	delete m_stations_page;
 	delete m_station_page;
+	delete m_player_page;
 
 	delete m_app_window;
 }
@@ -113,11 +120,11 @@ void App::on_web_finished(Task *task)
 		case Task::AddToPlaylist:
 		case Task::PlaylistDestroy:
 			qDebug() << "task->result" << task->result;
-			if (task->result == "ok")
-				showMessage("OK", 500);
-			else
-				showMessage("FAIL", 500);
-			break;
+//			if (task->result == "ok")
+//				showMessage("OK", 500);
+//			else
+//				showMessage("FAIL", 500);
+//			break;
 
 		case Task::Station:
 			// Данные одной станции
@@ -187,7 +194,7 @@ void App::on_showStationPage(Station station)
 
 void App::on_openStream(Station station, QString stream)
 {
-//	m_player_page->showStationInfo(station);
+	m_player_page->showStationInfo(station);
 	m_media->open(station, stream);
 }
 
@@ -202,6 +209,11 @@ void App::on_media_status(Station station, QString url, bool ok)
 		QString msg = QString("Playing: %1").arg(station.name());
 		showMessage(msg);
 	}
+}
+
+void App::on_actionLog_triggered()
+{
+	m_log_page->appear(m_app_window);
 }
 
 void App::on_requestPage(int page)

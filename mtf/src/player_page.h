@@ -1,21 +1,16 @@
 #pragma once
-#include <QWidget>
 #include "data.h"
-
-namespace Ui {
-    class PlayerPage;
-}
 
 class Media;
 
 //! Страница плеера
-class PlayerPage : public QWidget
+class PlayerPage : public MApplicationPage
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-	explicit PlayerPage(Media *media, QWidget *parent = 0);
-    ~PlayerPage();
+	PlayerPage(Media *media);
+	~PlayerPage();
 
 	void showStationInfo(Station station);
 
@@ -24,14 +19,16 @@ signals:
 
 private slots:
 	void on_station_clicked();
-	void on_pushButton_play_clicked();
-	void on_pushButton_close_clicked();
+	void on_play_clicked();
+	void on_close_clicked();
 
 	//! Сообщения от плееров
 	void on_media_messages(QString str);
 
 private:
-	Ui::PlayerPage *ui;
 	Media *m_media;
 	Station m_station; //!< Текущая станция
+
+	MTextEdit *m_messages; //!< Лог плеера
+	MButton *m_station_btn; //!< Кнопка перехода на страницу станции
 };

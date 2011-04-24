@@ -11,6 +11,7 @@ class LogPage;
 class FilterPage;
 class StationsPage;
 class StationPage;
+class PlayerPage;
 
 class App : public QObject
 {
@@ -32,6 +33,9 @@ private slots:
 	void on_setServer(QString server);
 	void on_requestPage(int page);
 
+	//! Показать окно с детальным логом
+	void on_actionLog_triggered();
+
 	//! Получен результат запроса
 	void on_web_finished(Task *task);
 
@@ -50,6 +54,7 @@ private:
 	FilterPage *m_filter_page;
 	StationsPage *m_stations_page;
 	StationPage *m_station_page;
+	PlayerPage *m_player_page;
 
 	Web *m_web; //!< Веб запросы
 	Media *m_media; //!< Плеер
