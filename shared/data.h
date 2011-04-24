@@ -32,6 +32,8 @@ struct Genre
 	FIELD_INT(id);
 	FIELD_STRING(name);
 };
+//Q_DECLARE_METATYPE(Genre);
+
 
 //! Локации (Страна, город)
 struct Location
@@ -48,6 +50,7 @@ struct Location
 	FIELD_INT(id);
 	FIELD_STRING(name);
 };
+//Q_DECLARE_METATYPE(Location);
 
 //! Аудиопотоки
 struct Stream
@@ -66,21 +69,15 @@ struct Stream
 	FIELD_STRING(bitrate);
 	FIELD_STRING(codec);
 };
+//Q_DECLARE_METATYPE(Stream);
 
 //! Станция
 struct Station
 {
 	typedef AsList<Station> List;
 
-	Station()
-	{
-	}
-
-	Station(const Station &that)
-		: data(that.data)
-	{
-	}
-
+	Station() {}
+	Station(const Station &that) : data(that.data) {}
 	explicit Station(QVariant var)
 	{
 		data = var.toMap().value("station").toMap();
@@ -98,3 +95,4 @@ struct Station
 	//! Все данные
 	QVariantMap data;
 };
+Q_DECLARE_METATYPE(Station);

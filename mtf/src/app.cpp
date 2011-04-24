@@ -22,7 +22,7 @@ App::App(QObject *parent)
 
 	// Управление плеером
 	m_media = new Media(this);
-	connect(m_media, SIGNAL(sig_status(QVariantMap, QString, bool)), SLOT(on_media_status(QVariantMap, QString, bool)));
+	connect(m_media, SIGNAL(sig_status(Station, QString, bool)), SLOT(on_media_status(Station, QString, bool)));
 
 	// Окно приложения
 	m_app_window = new AppWindow();
@@ -40,7 +40,7 @@ App::App(QObject *parent)
 
 	m_station_page = new StationPage();
 	connect(m_station_page, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
-//	connect(m_station_page, SIGNAL(sig_addToFavorites(QVariantMap)), SLOT(on_addStationToFavorites(QVariantMap)));
+//	connect(m_station_page, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_page, SLOT(on_media_messages(QString)));
 
 	m_app_window->addPage(m_stations_page);
@@ -122,9 +122,8 @@ void App::on_web_finished(Task *task)
 		case Task::Station:
 			// Данные одной станции
 			{
-				QVariantMap station = task->json.toMap()["station"].toMap();
-//				m_station_view->setStation(station);
-//				m_station_view->show();
+				m_station_page->setStation(Station(task->json));
+				m_station_page->appear(m_app_window);
 			}
 			break;
 		case Task::Stations:
@@ -192,7 +191,7 @@ void App::on_openStream(Station station, QString stream)
 	m_media->open(station, stream);
 }
 
-void App::on_media_status(QVariantMap station, QString url, bool ok)
+void App::on_media_status(Station station, QString url, bool ok)
 {
 	qDebug() << Q_FUNC_INFO << ok << url;
 	if (ok)
@@ -200,7 +199,7 @@ void App::on_media_status(QVariantMap station, QString url, bool ok)
 		// Удалось подключится, добавить в историю
 		m_web->addStationToPlaylist(station);
 
-		QString msg = QString("Playing: %1").arg(station["name"].toString());
+		QString msg = QString("Playing: %1").arg(station.name());
 		showMessage(msg);
 	}
 }

@@ -41,7 +41,7 @@ Form::Form(QWidget *parent)
 	// Добавить страницы
 	m_stations_page = new StationsPage(this);
 	connect(m_stations_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
-	connect(m_stations_page, SIGNAL(sig_showStation(QVariantMap)), SLOT(on_showStationPage(QVariantMap)));
+	connect(m_stations_page, SIGNAL(sig_showStation(Station)), SLOT(on_showStationPage(Station)));
 	ui->tabWidget->addTab(m_stations_page, "Stations");
 
 	m_filter_page = new FilterPage(this);
@@ -53,15 +53,15 @@ Form::Form(QWidget *parent)
 
 	m_station_view = new InfoPage(this);
 	m_station_view->hide();
-	connect(m_station_view, SIGNAL(sig_openStream(QVariantMap, QString)), SLOT(on_openStream(QVariantMap, QString)));
-	connect(m_station_view, SIGNAL(sig_addToFavorites(QVariantMap)), SLOT(on_addStationToFavorites(QVariantMap)));
+	connect(m_station_view, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
+	connect(m_station_view, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
 
 	m_media = new Media(this);
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
-	connect(m_media, SIGNAL(sig_status(QVariantMap, QString, bool)), SLOT(on_media_status(QVariantMap, QString, bool)));
+	connect(m_media, SIGNAL(sig_status(Station, QString, bool)), SLOT(on_media_status(Station, QString, bool)));
 
 	m_player_page = new PlayerPage(m_media, this);
-	connect(m_player_page, SIGNAL(sig_showStationPage(QVariantMap)), SLOT(on_showStationPage(QVariantMap)));
+	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
 	ui->tabWidget->addTab(m_player_page, "Player");
 
 	m_playlist_page = new PlaylistPage(this);
@@ -144,8 +144,7 @@ void Form::on_web_finished(Task *task)
 		case Task::Station:
 			// Данные одной станции
 			{
-				QVariantMap station = task->json.toMap()["station"].toMap();
-				m_station_view->setStation(station);
+				m_station_view->setStation(Station(task->json));
 				m_station_view->show();
 			}
 			break;
@@ -205,19 +204,19 @@ void Form::on_web_finished(Task *task)
 	delete task;
 }
 
-void Form::on_showStationPage(QVariantMap station)
+void Form::on_showStationPage(Station station)
 {
 	m_station_view->setStation(station);
 	m_station_view->show();
 }
 
-void Form::on_openStream(QVariantMap station, QString stream)
+void Form::on_openStream(Station station, QString stream)
 {
 	m_player_page->showStationInfo(station);
 	m_media->open(station, stream);
 }
 
-void Form::on_media_status(QVariantMap station, QString url, bool ok)
+void Form::on_media_status(Station station, QString url, bool ok)
 {
 	qDebug() << Q_FUNC_INFO << ok << url;
 	if (ok)
@@ -225,7 +224,7 @@ void Form::on_media_status(QVariantMap station, QString url, bool ok)
 		// Удалось подключится, добавить в историю
 		m_web->addStationToPlaylist(station);
 
-		QString msg = QString("Playing: %1").arg(station["name"].toString());
+		QString msg = QString("Playing: %1").arg(station.name());
 		showMessage(msg);
 	}
 }
@@ -252,7 +251,7 @@ void Form::on_setServer(QString server)
 	m_web->requestCookies();
 }
 
-void Form::on_addStationToFavorites(QVariantMap station)
+void Form::on_addStationToFavorites(Station station)
 {
 	// Список избранных
 	QStringList items;

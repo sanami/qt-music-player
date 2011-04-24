@@ -2,6 +2,7 @@
 #define FORM_H
 #include <QMainWindow>
 #include "task.h"
+#include "data.h"
 
 namespace Ui {
     class Form;
@@ -47,16 +48,16 @@ private slots:
 	void on_web_finished(Task *task);
 
 	//! Начать проигрывание аудиопотока
-	void on_openStream(QVariantMap station, QString stream);
+	void on_openStream(Station station, QString stream);
 
 	//! Показать детали станции
-	void on_showStationPage(QVariantMap station);
+	void on_showStationPage(Station station);
 
 	//! Добавление станции в избранное
-	void on_addStationToFavorites(QVariantMap station);
+	void on_addStationToFavorites(Station station);
 
 	//! Результат попытки подключения к станции
-	void on_media_status(QVariantMap station, QString url, bool ok);
+	void on_media_status(Station station, QString url, bool ok);
 
 private:
 	Ui::Form *ui;

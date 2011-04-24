@@ -42,7 +42,7 @@ private slots:
 	void on_showStationPage(Station station);
 
 	//! Результат попытки подключения к станции
-	void on_media_status(QVariantMap station, QString url, bool ok);
+	void on_media_status(Station station, QString url, bool ok);
 
 private:
 	AppWindow *m_app_window;

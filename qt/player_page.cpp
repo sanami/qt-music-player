@@ -21,11 +21,11 @@ PlayerPage::~PlayerPage()
     delete ui;
 }
 
-void PlayerPage::showStationInfo(QVariantMap station)
+void PlayerPage::showStationInfo(Station station)
 {
 	m_station = station;
 
-	QString info = station["name"].toString();
+	QString info = station.name();
 	ui->station->setText(info);
 }
 

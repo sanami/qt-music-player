@@ -139,15 +139,9 @@ void FilterPage::showGenres(Genre::List genres)
 
 	foreach(Genre g, genres)
 	{
+		// С привязкой к id
 		ui->comboBox_genre->addItem(g.name());
 		ui->comboBox_genre_itemData[i++] = g.id();
-//		QVariantMap genre = genre_var.toMap().value("genre").toMap();
-//		QString name = genre["name"].toString();
-
-//		// С привязкой к id
-////		ui->comboBox_genre->addItem(name, genre["id"]);
-//		ui->comboBox_genre->addItem(name);
-//		ui->comboBox_genre_itemData[i++] = genre["id"];
 	}
 }
 

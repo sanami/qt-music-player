@@ -3,6 +3,7 @@
 #include <QMap>
 #include <QString>
 #include "task.h"
+#include "data.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -29,7 +30,7 @@ public:
 	//! Запрос на HTML страницу, это установит cookies
 	void requestCookies();
 	//! Добавить запись в плейлист пользователя
-	void addStationToPlaylist(QVariantMap station, int parent_id = -1);
+	void addStationToPlaylist(Station station, int parent_id = -1);
 
 	//! Список стран
 	void requestCountries();

@@ -64,7 +64,7 @@ void Web::createPlaylist(QString name, int parent_id)
 	request(Task::AddToPlaylist, url, Task::Post, params);
 }
 
-void Web::addStationToPlaylist(QVariantMap station, int parent_id)
+void Web::addStationToPlaylist(Station station, int parent_id)
 {
 	QString url = QString("%1/playlists.json").arg(m_server);
 
@@ -72,8 +72,8 @@ void Web::addStationToPlaylist(QVariantMap station, int parent_id)
 	{
 		QVariantMap e;
 		e["playlist_type_id"] = Playlist::Item;
-		e["station_id"] = station["id"];
-		e["name"] = station["name"];
+		e["station_id"] = station.id();
+		e["name"] = station.name();
 
 		if (parent_id > 0)
 			e["parent_id"] = parent_id;

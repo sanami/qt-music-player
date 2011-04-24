@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QVariant>
+#include "data.h"
 
 namespace Ui {
     class InfoPage;
@@ -19,11 +20,11 @@ public:
     ~InfoPage();
 
 	//! Показать данные станции
-	void setStation(QVariantMap station);
+	void setStation(Station station);
 
 signals:
-	void sig_openStream(QVariantMap station, QString stream);
-	void sig_addToFavorites(QVariantMap station);
+	void sig_openStream(Station station, QString stream);
+	void sig_addToFavorites(Station station);
 
 private slots:
 	void on_streams_itemDoubleClicked(QTreeWidgetItem* item);
@@ -34,7 +35,7 @@ private slots:
 
 private:
 	Ui::InfoPage *ui;
-	QVariantMap m_station; //!< Текущая станция
+	Station m_station; //!< Текущая станция
 };
 
 #endif // INFO_PAGE_H

@@ -22,7 +22,7 @@ public:
 	bool isEmpty() const;
 
 signals:
-	void sig_showStation(QVariantMap station);
+	void sig_showStation(Station station);
 	void sig_requestPage(int page);
 
 private slots:

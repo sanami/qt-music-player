@@ -98,13 +98,14 @@ void StationsPage::on_nextPage_clicked()
 	}
 }
 
-//void StationsPage::on_stations_itemDoubleClicked(QListWidgetItem* it)
-//{
-//	QVariantMap station = it->data(StationRole).toMap();
-
-//	// Показать детали станции
-//	emit sig_showStation(station);
-//}
+void StationsPage::on_list_itemClicked(const QModelIndex &index)
+{
+	const Station *station = m_model->station(index);
+	if (station)
+	{
+		emit sig_showStation(*station);
+	}
+}
 
 void StationsPage::requestPage()
 {
@@ -140,13 +141,4 @@ void StationsPage::on_orientationChanged(M::Orientation orientation)
 		m_list->setColumns(2);
 	else
 		m_list->setColumns(1);
-}
-
-void StationsPage::on_list_itemClicked(const QModelIndex &index)
-{
-	const Station *station = m_model->station(index);
-	if (station)
-	{
-		emit sig_showStation(*station);
-	}
 }

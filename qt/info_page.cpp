@@ -17,19 +17,20 @@ InfoPage::~InfoPage()
     delete ui;
 }
 
-void InfoPage::setStation(QVariantMap station)
+void InfoPage::setStation(Station station)
 {
 	// Сохранить данные
 	m_station = station;
 
 	ui->streams->clear();
+
 	QStringList info;
-	foreach(QString name, station.keys())
+	foreach(QString name, station.data.keys())
 	{
 		if (name == "streams")
 		{
 			// Данные в список
-			QVariantList streams = station["streams"].toList();
+			QVariantList streams = station.data["streams"].toList();
 			foreach(QVariant stream_var, streams)
 			{
 				QVariantMap stream = stream_var.toMap()["stream"].toMap();
@@ -48,7 +49,7 @@ void InfoPage::setStation(QVariantMap station)
 			// Текстом
 			if (name == "name" || name == "id")
 			{
-				info << QString("%1: %2").arg(name).arg(station[name].toString());
+				info << QString("%1: %2").arg(name).arg(station.data[name].toString());
 			}
 		}
 	}

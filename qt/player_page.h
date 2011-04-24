@@ -1,7 +1,6 @@
-#ifndef PLAYER_PAGE_H
-#define PLAYER_PAGE_H
-
+#pragma once
 #include <QWidget>
+#include "data.h"
 
 namespace Ui {
     class PlayerPage;
@@ -17,15 +16,15 @@ public:
 	explicit PlayerPage(Media *media, QWidget *parent = 0);
     ~PlayerPage();
 
-	void showStationInfo(QVariantMap station);
+	void showStationInfo(Station station);
 
 signals:
-	void sig_showStationPage(QVariantMap station);
+	void sig_showStationPage(Station station);
 
 private:
     Ui::PlayerPage *ui;
 	Media *m_media;
-	QVariantMap m_station; //!< Текущая станция
+	Station m_station; //!< Текущая станция
 
 private slots:
 	void on_station_clicked();
@@ -35,5 +34,3 @@ private slots:
 	//! Сообщения от плееров
 	void on_media_messages(QString str);
 };
-
-#endif // PLAYER_PAGE_H

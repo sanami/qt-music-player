@@ -29,7 +29,7 @@ void StationsPage::showStations(Station::List stations, QVariantMap result)
 	foreach(Station station, stations)
 	{
 		QListWidgetItem *it = new QListWidgetItem(station.name());
-		it->setData(StationRole, station.data); //TODO
+		it->setData(StationRole, QVariant::fromValue(station));
 		ui->stations->addItem(it);
 	}
 	// Пустой список
@@ -66,7 +66,7 @@ void StationsPage::on_pushButton_2_clicked()
 
 void StationsPage::on_stations_itemDoubleClicked(QListWidgetItem* it)
 {
-	QVariantMap station = it->data(StationRole).toMap();
+	Station station = it->data(StationRole).value<Station>();
 
 	// Показать детали станции
 	emit sig_showStation(station);
