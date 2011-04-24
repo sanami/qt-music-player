@@ -1,5 +1,6 @@
 #include "log_page.h"
 #include "ui_log_page.h"
+#include "logger.h"
 
 LogPage::LogPage(QWidget *parent)
 	: QWidget(parent, Qt::Window)
@@ -19,6 +20,9 @@ LogPage::~LogPage()
 
 void LogPage::addLog(QString text)
 {
+	// Чтобы не было цикла
+	Logger::logger()->blockSignals(true);
 //	qDebug() << Q_FUNC_INFO << text;
 	ui->log->appendPlainText(text);
+	Logger::logger()->blockSignals(false);
 }

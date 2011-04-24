@@ -57,7 +57,8 @@ static void conMessageOutput(QtMsgType type, const char *raw_msg)
 		break;
 	case QtFatalMsg:
 		printf("#%s\n", msg.toUtf8().constData());
-		//TODO abort();
+		abort();
+//		Q_ASSERT( 0 );
 	}
 	fflush(stdout);
 

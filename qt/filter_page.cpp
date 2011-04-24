@@ -26,52 +26,43 @@ FilterPage::~FilterPage()
     delete ui;
 }
 
-void FilterPage::showCountries(QVariantList countries)
+void FilterPage::showCountries(Location::List countries)
 {
 	ui->comboBox_country->clear();
 	// Первый элемент, все страны
 	ui->comboBox_country->addItem("All", 0);
 
-	foreach(QVariant country_var, countries)
+	foreach(Location country, countries)
 	{
-		QVariantMap country = country_var.toMap().value("location").toMap();
-		QString name = country["name"].toString();
-
 		// С привязкой к id
-		ui->comboBox_country->addItem(name, country["id"]);
+		ui->comboBox_country->addItem(country.name(), country.id());
 	}
 }
 
-void FilterPage::showCities(QVariantList cities)
+void FilterPage::showCities(Location::List cities)
 {
 	ui->comboBox_city->clear();
 	// Первый элемент, все города
 	ui->comboBox_city->addItem("All", 0);
 	ui->comboBox_city->setEnabled(true);
 
-	foreach(QVariant city_var, cities)
+	foreach(Location city, cities)
 	{
-		QVariantMap city = city_var.toMap().value("location").toMap();
-		QString name = city["name"].toString();
-
 		// С привязкой к id
-		ui->comboBox_city->addItem(name, city["id"]);
+		ui->comboBox_city->addItem(city.name(), city.id());
 	}
 }
 
-void FilterPage::showGenres(QVariantList genres)
+void FilterPage::showGenres(Genre::List genres)
 {
 	ui->comboBox_genre->clear();
 	// Первый элемент, все жанры
 	ui->comboBox_genre->addItem("All", 0);
 
-	foreach(QVariant genre_var, genres)
+	foreach(Genre g, genres)
 	{
-		QVariantMap genre = genre_var.toMap().value("genre").toMap();
-		QString name = genre["name"].toString();
-
 		// С привязкой к id
-		ui->comboBox_genre->addItem(name, genre["id"]);
+		ui->comboBox_genre->addItem(g.name(), g.id());
 	}
 }
 
@@ -107,7 +98,7 @@ void FilterPage::on_pushButton_filter_apply_clicked()
 	QStringList search = ui->comboBox_search->currentText().split(QRegExp("\\s+"), QString::SkipEmptyParts);
 	if (!search.isEmpty())
 	{
-		m_filter["name"] = search.join("+");
+		m_filter["name"] = search.join(" ");
 	}
 
 	// Локация

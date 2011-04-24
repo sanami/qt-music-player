@@ -68,7 +68,8 @@ HEADERS  += form.h \
     ../shared/logger.h \
     ../shared/playlist.h \
     playlist_page.h \
-    pch.h
+    pch.h \
+    ../shared/data.h
 
 FORMS    += form.ui \
     info_page.ui \

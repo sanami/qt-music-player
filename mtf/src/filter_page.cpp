@@ -9,6 +9,8 @@ struct Ui
 	QVector<QVariant> comboBox_city_itemData;
 	MComboBox *comboBox_genre;
 	QVector<QVariant> comboBox_genre_itemData;
+
+	MTextEdit *search;
 };
 
 FilterPage::FilterPage()
@@ -62,12 +64,6 @@ void FilterPage::createContent()
 		layout->addItem(combobox, row, 0);
 		ui->comboBox_city = combobox;
 	}
-//	++row;
-//	layout->addItem(new MLabel("Search"), row, 0);
-//	{
-//		MTextEdit *edit = new MTextEdit();
-//		layout->addItem(edit, row, 0);
-//	}
 	++row;
 	//layout->addItem(new MLabel("Genre"), row, 0);
 	{
@@ -75,6 +71,13 @@ void FilterPage::createContent()
 		combobox->setTitle("Genre");
 		layout->addItem(combobox, row, 0);
 		ui->comboBox_genre = combobox;
+	}
+	++row;
+	//layout->addItem(new MLabel("Search"), row, 0);
+	{
+		MTextEdit *edit = new MTextEdit();
+		layout->addItem(edit, row, 0);
+		ui->search = edit;
 	}
 	++row;
 	{
@@ -86,7 +89,7 @@ void FilterPage::createContent()
 	centralWidget()->setLayout(layout);
 }
 
-void FilterPage::showCountries(QVariantList countries)
+void FilterPage::showCountries(Location::List countries)
 {
 	ui->comboBox_country->clear();
 	// Первый элемент, все страны
@@ -96,19 +99,16 @@ void FilterPage::showCountries(QVariantList countries)
 	ui->comboBox_country_itemData.fill(0, countries.size()+1);
 	int i = 1; // Первый 'All'
 
-	foreach(QVariant country_var, countries)
+	foreach(Location country, countries)
 	{
-		QVariantMap country = country_var.toMap().value("location").toMap();
-		QString name = country["name"].toString();
-
 		// С привязкой к id
 //		ui->comboBox_country->addItem(name, country["id"]);
-		ui->comboBox_country->addItem(name);
-		ui->comboBox_country_itemData[i++] = country["id"];
+		ui->comboBox_country->addItem(country.name());
+		ui->comboBox_country_itemData[i++] = country.id();
 	}
 }
 
-void FilterPage::showCities(QVariantList cities)
+void FilterPage::showCities(Location::List cities)
 {
 	ui->comboBox_city->clear();
 	// Первый элемент, все города
@@ -119,19 +119,16 @@ void FilterPage::showCities(QVariantList cities)
 	ui->comboBox_city_itemData.fill(0, cities.size()+1);
 	int i = 1; // Первый 'All'
 
-	foreach(QVariant city_var, cities)
+	foreach(Location city, cities)
 	{
-		QVariantMap city = city_var.toMap().value("location").toMap();
-		QString name = city["name"].toString();
-
 		// С привязкой к id
 //		ui->comboBox_city->addItem(name, city["id"]);
-		ui->comboBox_city->addItem(name);
-		ui->comboBox_city_itemData[i++] = city["id"];
+		ui->comboBox_city->addItem(city.name());
+		ui->comboBox_city_itemData[i++] = city.id();
 	}
 }
 
-void FilterPage::showGenres(QVariantList genres)
+void FilterPage::showGenres(Genre::List genres)
 {
 	ui->comboBox_genre->clear();
 	// Первый элемент, все жанры
@@ -141,15 +138,17 @@ void FilterPage::showGenres(QVariantList genres)
 	ui->comboBox_genre_itemData.fill(0, genres.size()+1);
 	int i = 1; // Первый 'All'
 
-	foreach(QVariant genre_var, genres)
+	foreach(Genre g, genres)
 	{
-		QVariantMap genre = genre_var.toMap().value("genre").toMap();
-		QString name = genre["name"].toString();
+		ui->comboBox_genre->addItem(g.name());
+		ui->comboBox_genre_itemData[i++] = g.id();
+//		QVariantMap genre = genre_var.toMap().value("genre").toMap();
+//		QString name = genre["name"].toString();
 
-		// С привязкой к id
-//		ui->comboBox_genre->addItem(name, genre["id"]);
-		ui->comboBox_genre->addItem(name);
-		ui->comboBox_genre_itemData[i++] = genre["id"];
+//		// С привязкой к id
+////		ui->comboBox_genre->addItem(name, genre["id"]);
+//		ui->comboBox_genre->addItem(name);
+//		ui->comboBox_genre_itemData[i++] = genre["id"];
 	}
 }
 
@@ -181,12 +180,12 @@ void FilterPage::on_pushButton_filter_apply_clicked()
 {
 	m_filter.clear();
 
-//	// Строка поиска
-//	QStringList search = ui->comboBox_search->currentText().split(QRegExp("\\s+"), QString::SkipEmptyParts);
-//	if (!search.isEmpty())
-//	{
-//		m_filter["name"] = search.join("+");
-//	}
+	// Строка поиска
+	QStringList search = ui->search->text().split(QRegExp("\\s+"), QString::SkipEmptyParts);
+	if (!search.isEmpty())
+	{
+		m_filter["name"] = search.join(" ");
+	}
 
 	// Локация
 	int city_id = ui->comboBox_city->currentIndex() >= 0 ? ui->comboBox_city_itemData[ui->comboBox_city->currentIndex()].toInt() : 0;

@@ -170,15 +170,15 @@ void Form::on_web_finished(Task *task)
 			break;
 		case Task::Countries:
 			// Список стран
-			m_filter_page->showCountries(task->json.toList());
+			m_filter_page->showCountries(Location::List(task->json));
 			break;
 		case Task::Cities:
 			// Список городов
-			m_filter_page->showCities(task->json.toList());
+			m_filter_page->showCities(Location::List(task->json));
 			break;
 		case Task::Genres:
 			// Список жанров
-			m_filter_page->showGenres(task->json.toList());
+			m_filter_page->showGenres(Genre::List(task->json));
 			break;
 
 		default:

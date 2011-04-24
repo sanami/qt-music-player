@@ -2,6 +2,7 @@
 #define FILTER_PAGE_H
 #include <QWidget>
 #include "settings.h"
+#include "data.h"
 
 namespace Ui {
     class FilterPage;
@@ -18,11 +19,11 @@ public:
 	const QVariantMap &filter() const { return m_filter; }
 
 	//! Заполнить список стран на странице фильтров
-	void showCountries(QVariantList countries);
+	void showCountries(Location::List countries);
 	//! Заполнить список стран на странице фильтров
-	void showCities(QVariantList cities);
+	void showCities(Location::List cities);
 	//! Заполнить список жанров на странице фильтров
-	void showGenres(QVariantList genres);
+	void showGenres(Genre::List genres);
 
 	QString server() const { return m_settings.server(); }
 

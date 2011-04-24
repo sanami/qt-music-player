@@ -1,5 +1,6 @@
 #pragma once
 #include "settings.h"
+#include "data.h"
 
 //! Настройки поиска/фильтра станций
 class FilterPage : public MApplicationPage
@@ -10,11 +11,11 @@ public:
 
 	const QVariantMap &filter() const { return m_filter; }
 	//! Заполнить список стран на странице фильтров
-	void showCountries(QVariantList countries);
+	void showCountries(Location::List countries);
 	//! Заполнить список стран на странице фильтров
-	void showCities(QVariantList cities);
+	void showCities(Location::List cities);
 	//! Заполнить список жанров на странице фильтров
-	void showGenres(QVariantList genres);
+	void showGenres(Genre::List genres);
 
 	QString server() const { return m_settings.server(); }
 

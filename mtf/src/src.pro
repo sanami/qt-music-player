@@ -63,7 +63,8 @@ HEADERS += \
     stations_page.h \
     filter_page.h \
     log_page.h \
-    app_window.h
+    app_window.h \
+    ../../shared/data.h
 
 MAKE_CLEAN += $$OBJECTS_DIR/*.o
 MAKE_DISTCLEAN += \

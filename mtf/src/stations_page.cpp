@@ -14,6 +14,7 @@ protected:
 	{
 		return g_stations.size();
 	}
+
 	QVariant data(const QModelIndex &index, int role) const
 	{
 		if (role == Qt::DisplayRole)

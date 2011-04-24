@@ -1,4 +1,5 @@
 #include "log_page.h"
+#include "logger.h"
 
 LogPage::LogPage()
 	: m_messages(NULL)
@@ -33,6 +34,9 @@ void LogPage::addLog(QString text)
 	if (m_messages)
 	{
 //		m_messages->insert(text);
+		// Чтобы не было цикла
+		Logger::logger()->blockSignals(true);
 		m_messages->setText(text  + "\n" + m_messages->text());
+		Logger::logger()->blockSignals(false);
 	}
 }
