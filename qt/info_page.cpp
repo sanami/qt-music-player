@@ -24,35 +24,29 @@ void InfoPage::setStation(Station station)
 
 	ui->streams->clear();
 
-	QStringList info;
-	foreach(QString name, station.data.keys())
+	// Данные в список
+	foreach(Stream stream, m_station.streams())
 	{
-		if (name == "streams")
-		{
-			// Данные в список
-			QVariantList streams = station.data["streams"].toList();
-			foreach(QVariant stream_var, streams)
-			{
-				QVariantMap stream = stream_var.toMap()["stream"].toMap();
+		// Информация об аудиопотоке
+		QStringList columns;
+		columns << stream.bitrate() + "\n" + stream.codec();
+		columns << stream.url();
 
-				// Информация об аудиопотоке
-				QStringList columns;
-				columns << stream["bitrate"].toString() + "\n" + stream["codec"].toString();
-				columns << stream["url"].toString();
-
-				QTreeWidgetItem *it = new QTreeWidgetItem(columns);
-				ui->streams->addTopLevelItem(it);
-			}
-		}
-		else
-		{
-			// Текстом
-			if (name == "name" || name == "id")
-			{
-				info << QString("%1: %2").arg(name).arg(station.data[name].toString());
-			}
-		}
+		QTreeWidgetItem *it = new QTreeWidgetItem(columns);
+		ui->streams->addTopLevelItem(it);
 	}
+
+	// Текстом
+	QStringList info;
+//	foreach(QString name, station.data.keys())
+//	{
+//		if (name == "name" || name == "id")
+//		{
+//			info << QString("%1: %2").arg(name).arg(station.data[name].toString());
+//		}
+//	}
+	info << QString("Id: %1").arg(m_station.id());
+	info << QString("Name: %1").arg(m_station.name());
 
 	ui->label->setText(info.join("\n"));
 }

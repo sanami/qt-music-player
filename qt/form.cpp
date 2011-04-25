@@ -13,7 +13,6 @@
 #include "log_page.h"
 #include "media.h"
 #include "logger.h"
-#include "playlist.h"
 #include "playlist_page.h"
 
 Form::Form(QWidget *parent)
@@ -121,8 +120,8 @@ void Form::on_web_finished(Task *task)
 		{
 		case Task::Cookies:
 			{
-				QVariantMap playlist = task->json.toMap()["root"].toMap();
-				m_playlist_page->showPlaylist(playlist);
+				QVariant root_playlist = task->json.toMap()["root"];
+				m_playlist_page->showPlaylist(Playlist(root_playlist));
 			}
 			// Список стран в фильтр
 			m_web->requestCountries();
@@ -130,7 +129,7 @@ void Form::on_web_finished(Task *task)
 			m_web->requestGenres();
 			break;
 		case Task::Playlist:
-			m_playlist_page->showPlaylist(task->json.toMap());
+			m_playlist_page->showPlaylist(Playlist(task->json));
 			break;
 		case Task::AddToPlaylist:
 		case Task::PlaylistDestroy:
@@ -152,7 +151,7 @@ void Form::on_web_finished(Task *task)
 			// Получены данные о списке станций
 			{
 				QVariantMap result = task->json.toMap();
-				m_stations_page->showStations(Station::List(result["stations"]), result);
+				m_stations_page->showStations(Station::List(result["stations"]), result); //TODO вынести в мета-информацию к списку
 			}
 
 			if (ui->tabWidget->currentWidget() != m_stations_page)
@@ -255,9 +254,9 @@ void Form::on_addStationToFavorites(Station station)
 {
 	// Список избранных
 	QStringList items;
-	foreach(QVariantMap favorite, m_playlist_page->all())
+	foreach(Playlist favorite, m_playlist_page->all())
 	{
-		items << favorite["id"].toString() + " " + favorite["name"].toString();
+		items << QString("%1 %2").arg(favorite.id()).arg(favorite.name());
 	}
 
 	bool ok;

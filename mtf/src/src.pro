@@ -43,7 +43,6 @@ HEADERS += \
     ../../shared/web.h \
     ../../shared/task.h \
     ../../shared/settings.h \
-    ../../shared/playlist.h \
     ../../shared/mplayer_control.h \
     ../../shared/media.h \
     ../../shared/logger.h \

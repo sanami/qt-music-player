@@ -66,7 +66,6 @@ HEADERS  += form.h \
     ../shared/settings.h \
     ../shared/cookie_jar.h \
     ../shared/logger.h \
-    ../shared/playlist.h \
     playlist_page.h \
     pch.h \
     ../shared/data.h

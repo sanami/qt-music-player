@@ -1,7 +1,6 @@
-#ifndef PLAYLIST_PAGE_H
-#define PLAYLIST_PAGE_H
-
+#pragma once
 #include <QWidget>
+#include "data.h"
 
 namespace Ui {
     class PlaylistPage;
@@ -17,11 +16,11 @@ public:
     ~PlaylistPage();
 
 	//! Показать список
-	void showPlaylist(QVariantMap playlist);
+	void showPlaylist(Playlist playlist);
 
 	//! Очистить все списки
 	void reset();
-	const QMap<int, QVariantMap> &all() const { return m_all_playlists; }
+	const QMap<int, Playlist> &all() const { return m_all_playlists; }
 
 signals:
 	//! Данные станции
@@ -47,8 +46,6 @@ private slots:
 private:
     Ui::PlaylistPage *ui;
 
-	QVariantMap m_current_playlist; //!< Текущий список
-	QMap<int, QVariantMap> m_all_playlists; //!< Все избранные id => список
+	Playlist m_current_playlist; //!< Текущий список
+	QMap<int, Playlist> m_all_playlists; //!< Все избранные id => список
 };
-
-#endif // PLAYLIST_PAGE_H

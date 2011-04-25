@@ -1,8 +1,9 @@
 #include "playlist_page.h"
 #include "ui_playlist_page.h"
-#include "playlist.h"
 
 #define PlaylistRole (Qt::UserRole + 2)
+
+QMap<int, Playlist> Playlist::g_all_playlists;
 
 PlaylistPage::PlaylistPage(QWidget *parent) :
     QWidget(parent),
@@ -27,63 +28,56 @@ void PlaylistPage::reset()
 	m_all_playlists.clear();
 }
 
-void PlaylistPage::showPlaylist(QVariantMap result)
+void PlaylistPage::showPlaylist(Playlist playlist)
 {
-	qDebug() << Q_FUNC_INFO << result;
+//	qDebug() << Q_FUNC_INFO << playlist;
 	ui->playlist->clear();
 
 	// Данные самого списка
-	QVariantMap playlist = result["playlist"].toMap();
 	m_current_playlist = playlist;
 
-	if (!playlist["parent_id"].isNull())
+	if (playlist.parent_id() > 0)
 	{
 		// Переход на родителя
-		int parent_id = playlist["parent_id"].toInt();
-		QVariantMap parent;
-		parent["id"] = parent_id;
 		QListWidgetItem *it = new QListWidgetItem("[..]");
-		it->setData(PlaylistRole, parent);
+		it->setData(PlaylistRole, playlist.parent_id());
 		ui->playlist->addItem(it);
 	}
 
 	// Данные о под-списках
-	QVariantList children = result["children"].toList();
-	foreach(QVariant item_var, children)
+	foreach(Playlist item, playlist.children)
 	{
-		QVariantMap item = item_var.toMap();
-		QVariantMap info = item["playlist"].toMap();
+		QString name = QString::number(item.id()) + " ";
 
-		QString name = info["id"].toString() + " ";
-		switch (info["playlist_type_id"].toInt())
+		switch (item.type())
 		{
 		case Playlist::Item:
-			name += info["name"].toString();
+			name += item.name();
 			break;
 		default:
-			name += "[" + info["name"].toString() + "]";
+			name += "[" + item.name() + "]";
 
 			// Сохранить в список всех избранных
-			m_all_playlists[info["id"].toInt()] = info;
+			m_all_playlists[item.id()] = item;
 		}
 
 		QListWidgetItem *it = new QListWidgetItem(name);
-		it->setData(PlaylistRole, info);
+		it->setData(PlaylistRole, item.id());
 		ui->playlist->addItem(it);
 	}
 }
 
 void PlaylistPage::on_playlist_itemDoubleClicked(QListWidgetItem* it)
 {
-	QVariantMap playlist = it->data(PlaylistRole).toMap();
-	qDebug() << Q_FUNC_INFO << playlist;
-	switch (playlist["playlist_type_id"].toInt())
+	Playlist playlist = Playlist::playlist(it->data(PlaylistRole).toInt());
+	qDebug() << Q_FUNC_INFO << playlist.data;
+	switch (playlist.type())
 	{
 	case Playlist::Item:
-		emit sig_requestStation(playlist["station_id"].toInt());
+		emit sig_requestStation(playlist.station_id());
 		break;
 	default:
-		emit sig_requestPlaylist(playlist["id"].toInt());
+		emit sig_requestPlaylist(playlist.id());
 	}
 }
 
@@ -92,8 +86,7 @@ void PlaylistPage::on_actionDeletePlaylist_triggered()
 	QListWidgetItem* it = ui->playlist->currentItem();
 	if (it)
 	{
-		QVariantMap playlist = it->data(PlaylistRole).toMap();
-		int playlist_id = playlist["id"].toInt();
+		int playlist_id = it->data(PlaylistRole).toInt();
 		emit sig_destroyPlaylist(playlist_id);
 	}
 }
@@ -104,7 +97,7 @@ void PlaylistPage::on_actionCreatePlaylist_triggered()
 	if (!name.isEmpty())
 	{
 		// Текущий список будет родителем
-		int parent_id = m_current_playlist["id"].toInt();
+		int parent_id = m_current_playlist.id();
 
 		// Отправить запрос на создание
 		emit sig_createPlaylist(name, parent_id);
