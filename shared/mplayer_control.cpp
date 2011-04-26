@@ -24,8 +24,10 @@ void MPlayerControl::close()
 {
 	if (!m_proc.isNull())
 	{
+		struct ThisThread : public QThread { using QThread::msleep;};
+
 		cmd("quit");
-		sleep(1);
+		ThisThread::msleep(1000);
 		m_proc->waitForBytesWritten();
 		m_proc->close();
 
