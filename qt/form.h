@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include "task.h"
 #include "data.h"
+#include "playlist.h"
 
 namespace Ui {
     class Form;
@@ -17,6 +18,7 @@ class PlaylistPage;
 class LogPage;
 class Web;
 class Media;
+class PlaylistManager;
 
 class Form : public QMainWindow
 {
@@ -64,6 +66,7 @@ private:
 
 	Web *m_web; //!< Веб запросы
 	Media *m_media; //!< Плеер
+	PlaylistManager *m_manager; //!< Менеджер списками избранных/истории
 
 	StationsPage *m_stations_page; //!< Список станций
 	FilterPage *m_filter_page; //!< Фильтрация станций

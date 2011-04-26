@@ -1,13 +1,12 @@
 #include "playlist_page.h"
 #include "ui_playlist_page.h"
+#include "playlist_manager.h"
 
 #define PlaylistRole (Qt::UserRole + 2)
 
-QMap<int, Playlist> Playlist::g_all_playlists;
-
-PlaylistPage::PlaylistPage(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::PlaylistPage)
+PlaylistPage::PlaylistPage(PlaylistManager *manager)
+	: m_manager(manager)
+	, ui(new Ui::PlaylistPage)
 {
     ui->setupUi(this);
 
@@ -23,54 +22,51 @@ PlaylistPage::~PlaylistPage()
     delete ui;
 }
 
-void PlaylistPage::reset()
+void PlaylistPage::showPlaylist(int playlist_id)
 {
-	m_all_playlists.clear();
-}
-
-void PlaylistPage::showPlaylist(Playlist playlist)
-{
-//	qDebug() << Q_FUNC_INFO << playlist;
+	qDebug() << Q_FUNC_INFO << playlist_id;
 	ui->playlist->clear();
 
 	// Данные самого списка
-	m_current_playlist = playlist;
+	Playlist playlist = m_manager->playlist(playlist_id);
+	m_current_playlist_id = playlist_id;
 
-	if (playlist.parent_id() > 0)
+	// Переход наверх
+	Playlist parent = m_manager->parent(playlist_id);
+	if (!parent.isNull())
 	{
-		// Переход на родителя
-		QListWidgetItem *it = new QListWidgetItem("[..]");
-		it->setData(PlaylistRole, playlist.parent_id());
+		QString name = QString("[..](%1)").arg(parent.name());
+		QListWidgetItem *it = new QListWidgetItem(name);
+		it->setData(PlaylistRole, parent.id());
 		ui->playlist->addItem(it);
 	}
 
-	// Данные о под-списках
-	foreach(Playlist item, playlist.children)
+	// Данные о дочерних списках/элементах
+	foreach(int child_id, playlist.children)
 	{
-		QString name = QString::number(item.id()) + " ";
+		Playlist child_pl = m_manager->playlist(child_id);
 
-		switch (item.type())
+		QString name = QString::number(child_pl.id()) + " ";
+		switch (child_pl.type())
 		{
 		case Playlist::Item:
-			name += item.name();
+			// Обычный элемент
+			name += child_pl.name();
 			break;
 		default:
-			name += "[" + item.name() + "]";
-
-			// Сохранить в список всех избранных
-			m_all_playlists[item.id()] = item;
+			// Список
+			name += "[" + child_pl.name() + "]";
 		}
 
 		QListWidgetItem *it = new QListWidgetItem(name);
-		it->setData(PlaylistRole, item.id());
+		it->setData(PlaylistRole, child_pl.id());
 		ui->playlist->addItem(it);
 	}
 }
 
 void PlaylistPage::on_playlist_itemDoubleClicked(QListWidgetItem* it)
 {
-	Playlist playlist = Playlist::playlist(it->data(PlaylistRole).toInt());
-	qDebug() << Q_FUNC_INFO << playlist.data;
+	Playlist playlist = m_manager->playlist(it->data(PlaylistRole).toInt());
 	switch (playlist.type())
 	{
 	case Playlist::Item:
@@ -96,10 +92,7 @@ void PlaylistPage::on_actionCreatePlaylist_triggered()
 	QString name = QInputDialog::getText(this, "Create playlist", "Name:");
 	if (!name.isEmpty())
 	{
-		// Текущий список будет родителем
-		int parent_id = m_current_playlist.id();
-
 		// Отправить запрос на создание
-		emit sig_createPlaylist(name, parent_id);
+		emit sig_createPlaylist(name, m_current_playlist_id); // Текущий список будет родителем
 	}
 }

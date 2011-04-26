@@ -7,6 +7,7 @@
 #include "qjson/parser.h"
 #include "web.h"
 #include "cookie_jar.h"
+#include "playlist.h"
 
 Web::Web()
 	: QObject(NULL)

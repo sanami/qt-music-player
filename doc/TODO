@@ -6,8 +6,6 @@
 	phonon?
 	MAFW
 
-Всегда удостоверятся, что процесс mplayer остановлен!
-
 +Сохранение настроек локально в системе
 
 +Тестировать модули через Qt UnitTest
@@ -16,7 +14,18 @@
 	Определять страну
 	Шаринг
 
+Десктопная версия
+	Linux
+	Windows
+
+Кеширование сетевых запросов
+	Поиск
+	Данные станций
+	Списки
+
 ----------------------------------------------------------------------------- mplayer
+Всегда удостоверятся, что процесс mplayer остановлен!
+
 +Зависание mplayer в станции id 1440
 +	-nogui -nomouseinput -slave -idle -nojoystick -nolirc -loop -1 -msglevel all=4 -vo null
 +		Установить loop 1
@@ -31,7 +40,7 @@ mplayer -quiet -slave -noconsolecontrols -nojoystick -nolirc -nomouseinput -inpu
 
 /bin/sh-c/usr/bin/mplayer -quiet -slave -noconsolecontrols -nojoystick -nolirc -nomouseinput -idle -osdlevel 0 -idx -identify -novideo -ao pulse -loop 1 mms://wm1.streaming.castor.nl/100pctnl=wm2/home/d
 
------------------------------------------------------------------------------ POST
+----------------------------------------------------------------------------- JSON
 "playlist"=>{"name"=>"", "comment"=>"", "parent_id"=>"", "playlist_type_id"=>"2", "station_id"=>"12"}
 utf8=%E2%9C%93&authenticity_token=e4aBElAbSqetdTelF0CubMsv0tyNoLno5jvK0w06abw%3D&playlist%5Bparent_id%5D=&playlist%5Bname%5D=&playlist%5Bplaylist_type_id%5D=2&playlist%5Bstation_id%5D=11&playlist%5Bcomment%5D=&commit=Save
 
@@ -55,11 +64,12 @@ utf8=%E2%9C%93&authenticity_token=e4aBElAbSqetdTelF0CubMsv0tyNoLno5jvK0w06abw%3D
 	Громкость?
 
 Избранное
+	Менеджер избранных
 +	Добавление текущей станции
 +	Удаление
 +	Создание каталога
 	Полная очиска каталога (истории)
-	Перенос из одного каталога в другой
+	Перенос элементов из одного списка в другой
 	Экспорт/импорт из файлов
 
 Сообщения об ошибках
@@ -73,9 +83,10 @@ utf8=%E2%9C%93&authenticity_token=e4aBElAbSqetdTelF0CubMsv0tyNoLno5jvK0w06abw%3D
 +Окно подробного лога
 
 Окно настроек
+	Выбор сервера
 
 +Окно фильтра
 
 ----------------------------------------------------------------------------- MTF
-/usr/local/share/themes/base/meegotouch/playermtf/style/playermtf.css
-
+Стиль оформления
+	/usr/local/share/themes/base/meegotouch/playermtf/style/playermtf.css

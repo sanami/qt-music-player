@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     ../shared/logger.cpp \
     stations_page.cpp \
     filter_page.cpp \
-    playlist_page.cpp
+    playlist_page.cpp \
+    ../shared/playlist_manager.cpp
 
 HEADERS  += form.h \
     info_page.h \
@@ -68,7 +69,9 @@ HEADERS  += form.h \
     ../shared/logger.h \
     playlist_page.h \
     pch.h \
-    ../shared/data.h
+    ../shared/data.h \
+    ../shared/playlist_manager.h \
+    ../shared/playlist.h
 
 FORMS    += form.ui \
     info_page.ui \

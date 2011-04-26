@@ -1,10 +1,12 @@
 #pragma once
 #include <QWidget>
-#include "data.h"
+#include "playlist.h"
 
 namespace Ui {
     class PlaylistPage;
 }
+
+class PlaylistManager;
 
 //! Иерархический список станций
 class PlaylistPage : public QWidget
@@ -12,21 +14,18 @@ class PlaylistPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlaylistPage(QWidget *parent = 0);
+	PlaylistPage(PlaylistManager *manager);
     ~PlaylistPage();
 
+public slots:
 	//! Показать список
-	void showPlaylist(Playlist playlist);
-
-	//! Очистить все списки
-	void reset();
-	const QMap<int, Playlist> &all() const { return m_all_playlists; }
+	void showPlaylist(int playlist_id);
 
 signals:
-	//! Данные станции
+	//! Показать данные станции
 	void sig_requestStation(int station_id);
 
-	//! Данные списка
+	//! Открыть список
 	void sig_requestPlaylist(int playlist_id);
 	//! Удалить список на сервере
 	void sig_destroyPlaylist(int playlist_id);
@@ -46,6 +45,6 @@ private slots:
 private:
     Ui::PlaylistPage *ui;
 
-	Playlist m_current_playlist; //!< Текущий список
-	QMap<int, Playlist> m_all_playlists; //!< Все избранные id => список
+	PlaylistManager *m_manager; //!< Все операции со списками, через менеджера
+	int m_current_playlist_id; //!< Текущий список
 };

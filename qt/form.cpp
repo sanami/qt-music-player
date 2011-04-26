@@ -14,6 +14,7 @@
 #include "media.h"
 #include "logger.h"
 #include "playlist_page.h"
+#include "playlist_manager.h"
 
 Form::Form(QWidget *parent)
 	: QMainWindow(parent)
@@ -31,10 +32,17 @@ Form::Form(QWidget *parent)
 	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
 	connect(m_web, SIGNAL(sig_busy(bool)), SLOT(showBusy(bool)));
 
+	// Плеер
+	m_media = new Media(this);
+	connect(m_media, SIGNAL(sig_status(Station, QString, bool)), SLOT(on_media_status(Station, QString, bool)));
+
+	// Менеджер избранных
+	m_manager = new PlaylistManager(this);
+
 	// Отладочные сообщения
 	m_log_page = new LogPage(this);
-	m_log_page->hide();
 	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
+	m_log_page->hide();
 	menuBar()->addAction(ui->actionLog);
 
 	// Добавить страницы
@@ -51,26 +59,25 @@ Form::Form(QWidget *parent)
 	ui->tabWidget->addTab(m_filter_page, "Filter");
 
 	m_station_view = new InfoPage(this);
-	m_station_view->hide();
 	connect(m_station_view, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
 	connect(m_station_view, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
-
-	m_media = new Media(this);
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
-	connect(m_media, SIGNAL(sig_status(Station, QString, bool)), SLOT(on_media_status(Station, QString, bool)));
+	m_station_view->hide();
 
 	m_player_page = new PlayerPage(m_media, this);
 	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
 	ui->tabWidget->addTab(m_player_page, "Player");
 
-	m_playlist_page = new PlaylistPage(this);
+	m_playlist_page = new PlaylistPage(m_manager);
 	connect(m_playlist_page, SIGNAL(sig_requestStation(int)), m_web, SLOT(requestStation(int)));
 	connect(m_playlist_page, SIGNAL(sig_requestPlaylist(int)), m_web, SLOT(requestPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), m_web, SLOT(destroyPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_createPlaylist(QString, int)), m_web, SLOT(createPlaylist(QString, int)));
+	connect(m_manager, SIGNAL(sig_showPlaylist(int)), m_playlist_page, SLOT(showPlaylist(int)));
 //	connect(m_playlist_page, SIGNAL(), m_web, SLOT());
 	ui->tabWidget->addTab(m_playlist_page, "Playlist");
 
+	// Показать FilterPage
 	ui->tabWidget->setCurrentIndex(1);
 
 	// Сделать запрос на сервер
@@ -80,14 +87,17 @@ Form::Form(QWidget *parent)
 Form::~Form()
 {
     delete ui;
+
+	delete m_web;
+	delete m_media;
+	delete m_manager;
+
 	delete m_stations_page;
 	delete m_filter_page;
 	delete m_station_view;
 	delete m_player_page;
 	delete m_playlist_page;
 	delete m_log_page;
-	delete m_web;
-	delete m_media;
 }
 
 void Form::showBusy(bool busy)
@@ -121,7 +131,8 @@ void Form::on_web_finished(Task *task)
 		case Task::Cookies:
 			{
 				QVariant root_playlist = task->json.toMap()["root"];
-				m_playlist_page->showPlaylist(Playlist(root_playlist));
+				m_manager->process(root_playlist);
+//				m_playlist_page->showPlaylist(Playlist(root_playlist));
 			}
 			// Список стран в фильтр
 			m_web->requestCountries();
@@ -129,7 +140,8 @@ void Form::on_web_finished(Task *task)
 			m_web->requestGenres();
 			break;
 		case Task::Playlist:
-			m_playlist_page->showPlaylist(Playlist(task->json));
+			m_manager->process(task->json);
+//			m_playlist_page->showPlaylist(Playlist(task->json));
 			break;
 		case Task::AddToPlaylist:
 		case Task::PlaylistDestroy:
@@ -244,7 +256,7 @@ void Form::on_setServer(QString server)
 	m_web->setServer(server);
 
 	// Очистить список избранных
-	m_playlist_page->reset();
+	m_manager->clear();
 
 	// Первый запрос установит cookies с сервера
 	m_web->requestCookies();
@@ -254,8 +266,9 @@ void Form::on_addStationToFavorites(Station station)
 {
 	// Список избранных
 	QStringList items;
-	foreach(Playlist favorite, m_playlist_page->all())
+	foreach(int favorite_id, m_manager->favorites())
 	{
+		Playlist favorite = m_manager->playlist(favorite_id);
 		items << QString("%1 %2").arg(favorite.id()).arg(favorite.name());
 	}
 
