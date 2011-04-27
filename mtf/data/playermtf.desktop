@@ -2,4 +2,4 @@
 Type=Application
 Name=playermtf
 Icon=icons-Applications-music
-Exec=playermtf
+Exec=playermtf -show-fps

@@ -7,11 +7,13 @@
 TEMPLATE = app
 TARGET = playerqt
 
-QT       += core gui network phonon
+QT       += core gui network phonon maemo5
 CONFIG += precompile_header mobility
 MOBILITY = 
 
-QT += maemo5
+MOC_DIR = .moc
+OBJECTS_DIR = .obj
+UI_DIR = .ui
 
 INCLUDEPATH += ../shared
 

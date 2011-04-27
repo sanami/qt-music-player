@@ -15,12 +15,37 @@ Web::Web()
 {
 	m_json_parser = new QJson::Parser();
 
+#ifdef Q_WS_WIN
+	// Только под Windows
+	QNetworkProxyFactory::setUseSystemConfiguration(true);
+#else
+	// Брать из http_proxy=http://nokes.nokia.com:8080/
+	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	QString httpProxy = env.value("http_proxy");
+	if (httpProxy.isEmpty())
+	{
+		httpProxy = env.value("HTTP_PROXY");
+	}
+	if (!httpProxy.isEmpty())
+	{
+		qDebug() << Q_FUNC_INFO << httpProxy;
+		QUrl url(httpProxy);
+
+		QNetworkProxy proxy;
+		proxy.setType(QNetworkProxy::HttpProxy);
+		proxy.setHostName(url.host());
+		proxy.setPort(url.port());
+		proxy.setUser(url.userName());
+		proxy.setPassword(url.password());
+
+		QNetworkProxy::setApplicationProxy(proxy);
+	}
+#endif
+
 	m_network = new QNetworkAccessManager(this);
 	connect(m_network, SIGNAL(finished(QNetworkReply *)), this, SLOT(on_replyFinished(QNetworkReply *)));
 
 	m_network->setCookieJar(new CookieJar(this));
-//	m_network->setCookieJar(new QNetworkCookieJar(this));
-
 }
 
 Web::~Web()

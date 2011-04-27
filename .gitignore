@@ -1,3 +1,7 @@
 Makefile
 *.pro.user*
 *-build-*
+.moc
+.obj
+.ui
+*.qm
