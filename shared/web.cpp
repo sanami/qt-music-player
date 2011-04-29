@@ -86,7 +86,7 @@ void Web::createPlaylist(QString name, int parent_id)
 		params["playlist"] = e;
 	}
 
-	request(Task::AddToPlaylist, url, Task::Post, params);
+	request(Task::PlaylistCreate, url, Task::Post, params);
 }
 
 void Web::addStationToPlaylist(Station station, int parent_id)
@@ -106,7 +106,7 @@ void Web::addStationToPlaylist(Station station, int parent_id)
 		params["playlist"] = e;
 	}
 
-	request(Task::AddToPlaylist, url, Task::Post, params);
+	request(Task::PlaylistCreate, url, Task::Post, params);
 }
 
 void Web::requestCountries()

@@ -38,6 +38,8 @@ Form::Form(QWidget *parent)
 
 	// Менеджер избранных
 	m_manager = new PlaylistManager(this);
+	connect(m_manager, SIGNAL(sig_requestStation(int)), m_web, SLOT(requestStation(int)));
+	connect(m_manager, SIGNAL(sig_requestPlaylist(int)), m_web, SLOT(requestPlaylist(int)));
 
 	// Отладочные сообщения
 	m_log_page = new LogPage(this);
@@ -68,17 +70,18 @@ Form::Form(QWidget *parent)
 	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
 	ui->tabWidget->addTab(m_player_page, "Player");
 
-	m_playlist_page = new PlaylistPage(m_manager);
-	connect(m_playlist_page, SIGNAL(sig_requestStation(int)), m_web, SLOT(requestStation(int)));
-	connect(m_playlist_page, SIGNAL(sig_requestPlaylist(int)), m_web, SLOT(requestPlaylist(int)));
-	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), m_web, SLOT(destroyPlaylist(int)));
+	m_playlist_page = new PlaylistPage();
+	connect(m_playlist_page, SIGNAL(sig_openPlaylist(int)), m_manager, SLOT(on_openPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_createPlaylist(QString, int)), m_web, SLOT(createPlaylist(QString, int)));
-	connect(m_manager, SIGNAL(sig_showPlaylist(int)), m_playlist_page, SLOT(showPlaylist(int)));
-//	connect(m_playlist_page, SIGNAL(), m_web, SLOT());
+	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), m_web, SLOT(destroyPlaylist(int)));
+	connect(m_manager, SIGNAL(sig_clear()), m_playlist_page, SLOT(clearItems()));
+	connect(m_manager, SIGNAL(sig_show(Playlist)), m_playlist_page, SLOT(showPlaylist(Playlist)));
+	connect(m_manager, SIGNAL(sig_add(Playlist)), m_playlist_page, SLOT(addItem(Playlist)));
+	connect(m_manager, SIGNAL(sig_remove(int)), m_playlist_page, SLOT(removeItem(int)));
 	ui->tabWidget->addTab(m_playlist_page, "Playlist");
 
 	// Показать FilterPage
-	ui->tabWidget->setCurrentIndex(1);
+	ui->tabWidget->setCurrentIndex(3);
 
 	// Сделать запрос на сервер
 	on_setServer(m_filter_page->server());
@@ -115,9 +118,14 @@ void Form::showMessage(QString msg, int timeout)
 #ifdef Q_WS_MAEMO_5
 	QMaemo5InformationBox::information(this, msg, timeout);
 #else
-	Q_UNUSED(msg);
-	Q_UNUSED(timeout);
+	setWindowTitle("Heroku " + msg);
+	QTimer::singleShot(timeout+500, this, SLOT(clearMessage()));
 #endif
+}
+
+void Form::clearMessage()
+{
+	setWindowTitle("Heroku");
 }
 
 void Form::on_web_finished(Task *task)
@@ -131,7 +139,7 @@ void Form::on_web_finished(Task *task)
 		case Task::Cookies:
 			{
 				QVariant root_playlist = task->json.toMap()["root"];
-				m_manager->process(root_playlist);
+				m_manager->process(root_playlist, Playlist::AllList);
 //				m_playlist_page->showPlaylist(Playlist(root_playlist));
 			}
 			// Список стран в фильтр
@@ -139,19 +147,18 @@ void Form::on_web_finished(Task *task)
 			// Список жанров в фильтр
 			m_web->requestGenres();
 			break;
-		case Task::Playlist:
-			m_manager->process(task->json);
+//		case Task::Playlist:
+//			m_manager->process(task->json);
 //			m_playlist_page->showPlaylist(Playlist(task->json));
+//			break;
+		case Task::PlaylistCreate:
+			m_manager->process(task->json, Playlist::Create);
+			showMessage("OK", 500);
 			break;
-		case Task::AddToPlaylist:
 		case Task::PlaylistDestroy:
-			qDebug() << "task->result" << task->result;
-			if (task->result == "ok")
-				showMessage("OK", 500);
-			else
-				showMessage("FAIL", 500);
+			m_manager->process(task->json, Playlist::Destroy);
+			showMessage("OK", 500);
 			break;
-
 		case Task::Station:
 			// Данные одной станции
 			{
@@ -210,6 +217,7 @@ void Form::on_web_finished(Task *task)
 		default:
 			qDebug() << "Error code:" << task->error_code << "for task type:" << task->type;
 		}
+		showMessage("FAIL", 500);
 	}
 
 	delete task;

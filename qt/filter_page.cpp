@@ -19,6 +19,8 @@ FilterPage::FilterPage(QWidget *parent) :
 
 //	QString server = ui->comboBox_server->currentText();
 //	on_comboBox_server_currentIndexChanged(server);
+
+	ui->comboBox_search->addItem("stac");
 }
 
 FilterPage::~FilterPage()

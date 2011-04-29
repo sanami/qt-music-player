@@ -97,10 +97,12 @@ OTHER_FILES += \
     qtc_packaging/debian_fremantle/control \
     qtc_packaging/debian_fremantle/compat \
     qtc_packaging/debian_fremantle/changelog \
-    doc/TODO \
     ../doc/TODO
 
 maemo5 {
-    target.path = /opt/player_qt/bin
-    INSTALLS += target
+	desktop.files = qtc_packaging/playerqt.desktop
+    desktop.path = /usr/share/applications/hildon
+
+    target.path = /opt/playerqt/bin
+	INSTALLS += target desktop
 }

@@ -8,11 +8,18 @@ struct Playlist
 
 	//! Типы списков
 	enum Type {
-		Unknown   = 0,  // Ошибка
+		UnknownType = 0, // Ошибка
 		Root      = 1,  // Корневой список
 		Item      = 2,  // Обычный объект, ссылается на станцию
 		History   = 3,  // Список история
-		Favorites = 4  // Список избранных пользователя
+		Favorites = 4   // Список избранных пользователя
+	};
+
+	enum Action {
+		UnknownAction = 0, // Ошибка
+		AllList   = 1,  // Весь список
+		Create    = 2,  // Добавить
+		Destroy   = 3   // Удалить
 	};
 
 	//! Стандартные конструкторы и оператор
@@ -53,6 +60,14 @@ struct Playlist
 	}
 
 	bool isNull() const { return data.isEmpty(); }
+
+	void add(int child_id)
+	{
+		if (!children.contains(child_id))
+		{
+			children << child_id;
+		}
+	}
 
 	//! Определения рабочих полей
 	FIELD_INT(id);

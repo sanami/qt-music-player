@@ -6,31 +6,36 @@ namespace Ui {
     class PlaylistPage;
 }
 
-class PlaylistManager;
-
 //! Иерархический список станций
 class PlaylistPage : public QWidget
 {
     Q_OBJECT
 
 public:
-	PlaylistPage(PlaylistManager *manager);
+	PlaylistPage();
     ~PlaylistPage();
 
 public slots:
 	//! Показать список
-	void showPlaylist(int playlist_id);
+	void showPlaylist(Playlist pl);
+
+	//! Добавить элемент в список
+	void addItem(Playlist pl);
+
+	//! Удалить элемент из списка
+	void removeItem(int playlist_id);
+
+	//! Очистить весь список
+	void clearItems();
 
 signals:
-	//! Показать данные станции
-	void sig_requestStation(int station_id);
-
 	//! Открыть список
-	void sig_requestPlaylist(int playlist_id);
-	//! Удалить список на сервере
-	void sig_destroyPlaylist(int playlist_id);
+	void sig_openPlaylist(int playlist_id);
 	//! Создать новый плейлист
 	void sig_createPlaylist(QString name, int parent_id);
+
+	//! Удалить список на сервере
+	void sig_destroyPlaylist(int playlist_id);
 
 private slots:
 	//! Двойной клик на запись в списке
@@ -45,6 +50,5 @@ private slots:
 private:
     Ui::PlaylistPage *ui;
 
-	PlaylistManager *m_manager; //!< Все операции со списками, через менеджера
 	int m_current_playlist_id; //!< Текущий список
 };

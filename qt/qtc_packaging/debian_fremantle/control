@@ -1,4 +1,4 @@
-Source: player-qt
+Source: playerqt
 Section: user/hidden
 Priority: optional
 Maintainer: sa <sa@unknown>
@@ -6,9 +6,9 @@ Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
 Homepage: <insert the upstream URL, if relevant>
 
-Package: player-qt
+Package: playerqt
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
-XB-Maemo-Display-Name: player_qt
+XB-Maemo-Display-Name: playerqt

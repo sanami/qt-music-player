@@ -34,6 +34,8 @@ public slots:
 
 	//! Всплывающее сообщение
 	void showMessage(QString msg, int timeout = 3000);
+	//! Удалить сообщение
+	void clearMessage();
 
 private:
 	//! Запросить текущую страницу
