@@ -39,10 +39,6 @@ public:
 	//! Список станций на странице
 	void requestStations(int page, QVariantMap params = QVariantMap());
 
-public slots:
-	//! Список городов в стране
-	void requestCities(int country_id);
-
 	//! Запрос данных одной станции
 	void requestStation(int station_id);
 	//! Запрос информации о списке
@@ -51,6 +47,10 @@ public slots:
 	void destroyPlaylist(int playlist_id);
 	//! Создать новый плейлист
 	void createPlaylist(QString name, int parent_id);
+
+public slots:
+	//! Список городов в стране
+	void requestCities(int country_id);
 
 signals:
 	//! Завершенная задача

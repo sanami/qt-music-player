@@ -15,13 +15,26 @@ void PlaylistManager::process(QVariant json, Playlist::Action action)
 			// Весь список
 			clear();
 			int id = create(json.toMap());
-			show(id);
+			if (id)
+			{
+				show(id);
+			}
 		}
 		break;
 	case Playlist::Create:
 		{
 			int id = create(json.toMap());
-			emit sig_add(playlist(id));
+			Playlist pl = playlist(id);
+			if (pl.type() == Playlist::Root)
+			{
+				// Создан корень
+				show(id);
+			}
+			else
+			{
+				// Обычный элемент
+				emit sig_add(pl);
+			}
 		}
 		break;
 	case Playlist::Destroy:
@@ -41,24 +54,28 @@ int PlaylistManager::create(const QVariantMap &var)
 {
 	Playlist pl;
 	pl.data = var.value("playlist").toMap();
-	// Добавить в хранилище
-	m_playlists[pl.id()] = pl;
-
-//	if (!m_root && pl.type() == Playlist::Root)
-//		m_root = pl.id();
-//	if (!m_history && pl.type() == Playlist::History)
-//		m_history = pl.id();
-
-	parent(pl).add(pl.id());
-
-	foreach (QVariant child_var, var.value("children").toList())
+	if (pl.id() > 0)
 	{
-		// Рекурсивно создаст для всей иерархии
-		create(child_var.toMap());
-	}
+		// Добавить в хранилище
+		m_playlists[pl.id()] = pl;
 
-	// Вернуть только ID;
-	return pl.id();
+		//	if (!m_root && pl.type() == Playlist::Root)
+		//		m_root = pl.id();
+		//	if (!m_history && pl.type() == Playlist::History)
+		//		m_history = pl.id();
+
+		parent(pl).add(pl.id());
+
+		foreach (QVariant child_var, var.value("children").toList())
+		{
+			// Рекурсивно создаст для всей иерархии
+			create(child_var.toMap());
+		}
+
+		// Вернуть только ID;
+		return pl.id();
+	}
+	return 0; // Ошибка
 }
 
 void PlaylistManager::destroy(int id)
@@ -101,18 +118,3 @@ void PlaylistManager::show(int id)
 	}
 }
 
-void PlaylistManager::on_openPlaylist(int id)
-{
-	Playlist pl = playlist(id);
-	switch (pl.type())
-	{
-	case Playlist::Item:
-		emit sig_requestStation(pl.station_id());
-		break;
-	default:
-		if (contains(id))
-			show(id);
-		else
-			emit sig_requestPlaylist(pl.id());
-	}
-}

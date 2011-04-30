@@ -18,11 +18,12 @@ public:
 		m_playlists.clear();
 //		m_root = 0;
 //		m_history = 0;
+		emit sig_clear();
 	}
 
 	bool contains(int id) const
 	{
-		return m_playlists.contains(id);
+		return m_playlists.contains(id) && !m_playlists[id].isNull();
 	}
 
 	Playlist &playlist(int id)
@@ -35,10 +36,10 @@ public:
 		return playlist(pl.parent_id());
 	}
 
-	Playlist &parent(int id)
-	{
-		return parent(playlist(id));
-	}
+//	Playlist &parent(int id)
+//	{
+//		return parent(playlist(id));
+//	}
 
 //	//! Корневой элемент
 //	Playlist &root()
@@ -55,15 +56,10 @@ public:
 	//! Все избранные, в которые можно добавлять элементы
 	Playlist::List favorites() const;
 
-public slots:
-	void on_openPlaylist(int id);
+	//! Показать содержимое списка
+	void show(int id);
 
 signals:
-	//! Запросить данные станции
-	void sig_requestStation(int station_id);
-	//! Запросить данные списка
-	void sig_requestPlaylist(int playlist_id);
-
 	void sig_clear();
 	void sig_show(Playlist pl);
 	void sig_add(Playlist pl);
@@ -75,9 +71,6 @@ private:
 
 	//! Удалить плейлист из JSON данных
 	void destroy(int id);
-
-	//! Показать содержимое списка
-	void show(int id);
 
 private:
 	QMap<int, Playlist> m_playlists; //! Глобальное хранилище

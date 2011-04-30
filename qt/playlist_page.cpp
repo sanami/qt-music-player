@@ -13,6 +13,8 @@ PlaylistPage::PlaylistPage()
 	// Контекстное меню списка
 	ui->playlist->addAction(ui->actionDeletePlaylist);
 	ui->playlist->addAction(ui->actionCreatePlaylist);
+
+	clearItems();
 }
 
 PlaylistPage::~PlaylistPage()
@@ -23,6 +25,7 @@ PlaylistPage::~PlaylistPage()
 void PlaylistPage::clearItems()
 {
 	ui->playlist->clear();
+	m_current_playlist_id = 0;
 }
 
 void PlaylistPage::showPlaylist(Playlist pl)
@@ -41,8 +44,8 @@ void PlaylistPage::showPlaylist(Playlist pl)
 
 void PlaylistPage::addItem(Playlist pl)
 {
-	// Только для элементы этого списка
-	if (pl.parent_id() == m_current_playlist_id)
+	// Только для элементов этого списка
+	if (pl.parent_id() == m_current_playlist_id && !findItem(pl.id()))
 	{
 		QString name = QString::number(pl.id()) + " ";
 		switch (pl.type())
@@ -64,8 +67,16 @@ void PlaylistPage::addItem(Playlist pl)
 
 void PlaylistPage::removeItem(int playlist_id)
 {
-	//найти среди показываемых и удалить
-	QListWidgetItem* it = ui->playlist->currentItem();
+	// Найти среди показываемых и удалить
+	QListWidgetItem* it = findItem(playlist_id);
+	if (it)
+	{
+		delete it;
+	}
+}
+
+QListWidgetItem *PlaylistPage::findItem(int playlist_id)
+{
 	for(int i=0; i<ui->playlist->count(); ++i)
 	{
 		QListWidgetItem* it = ui->playlist->item(i);
@@ -73,10 +84,10 @@ void PlaylistPage::removeItem(int playlist_id)
 
 		if (playlist_id == id)
 		{
-			delete it;
-			break;
+			return it;
 		}
 	}
+	return NULL;
 }
 
 void PlaylistPage::on_playlist_itemDoubleClicked(QListWidgetItem* it)
@@ -87,12 +98,9 @@ void PlaylistPage::on_playlist_itemDoubleClicked(QListWidgetItem* it)
 
 void PlaylistPage::on_actionCreatePlaylist_triggered()
 {
-	QString name = QInputDialog::getText(this, "Create playlist", "Name:");
-	if (!name.isEmpty())
-	{
-		// Отправить запрос на создание
-		emit sig_createPlaylist(name, m_current_playlist_id); // Текущий список будет родителем
-	}
+	// Текущий список будет родителем
+	if (m_current_playlist_id)
+		emit sig_createPlaylist(m_current_playlist_id);
 }
 
 void PlaylistPage::on_actionDeletePlaylist_triggered()

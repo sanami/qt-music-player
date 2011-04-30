@@ -38,8 +38,6 @@ Form::Form(QWidget *parent)
 
 	// Менеджер избранных
 	m_manager = new PlaylistManager(this);
-	connect(m_manager, SIGNAL(sig_requestStation(int)), m_web, SLOT(requestStation(int)));
-	connect(m_manager, SIGNAL(sig_requestPlaylist(int)), m_web, SLOT(requestPlaylist(int)));
 
 	// Отладочные сообщения
 	m_log_page = new LogPage(this);
@@ -71,9 +69,9 @@ Form::Form(QWidget *parent)
 	ui->tabWidget->addTab(m_player_page, "Player");
 
 	m_playlist_page = new PlaylistPage();
-	connect(m_playlist_page, SIGNAL(sig_openPlaylist(int)), m_manager, SLOT(on_openPlaylist(int)));
-	connect(m_playlist_page, SIGNAL(sig_createPlaylist(QString, int)), m_web, SLOT(createPlaylist(QString, int)));
-	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), m_web, SLOT(destroyPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_openPlaylist(int)), SLOT(on_openPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_createPlaylist(int)), SLOT(on_createPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), SLOT(on_destroyPlaylist(int)));
 	connect(m_manager, SIGNAL(sig_clear()), m_playlist_page, SLOT(clearItems()));
 	connect(m_manager, SIGNAL(sig_show(Playlist)), m_playlist_page, SLOT(showPlaylist(Playlist)));
 	connect(m_manager, SIGNAL(sig_add(Playlist)), m_playlist_page, SLOT(addItem(Playlist)));
@@ -85,6 +83,12 @@ Form::Form(QWidget *parent)
 
 	// Сделать запрос на сервер
 	on_setServer(m_filter_page->server());
+
+#ifndef Q_WS_MAEMO_5
+	int x = 100, y = 100;
+	move(x, y);
+	m_station_view->move(x+width(), y);
+#endif
 }
 
 Form::~Form()
@@ -272,19 +276,70 @@ void Form::on_setServer(QString server)
 
 void Form::on_addStationToFavorites(Station station)
 {
-	// Список избранных
-	QStringList items;
-	foreach(int favorite_id, m_manager->favorites())
+	if (!m_manager->favorites().isEmpty())
 	{
-		Playlist favorite = m_manager->playlist(favorite_id);
-		items << QString("%1 %2").arg(favorite.id()).arg(favorite.name());
-	}
+		// Список избранных
+		QStringList items;
+		foreach(int favorite_id, m_manager->favorites())
+		{
+			Playlist favorite = m_manager->playlist(favorite_id);
+			items << QString("%1 %2").arg(favorite.id()).arg(favorite.name());
+		}
 
-	bool ok;
-	QString parent = QInputDialog::getItem(this, "Add to Favorites", "Choose:", items, 0, false, &ok);
-	if (ok)
+		bool ok;
+		QString parent = QInputDialog::getItem(this, "Add to Favorites", "Choose:", items, 0, false, &ok);
+		if (ok)
+		{
+			int parent_id = parent.section(' ', 0, 0).toInt();
+			m_web->addStationToPlaylist(station, parent_id);
+		}
+	}
+	else
 	{
-		int parent_id = parent.section(' ', 0, 0).toInt();
-		m_web->addStationToPlaylist(station, parent_id);
+		showMessage("First create playlist");
+	}
+}
+
+void Form::on_openPlaylist(int playlist_id)
+{
+	Playlist pl = m_manager->playlist(playlist_id);
+	switch (pl.type())
+	{
+	case Playlist::Item:
+		m_web->requestStation(pl.station_id());
+		break;
+	default:
+		if (m_manager->contains(playlist_id))
+			m_manager->show(playlist_id);
+		else
+			m_web->requestPlaylist(playlist_id);
+	}
+}
+
+void Form::on_createPlaylist(int parent_id)
+{
+	QString name = QInputDialog::getText(this, "Create playlist", "Name:");
+	if (!name.isEmpty())
+	{
+		// Отправить запрос на создание
+		m_web->createPlaylist(name, parent_id);
+	}
+}
+
+void Form::on_destroyPlaylist(int playlist_id)
+{
+	Playlist pl = m_manager->playlist(playlist_id);
+	switch (pl.type())
+	{
+	case Playlist::Item:
+		// Удалить станцию
+		m_web->destroyPlaylist(playlist_id);
+		break;
+	default:
+		// Каталог удалять с запросом
+		if (QMessageBox::question(this, "Delete playlist", "Are you sure?", QMessageBox::Ok|QMessageBox::Cancel) == QMessageBox::Ok)
+		{
+			m_web->destroyPlaylist(playlist_id);
+		}
 	}
 }

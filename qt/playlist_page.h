@@ -31,8 +31,9 @@ public slots:
 signals:
 	//! Открыть список
 	void sig_openPlaylist(int playlist_id);
+
 	//! Создать новый плейлист
-	void sig_createPlaylist(QString name, int parent_id);
+	void sig_createPlaylist(int parent_id);
 
 	//! Удалить список на сервере
 	void sig_destroyPlaylist(int playlist_id);
@@ -46,6 +47,10 @@ private slots:
 
 	//! Создать новый плейлист
 	void on_actionCreatePlaylist_triggered();
+
+private:
+	//! Найти запись или NULL
+	QListWidgetItem *findItem(int playlist_id);
 
 private:
     Ui::PlaylistPage *ui;

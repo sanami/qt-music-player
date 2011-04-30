@@ -59,6 +59,12 @@ private slots:
 
 	//! Добавление станции в избранное
 	void on_addStationToFavorites(Station station);
+	//! Открыть список или станцию
+	void on_openPlaylist(int playlist_id);
+	//! Создать новый список
+	void on_createPlaylist(int parent_id);
+	//! Удаление записи в списке
+	void on_destroyPlaylist(int playlist_id);
 
 	//! Результат попытки подключения к станции
 	void on_media_status(Station station, QString url, bool ok);
