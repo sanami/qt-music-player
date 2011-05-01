@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Filter</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -30,8 +30,13 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>-1</number>
+      <number>0</number>
      </property>
+     <item>
+      <property name="text">
+       <string>http://music.heroku.com</string>
+      </property>
+     </item>
      <item>
       <property name="text">
        <string>http://192.168.1.128:3000</string>
@@ -40,11 +45,6 @@
      <item>
       <property name="text">
        <string>http://192.168.2.14:3000</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>http://music.heroku.com</string>
       </property>
      </item>
     </widget>

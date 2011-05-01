@@ -11,6 +11,8 @@ LogPage::LogPage(QWidget *parent)
 #ifdef Q_WS_MAEMO_5
 	setAttribute(Qt::WA_Maemo5StackedWindow);
 #endif
+
+	hide();
 }
 
 LogPage::~LogPage()

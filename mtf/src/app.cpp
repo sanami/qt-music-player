@@ -117,7 +117,7 @@ void App::on_web_finished(Task *task)
 		case Task::Playlist:
 //			m_playlist_page->showPlaylist(task->json.toMap());
 			break;
-		case Task::AddToPlaylist:
+		case Task::PlaylistCreate:
 		case Task::PlaylistDestroy:
 			qDebug() << "task->result" << task->result;
 //			if (task->result == "ok")

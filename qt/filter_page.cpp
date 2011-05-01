@@ -11,14 +11,7 @@ FilterPage::FilterPage(QWidget *parent) :
 	if (server_index >= 0)
 	{
 		ui->comboBox_server->setCurrentIndex(server_index);
-
-		// Запрос первой страницы
-//		m_current_page = 1;
-//		requestPage();
 	}
-
-//	QString server = ui->comboBox_server->currentText();
-//	on_comboBox_server_currentIndexChanged(server);
 
 	ui->comboBox_search->addItem("stac");
 }
@@ -26,6 +19,11 @@ FilterPage::FilterPage(QWidget *parent) :
 FilterPage::~FilterPage()
 {
     delete ui;
+}
+
+QString FilterPage::server() const
+{
+	return ui->comboBox_server->currentText();
 }
 
 void FilterPage::showCountries(Location::List countries)

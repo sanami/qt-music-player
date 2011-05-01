@@ -21,7 +21,7 @@ INCLUDEPATH += ../shared
 PRECOMPILED_HEADER = pch.h
 
 SOURCES += main.cpp\
-        form.cpp \
+        app.cpp \
     ../shared/web.cpp \
     ../shared/qjson/serializerrunnable.cpp \
     ../shared/qjson/serializer.cpp \
@@ -41,9 +41,10 @@ SOURCES += main.cpp\
     stations_page.cpp \
     filter_page.cpp \
     playlist_page.cpp \
-    ../shared/playlist_manager.cpp
+    ../shared/playlist_manager.cpp \
+    app_window.cpp
 
-HEADERS  += form.h \
+HEADERS  += app.h \
     info_page.h \
     player_page.h \
     log_page.h \
@@ -73,15 +74,17 @@ HEADERS  += form.h \
     pch.h \
     ../shared/data.h \
     ../shared/playlist_manager.h \
-    ../shared/playlist.h
+    ../shared/playlist.h \
+    app_window.h
 
-FORMS    += form.ui \
+FORMS    += \
     info_page.ui \
     player_page.ui \
     log_page.ui \
     stations_page.ui \
     filter_page.ui \
-    playlist_page.ui
+    playlist_page.ui \
+    app_window.ui
 
 symbian {
     TARGET.UID3 = 0xe7928591
@@ -106,3 +109,6 @@ maemo5 {
     target.path = /opt/playerqt/bin
 	INSTALLS += target desktop
 }
+
+RESOURCES += \
+    resources.qrc

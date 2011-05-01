@@ -1,15 +1,9 @@
-#ifndef FORM_H
-#define FORM_H
-#include <QMainWindow>
+#pragma once
 #include "task.h"
 #include "data.h"
 #include "playlist.h"
 
-namespace Ui {
-    class Form;
-}
-
-class QListWidgetItem;
+class AppWindow;
 class StationsPage;
 class FilterPage;
 class InfoPage;
@@ -20,13 +14,13 @@ class Web;
 class Media;
 class PlaylistManager;
 
-class Form : public QMainWindow
+class App : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Form(QWidget *parent = 0);
-    ~Form();
+	App();
+	~App();
 
 public slots:
 	//! Индикатор загрузки
@@ -70,12 +64,11 @@ private slots:
 	void on_media_status(Station station, QString url, bool ok);
 
 private:
-	Ui::Form *ui;
-
 	Web *m_web; //!< Веб запросы
 	Media *m_media; //!< Плеер
 	PlaylistManager *m_manager; //!< Менеджер списками избранных/истории
 
+	AppWindow *m_app_window; //! Окно приложения
 	StationsPage *m_stations_page; //!< Список станций
 	FilterPage *m_filter_page; //!< Фильтрация станций
 	InfoPage *m_station_view;  //!< Информация о станции
@@ -83,5 +76,3 @@ private:
 	PlaylistPage *m_playlist_page; //!< Списки
 	LogPage *m_log_page; //!< Страница сообщений
 };
-
-#endif // FORM_H

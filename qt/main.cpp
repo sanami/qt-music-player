@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "form.h"
+#include "app.h"
 #include "logger.h"
 
 int main(int argc, char *argv[])
@@ -12,12 +12,7 @@ int main(int argc, char *argv[])
 
 	Logger::init();
 
-    Form w;
-#if defined(Q_WS_S60)
-    w.showMaximized();
-#else
-    w.show();
-#endif
+	App app;
 
     return a.exec();
 }

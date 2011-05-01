@@ -25,7 +25,7 @@ public:
 	//! Заполнить список жанров на странице фильтров
 	void showGenres(Genre::List genres);
 
-	QString server() const { return m_settings.server(); }
+	QString server() const;
 
 signals:
 	void sig_setServer(QString server);
