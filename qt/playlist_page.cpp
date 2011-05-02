@@ -13,6 +13,7 @@ PlaylistPage::PlaylistPage()
 	// Контекстное меню списка
 	ui->playlist->addAction(ui->actionDeletePlaylist);
 	ui->playlist->addAction(ui->actionCreatePlaylist);
+	ui->playlist->addAction(ui->actionRenamePlaylist);
 
 	clearItems();
 }
@@ -65,6 +66,28 @@ void PlaylistPage::addItem(Playlist pl)
 	}
 }
 
+void PlaylistPage::updateItem(Playlist pl)
+{
+	// Найти среди показываемых и удалить
+	QListWidgetItem* it = findItem(pl.id());
+	if (it)
+	{
+		QString name = QString::number(pl.id()) + " ";
+		switch (pl.type())
+		{
+		case Playlist::Item:
+			// Обычный элемент
+			name += pl.name();
+			break;
+		default:
+			// Список
+			name += "[" + pl.name() + "]";
+		}
+
+		it->setText(name);
+	}
+}
+
 void PlaylistPage::removeItem(int playlist_id)
 {
 	// Найти среди показываемых и удалить
@@ -75,7 +98,7 @@ void PlaylistPage::removeItem(int playlist_id)
 	}
 }
 
-QListWidgetItem *PlaylistPage::findItem(int playlist_id)
+QListWidgetItem *PlaylistPage::findItem(int playlist_id) const
 {
 	for(int i=0; i<ui->playlist->count(); ++i)
 	{
@@ -88,6 +111,16 @@ QListWidgetItem *PlaylistPage::findItem(int playlist_id)
 		}
 	}
 	return NULL;
+}
+
+int PlaylistPage::currentPlaylist() const
+{
+	QListWidgetItem* it = ui->playlist->currentItem();
+	if (it)
+	{
+		return it->data(PlaylistRole).toInt();
+	}
+	return 0;
 }
 
 void PlaylistPage::on_playlist_itemDoubleClicked(QListWidgetItem* it)
@@ -105,10 +138,18 @@ void PlaylistPage::on_actionCreatePlaylist_triggered()
 
 void PlaylistPage::on_actionDeletePlaylist_triggered()
 {
-	QListWidgetItem* it = ui->playlist->currentItem();
-	if (it)
+	int playlist_id = currentPlaylist();
+	if (playlist_id > 0)
 	{
-		int playlist_id = it->data(PlaylistRole).toInt();
 		emit sig_destroyPlaylist(playlist_id);
+	}
+}
+
+void PlaylistPage::on_actionRenamePlaylist_triggered()
+{
+	int playlist_id = currentPlaylist();
+	if (playlist_id > 0)
+	{
+		emit sig_renamePlaylist(playlist_id);
 	}
 }

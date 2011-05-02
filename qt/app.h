@@ -22,18 +22,11 @@ public:
 	App();
 	~App();
 
-public slots:
-	//! Индикатор загрузки
-	void showBusy(bool busy);
-
-	//! Всплывающее сообщение
-	void showMessage(QString msg, int timeout = 3000);
-	//! Удалить сообщение
-	void clearMessage();
-
 private:
 	//! Запросить текущую страницу
 	void requestPage();
+	//! Всплывающее сообщение
+	void showMessage(QString msg, int timeout = 3000);
 
 private slots:
 	void on_setServer(QString server);
@@ -59,6 +52,8 @@ private slots:
 	void on_createPlaylist(int parent_id);
 	//! Удаление записи в списке
 	void on_destroyPlaylist(int playlist_id);
+	//! Переименовать избранное
+	void on_renamePlaylist(int playlist_id);
 
 	//! Результат попытки подключения к станции
 	void on_media_status(Station station, QString url, bool ok);

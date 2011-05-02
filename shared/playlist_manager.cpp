@@ -37,6 +37,14 @@ void PlaylistManager::process(QVariant json, Playlist::Action action)
 			}
 		}
 		break;
+	case Playlist::Rename:
+		{
+			int id = update(json.toMap());
+			Playlist pl = playlist(id);
+			// Обычный элемент
+			emit sig_update(pl);
+		}
+		break;
 	case Playlist::Destroy:
 		{
 			QVariantMap var = json.toMap();
@@ -71,6 +79,21 @@ int PlaylistManager::create(const QVariantMap &var)
 			// Рекурсивно создаст для всей иерархии
 			create(child_var.toMap());
 		}
+
+		// Вернуть только ID;
+		return pl.id();
+	}
+	return 0; // Ошибка
+}
+
+int PlaylistManager::update(const QVariantMap &var)
+{
+	Playlist pl;
+	pl.data = var.value("playlist").toMap();
+	if (pl.id() > 0)
+	{
+		// Обновить только атрибуты, без children
+		m_playlists[pl.id()].data = pl.data;
 
 		// Вернуть только ID;
 		return pl.id();

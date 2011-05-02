@@ -19,7 +19,8 @@ struct Playlist
 		UnknownAction = 0, // Ошибка
 		AllList   = 1,  // Весь список
 		Create    = 2,  // Добавить
-		Destroy   = 3   // Удалить
+		Rename    = 3,  // Удалить
+		Destroy   = 4   // Удалить
 	};
 
 	//! Стандартные конструкторы и оператор

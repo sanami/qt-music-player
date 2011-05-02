@@ -47,6 +47,8 @@ public:
 	void destroyPlaylist(int playlist_id);
 	//! Создать новый плейлист
 	void createPlaylist(QString name, int parent_id);
+	//! Переименовать список
+	void renamePlaylist(int playlist_id, QString name);
 
 public slots:
 	//! Список городов в стране

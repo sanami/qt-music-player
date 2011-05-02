@@ -52,6 +52,11 @@
     <string>Create</string>
    </property>
   </action>
+  <action name="actionRenamePlaylist">
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

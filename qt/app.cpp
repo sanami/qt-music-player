@@ -1,6 +1,3 @@
-#ifdef Q_WS_MAEMO_5
-#include <QMaemo5InformationBox>
-#endif
 #include "app.h"
 #include "app_window.h"
 #include "web.h"
@@ -19,7 +16,6 @@ App::App()
 	// Веб-запросы
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
-	connect(m_web, SIGNAL(sig_busy(bool)), SLOT(showBusy(bool)));
 
 	// Плеер
 	m_media = new Media();
@@ -31,6 +27,7 @@ App::App()
 	// Окно приложения
 	m_app_window = new AppWindow();
 	connect(m_app_window, SIGNAL(sig_showLogPage()), SLOT(on_actionLog_triggered()));
+	connect(m_web, SIGNAL(sig_busy(bool)), m_app_window, SLOT(showBusy(bool)));
 
 	// Отладочные сообщения
 	m_log_page = new LogPage(m_app_window);
@@ -62,10 +59,12 @@ App::App()
 	connect(m_playlist_page, SIGNAL(sig_openPlaylist(int)), SLOT(on_openPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_createPlaylist(int)), SLOT(on_createPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), SLOT(on_destroyPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_renamePlaylist(int)), SLOT(on_renamePlaylist(int)));
 	connect(m_manager, SIGNAL(sig_clear()), m_playlist_page, SLOT(clearItems()));
 	connect(m_manager, SIGNAL(sig_show(Playlist)), m_playlist_page, SLOT(showPlaylist(Playlist)));
 	connect(m_manager, SIGNAL(sig_add(Playlist)), m_playlist_page, SLOT(addItem(Playlist)));
 	connect(m_manager, SIGNAL(sig_remove(int)), m_playlist_page, SLOT(removeItem(int)));
+	connect(m_manager, SIGNAL(sig_update(Playlist)), m_playlist_page, SLOT(updateItem(Playlist)));
 	m_app_window->addPage(m_playlist_page);
 
 	// Показать FilterPage
@@ -98,34 +97,18 @@ App::~App()
 	delete m_app_window;
 }
 
-void App::showBusy(bool busy)
-{
-#ifdef Q_WS_MAEMO_5
-	// Индикатор работы
-	m_app_window->setAttribute(Qt::WA_Maemo5ShowProgressIndicator, busy);
-#else
-	Q_UNUSED(busy);
-#endif
-}
-
 void App::showMessage(QString msg, int timeout)
 {
-#ifdef Q_WS_MAEMO_5
-	QMaemo5InformationBox::information(m_app_window, msg, timeout);
-#else
-	m_app_window->setWindowTitle("Heroku " + msg);
-	QTimer::singleShot(timeout+500, this, SLOT(clearMessage()));
-#endif
-}
-
-void App::clearMessage()
-{
-	m_app_window->setWindowTitle("Heroku");
+	m_app_window->showMessage(msg, timeout);
 }
 
 void App::on_web_finished(Task *task)
 {
 	qDebug() << Q_FUNC_INFO << task->type << task->ok << task->json_ok;
+#ifdef _DEBUG
+	qDebug() << "*****************************************************************************";
+	qDebug() << task->result;
+#endif
 
 	if (task->ok)
 	{
@@ -135,17 +118,13 @@ void App::on_web_finished(Task *task)
 			{
 				QVariant root_playlist = task->json.toMap()["root"];
 				m_manager->process(root_playlist, Playlist::AllList);
-//				m_playlist_page->showPlaylist(Playlist(root_playlist));
 			}
 			// Список стран в фильтр
 			m_web->requestCountries();
 			// Список жанров в фильтр
 			m_web->requestGenres();
 			break;
-//		case Task::Playlist:
-//			m_manager->process(task->json);
-//			m_playlist_page->showPlaylist(Playlist(task->json));
-//			break;
+		case Task::Playlist:
 		case Task::PlaylistCreate:
 			m_manager->process(task->json, Playlist::Create);
 			showMessage("OK", 500);
@@ -154,12 +133,14 @@ void App::on_web_finished(Task *task)
 			m_manager->process(task->json, Playlist::Destroy);
 			showMessage("OK", 500);
 			break;
+		case Task::PlaylistRename:
+			m_manager->process(task->json, Playlist::Rename);
+			showMessage("OK", 500);
+			break;
 		case Task::Station:
 			// Данные одной станции
-			{
-				m_station_view->setStation(Station(task->json));
-				m_station_view->show();
-			}
+			m_station_view->setStation(Station(task->json));
+			m_station_view->show();
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
@@ -181,7 +162,6 @@ void App::on_web_finished(Task *task)
 					m_app_window->showPage(m_stations_page);
 				}
 			}
-
 			break;
 		case Task::Countries:
 			// Список стран
@@ -207,12 +187,12 @@ void App::on_web_finished(Task *task)
 		{
 		case Task::Cookies:
 			// Ошибка подключения к серверу
-			qDebug() << "Bad server:" << m_web->server();
+			showMessage(QString("Bad server: %1").arg(m_web->server()));
 			break;
 		default:
 			qDebug() << "Error code:" << task->error_code << "for task type:" << task->type;
+			showMessage("FAIL", 500);
 		}
-		showMessage("FAIL", 500);
 	}
 
 	delete task;
@@ -332,5 +312,27 @@ void App::on_destroyPlaylist(int playlist_id)
 		{
 			m_web->destroyPlaylist(playlist_id);
 		}
+	}
+}
+
+void App::on_renamePlaylist(int playlist_id)
+{
+	Playlist pl = m_manager->playlist(playlist_id);
+	switch (pl.type())
+	{
+	case Playlist::Favorites:
+		{
+			// Имя каталога
+			QString name = QInputDialog::getText(m_app_window, "Rename playlist", "Name:", QLineEdit::Normal, pl.name());
+			if (!name.isEmpty())
+			{
+				// Отправить запрос на переименование
+				m_web->renamePlaylist(playlist_id, name);
+			}
+		}
+		break;
+	default:
+		// Нельзя
+		break;
 	}
 }

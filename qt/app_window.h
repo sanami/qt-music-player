@@ -17,6 +17,15 @@ public:
 	void showPage(QWidget *page);
 	QWidget *currentPage() const;
 
+public slots:
+	//! Индикатор загрузки
+	void showBusy(bool busy);
+
+	//! Всплывающее сообщение
+	void showMessage(QString msg, int timeout = 3000);
+	//! Удалить сообщение
+	void clearMessage();
+
 signals:
 	void sig_showLogPage();
 
@@ -30,10 +39,13 @@ private:
 
 private slots:
 	void on_trayActivated(QSystemTrayIcon::ActivationReason reason);
+	void on_busyAnimation();
 
 private:
     Ui::AppWindow *ui;
 
 	QSystemTrayIcon m_tray;
 	QMenu m_trayMenu;
+
+	QTimer *timer;
 };

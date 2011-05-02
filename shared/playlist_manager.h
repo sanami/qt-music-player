@@ -64,6 +64,7 @@ signals:
 	void sig_show(Playlist pl);
 	void sig_add(Playlist pl);
 	void sig_remove(int id);
+	void sig_update(Playlist pl);
 
 private:
 	//! Создать плейлист из JSON данных
@@ -71,6 +72,9 @@ private:
 
 	//! Удалить плейлист из JSON данных
 	void destroy(int id);
+
+	//! Обновить данные плейлиста из JSON данных
+	int update(const QVariantMap &var);
 
 private:
 	QMap<int, Playlist> m_playlists; //! Глобальное хранилище

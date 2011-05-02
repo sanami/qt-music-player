@@ -73,6 +73,20 @@ void Web::destroyPlaylist(int playlist_id)
 	request(Task::PlaylistDestroy, url, Task::Delete);
 }
 
+void Web::renamePlaylist(int playlist_id, QString name)
+{
+	QString url = QString("%1/playlists/%2.json").arg(m_server).arg(playlist_id);
+
+	QVariantMap params;
+	{
+		QVariantMap e;
+		e["name"] = name;
+		params["playlist"] = e;
+	}
+
+	request(Task::PlaylistRename, url, Task::Put, params);
+}
+
 void Web::createPlaylist(QString name, int parent_id)
 {
 	QString url = QString("%1/playlists.json").arg(m_server);
@@ -172,6 +186,13 @@ Task *Web::request(Task::Type type, QUrl url, Task::Op op, QVariantMap params)
 		Q_ASSERT( !params.isEmpty() );
 		reply = m_network->post(request, toParams(params));
 		break;
+	case Task::Put:
+		Q_ASSERT( !params.isEmpty() );
+		//TODO Не работает
+		//reply = m_network->put(request, toParams(params));
+		params["_method"]="PUT";
+		reply = m_network->post(request, toParams(params));
+		break;
 	case Task::Delete:
 		reply = m_network->deleteResource(request);
 		break;
@@ -217,7 +238,9 @@ QByteArray Web::toParams(QVariantMap params) const
 		}
 	}
 
-	return args.join("&").toUtf8();
+	QByteArray result = args.join("&").toUtf8();
+	qDebug() << Q_FUNC_INFO << result;
+	return result;
 }
 
 void Web::on_replyFinished(QNetworkReply *reply)

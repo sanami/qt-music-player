@@ -6,8 +6,8 @@
 //! Задача на выполнение
 struct Task
 {
-	enum Op {Get, Post, Delete};
-	enum Type {Unknown, Cookies, Station, Stations, Countries, Cities, Genres, Playlist, PlaylistCreate, PlaylistDestroy};
+	enum Op {Get, Post, Put, Delete};
+	enum Type {Unknown, Cookies, Station, Stations, Countries, Cities, Genres, Playlist, PlaylistCreate, PlaylistRename, PlaylistDestroy};
 
 	Type type; //!< Тип запроса
 	QUrl url;           //!< Адрес запроса

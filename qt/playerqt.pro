@@ -7,7 +7,7 @@
 TEMPLATE = app
 TARGET = playerqt
 
-QT       += core gui network phonon maemo5
+QT += core gui network phonon maemo5
 CONFIG += precompile_header mobility
 MOBILITY = 
 
@@ -19,6 +19,8 @@ INCLUDEPATH += ../shared
 
 # Use Precompiled headers (PCH)
 PRECOMPILED_HEADER = pch.h
+
+debug: DEFINES += _DEBUG
 
 SOURCES += main.cpp\
         app.cpp \

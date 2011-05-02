@@ -1,3 +1,6 @@
+#ifdef Q_WS_MAEMO_5
+#include <QMaemo5InformationBox>
+#endif
 #include "app_window.h"
 #include "ui_app_window.h"
 
@@ -12,13 +15,19 @@ AppWindow::AppWindow(QWidget *parent)
 #endif
 	ui->setupUi(this);
 
+#ifdef Q_WS_MAEMO_5
 	statusBar()->hide();
+#endif
 	menuBar()->addAction(ui->actionLog);
 
 	initTray();
 
 	connect(ui->actionLog, SIGNAL(triggered()), SIGNAL(sig_showLogPage()));
 	connect(ui->actionExit, SIGNAL(triggered()), SLOT(close()));
+
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), SLOT(on_busyAnimation()));
+	timer->setInterval(100);
 
 #if defined(Q_WS_S60)
 	showMaximized();
@@ -45,6 +54,46 @@ void AppWindow::showPage(QWidget *page)
 QWidget *AppWindow::currentPage() const
 {
 	ui->tabWidget->currentWidget();
+}
+
+void AppWindow::showBusy(bool busy)
+{
+#ifdef Q_WS_MAEMO_5
+	// Индикатор работы
+	setAttribute(Qt::WA_Maemo5ShowProgressIndicator, busy);
+#else
+	if (busy)
+	{
+		timer->start();
+	}
+	else
+	{
+		timer->stop();
+		setWindowTitle("Heroku");
+	}
+#endif
+}
+
+void AppWindow::showMessage(QString msg, int timeout)
+{
+#ifdef Q_WS_MAEMO_5
+	QMaemo5InformationBox::information(this, msg, timeout);
+#else
+	statusBar()->showMessage(msg, timeout+500);
+#endif
+}
+
+void AppWindow::clearMessage()
+{
+	statusBar()->clearMessage();
+}
+
+void AppWindow::on_busyAnimation()
+{
+	static QString anim = "|/-\\";
+	static int i = 0;
+	setWindowTitle(QString("Heroku %1").arg(anim[i]));
+	i = (i + 1) % anim.length();
 }
 
 void AppWindow::initTray()

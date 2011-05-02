@@ -22,6 +22,9 @@ public slots:
 	//! Добавить элемент в список
 	void addItem(Playlist pl);
 
+	//! Обновить элемент в список
+	void updateItem(Playlist pl);
+
 	//! Удалить элемент из списка
 	void removeItem(int playlist_id);
 
@@ -38,6 +41,9 @@ signals:
 	//! Удалить список на сервере
 	void sig_destroyPlaylist(int playlist_id);
 
+	//! Переименовать плейлист
+	void sig_renamePlaylist(int playlist_id);
+
 private slots:
 	//! Двойной клик на запись в списке
 	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
@@ -48,9 +54,15 @@ private slots:
 	//! Создать новый плейлист
 	void on_actionCreatePlaylist_triggered();
 
+	//! Переименовать плейлист
+	void on_actionRenamePlaylist_triggered();
+
 private:
 	//! Найти запись или NULL
-	QListWidgetItem *findItem(int playlist_id);
+	QListWidgetItem *findItem(int playlist_id) const;
+
+	//! Выбранный плейлист, или 0
+	int currentPlaylist() const;
 
 private:
     Ui::PlaylistPage *ui;
