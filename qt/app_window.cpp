@@ -18,16 +18,19 @@ AppWindow::AppWindow(QWidget *parent)
 #ifdef Q_WS_MAEMO_5
 	statusBar()->hide();
 #endif
+	menuBar()->addAction(ui->actionOptions);
 	menuBar()->addAction(ui->actionLog);
 
-	initTray();
-
 	connect(ui->actionLog, SIGNAL(triggered()), SIGNAL(sig_showLogPage()));
+	connect(ui->actionOptions, SIGNAL(triggered()), SIGNAL(sig_showOptionsPage()));
 	connect(ui->actionExit, SIGNAL(triggered()), SLOT(close()));
 
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), SLOT(on_busyAnimation()));
-	timer->setInterval(100);
+#ifndef Q_WS_MAEMO_5
+	initTray();
+
+	connect(&m_busy_timer, SIGNAL(timeout()), SLOT(on_busyAnimation()));
+	m_busy_timer.setInterval(100);
+#endif
 
 #if defined(Q_WS_S60)
 	showMaximized();
@@ -64,11 +67,11 @@ void AppWindow::showBusy(bool busy)
 #else
 	if (busy)
 	{
-		timer->start();
+		m_busy_timer.start();
 	}
 	else
 	{
-		timer->stop();
+		m_busy_timer.stop();
 		setWindowTitle("Heroku");
 	}
 #endif

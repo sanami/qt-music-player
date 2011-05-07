@@ -14,6 +14,7 @@ PlayerPage::PlayerPage(Media *media, QWidget *parent)
 #endif
 
 	connect(m_media, SIGNAL(sig_messages(QString)), SLOT(on_media_messages(QString)));
+	connect(m_media, SIGNAL(sig_volume(int)), SLOT(on_media_volume(int)));
 }
 
 PlayerPage::~PlayerPage()
@@ -49,4 +50,16 @@ void PlayerPage::on_pushButton_close_clicked()
 void PlayerPage::on_station_clicked()
 {
 	emit sig_showStationPage(m_station);
+}
+
+void PlayerPage::on_media_volume(int value)
+{
+	ui->volume->blockSignals(true);
+	ui->volume->setValue(value);
+	ui->volume->blockSignals(false);
+}
+
+void PlayerPage::on_volume_valueChanged(int value)
+{
+	m_media->set_volume(value);
 }

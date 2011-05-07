@@ -1,17 +1,11 @@
 #include "filter_page.h"
 #include "ui_filter_page.h"
 
-FilterPage::FilterPage(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::FilterPage)
+FilterPage::FilterPage(QWidget *parent)
+	: QWidget(parent)
+	, ui(new Ui::FilterPage)
 {
     ui->setupUi(this);
-
-	int server_index = ui->comboBox_server->findText(m_settings.server());
-	if (server_index >= 0)
-	{
-		ui->comboBox_server->setCurrentIndex(server_index);
-	}
 
 	ui->comboBox_search->addItem("stac");
 }
@@ -19,11 +13,6 @@ FilterPage::FilterPage(QWidget *parent) :
 FilterPage::~FilterPage()
 {
     delete ui;
-}
-
-QString FilterPage::server() const
-{
-	return ui->comboBox_server->currentText();
 }
 
 void FilterPage::showCountries(Location::List countries)
@@ -64,12 +53,6 @@ void FilterPage::showGenres(Genre::List genres)
 		// С привязкой к id
 		ui->comboBox_genre->addItem(g.name(), g.id());
 	}
-}
-
-void FilterPage::on_comboBox_server_currentIndexChanged(QString server)
-{
-	m_settings.setServer(server);
-	emit sig_setServer(server);
 }
 
 void FilterPage::on_comboBox_country_currentIndexChanged(int index)

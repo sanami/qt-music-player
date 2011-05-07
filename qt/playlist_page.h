@@ -57,6 +57,8 @@ private slots:
 	//! Переименовать плейлист
 	void on_actionRenamePlaylist_triggered();
 
+	void on_up_clicked();
+
 private:
 	//! Найти запись или NULL
 	QListWidgetItem *findItem(int playlist_id) const;
@@ -68,4 +70,5 @@ private:
     Ui::PlaylistPage *ui;
 
 	int m_current_playlist_id; //!< Текущий список
+	int m_parent_playlist_id;
 };

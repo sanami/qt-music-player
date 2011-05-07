@@ -123,6 +123,14 @@ void MPlayerControl::on_error(QProcess::ProcessError error)
 void MPlayerControl::on_stateChanged(QProcess::ProcessState newState)
 {
     qDebug() << Q_FUNC_INFO << newState;
+
+	if (newState == QProcess::Running)
+	{
+//		qDebug() << "(((((((((((((((((((((((((((((";
+//		cmd("get_property volume");
+//		qDebug() << m_proc->readAllStandardOutput();
+//		volume(50);
+	}
 }
 
 void MPlayerControl::on_readyReadStandardError()
@@ -141,7 +149,7 @@ void MPlayerControl::on_readyReadStandardOutput()
         QString line = m_proc->readLine().trimmed();
         //if (!line.startsWith("A:") && !line.startsWith("V:"))
         {
-            QString name = line.section("=",0,0);
+			QString name = line.section("=",0,0).toUpper();
             QString value = line.section("=",1,1);
             if (name == "ANS_TIME_POSITION")
             {
@@ -151,6 +159,10 @@ void MPlayerControl::on_readyReadStandardOutput()
             {
                 emit sig_videoLength(value.toFloat());
             }
+			else if (name == "ANS_VOLUME")
+			{
+				emit sig_volume((int)value.toFloat());
+			}
             else
             {
 				processOutput(line);
@@ -175,6 +187,12 @@ void MPlayerControl::on_updateStatus()
 {
 //	cmd("get_time_pos", false);
 //	cmd("get_time_length", false);
+}
+
+void MPlayerControl::volume(int value)
+{
+	cmd(QString("volume %1 1").arg(value));
+//	cmd("get_property volume");
 }
 
 void MPlayerControl::seek(int pos)
@@ -211,7 +229,7 @@ void MPlayerControl::startProcess(QString url)
 //	arguments << "-cache" << "256" << "-cache-min" << "50"; # Медленно
 	arguments << "-identify";
 	arguments << "-novideo";
-	arguments << "-ao" << "pulse";
+//	arguments << "-ao" << "pulse";
 	arguments << "-loop" << "1"; // Пробовать только один раз
 
 	//arguments << "-wid" << m_winId;
@@ -267,6 +285,8 @@ void MPlayerControl::processOutput(QString line)
 	{
 		qDebug() << "+++";
 		emit sig_urlStatus(m_current_url, true);
+
+		cmd("get_property volume");
 	}
 
 	emit sig_videoOutput(line);

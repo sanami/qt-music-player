@@ -4,6 +4,7 @@
 #include <QString>
 #include "task.h"
 #include "data.h"
+#include "web_proxy.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -20,8 +21,11 @@ class Web : public QObject
 	friend class Test;
 
 public:
-	Web();
+	Web(QObject *parent = 0);
 	~Web();
+
+	//! Установка прокси
+	void setProxy(WebProxy proxy);
 
 	//! Сервер для отправки запросов
 	QString server() const { return m_server; }

@@ -2,6 +2,7 @@
 #include "task.h"
 #include "data.h"
 #include "playlist.h"
+#include "settings.h"
 
 class AppWindow;
 class StationsPage;
@@ -10,6 +11,7 @@ class InfoPage;
 class PlayerPage;
 class PlaylistPage;
 class LogPage;
+class OptionsPage;
 class Web;
 class Media;
 class PlaylistManager;
@@ -29,11 +31,16 @@ private:
 	void showMessage(QString msg, int timeout = 3000);
 
 private slots:
-	void on_setServer(QString server);
+	//! Применить настройки
+	void on_applySettings();
+
+	//! Отправить запрос на страницу результатов поиска
 	void on_requestPage(int page);
 
 	//! Показать окно с детальным логом
-	void on_actionLog_triggered();
+	void on_showLogPage();
+	//! Показать окно настроек
+	void on_showOptionsPage();
 
 	//! Получен результат запроса
 	void on_web_finished(Task *task);
@@ -59,6 +66,7 @@ private slots:
 	void on_media_status(Station station, QString url, bool ok);
 
 private:
+	Settings m_settings; //!< Настройки
 	Web *m_web; //!< Веб запросы
 	Media *m_media; //!< Плеер
 	PlaylistManager *m_manager; //!< Менеджер списками избранных/истории
@@ -70,4 +78,5 @@ private:
 	PlayerPage *m_player_page; //!< Страница плеера
 	PlaylistPage *m_playlist_page; //!< Списки
 	LogPage *m_log_page; //!< Страница сообщений
+	OptionsPage *m_options_page; //!< Страница настроек
 };

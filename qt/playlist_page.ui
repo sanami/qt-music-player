@@ -15,13 +15,34 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
+    <widget class="QPushButton" name="up">
+     <property name="text">
+      <string>..</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
     <widget class="QPushButton" name="create">
      <property name="text">
       <string>Create</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
+   <item row="1" column="0" colspan="5">
+    <widget class="QListWidget" name="playlist">
+     <property name="contextMenuPolicy">
+      <enum>Qt::ActionsContextMenu</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QLabel" name="name">
+     <property name="text">
+      <string>[name]</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -33,13 +54,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QListWidget" name="playlist">
-     <property name="contextMenuPolicy">
-      <enum>Qt::ActionsContextMenu</enum>
-     </property>
-    </widget>
    </item>
   </layout>
   <action name="actionDeletePlaylist">

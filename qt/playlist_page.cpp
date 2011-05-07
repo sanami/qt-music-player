@@ -27,20 +27,30 @@ void PlaylistPage::clearItems()
 {
 	ui->playlist->clear();
 	m_current_playlist_id = 0;
+
+	ui->name->clear();
+	ui->up->setEnabled(false);
+	ui->create->setEnabled(false);
 }
 
 void PlaylistPage::showPlaylist(Playlist pl)
 {
 	m_current_playlist_id = pl.id();
+	m_parent_playlist_id = pl.parent_id();
+
+	ui->name->setText("["+pl.name()+"]");
+
 	// Переход наверх
-	int parent_id = pl.parent_id();
-	if (parent_id > 0)
-	{
-		QString name = "[..]";
-		QListWidgetItem *it = new QListWidgetItem(name);
-		it->setData(PlaylistRole, parent_id);
-		ui->playlist->addItem(it);
-	}
+	//	if (m_parent_playlist_id > 0)
+	//	{
+	//		QString name = "[..]";
+	//		QListWidgetItem *it = new QListWidgetItem(name);
+	//		it->setData(PlaylistRole, m_parent_playlist_id);
+	//		ui->playlist->addItem(it);
+	//	}
+	ui->up->setEnabled(m_parent_playlist_id > 0);
+
+	ui->create->setEnabled(pl.type() == Playlist::Favorites || pl.type() == Playlist::Root);
 }
 
 void PlaylistPage::addItem(Playlist pl)
@@ -152,4 +162,9 @@ void PlaylistPage::on_actionRenamePlaylist_triggered()
 	{
 		emit sig_renamePlaylist(playlist_id);
 	}
+}
+
+void PlaylistPage::on_up_clicked()
+{
+	emit sig_openPlaylist(m_parent_playlist_id);
 }

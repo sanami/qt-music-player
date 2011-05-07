@@ -9,38 +9,10 @@
 #include "cookie_jar.h"
 #include "playlist.h"
 
-Web::Web()
-	: QObject(NULL)
-	, m_server("http://192.168.2.14:3000") // Для разработки
+Web::Web(QObject *parent)
+	: QObject(parent)
 {
 	m_json_parser = new QJson::Parser();
-
-#ifdef Q_WS_WIN
-	// Только под Windows
-	QNetworkProxyFactory::setUseSystemConfiguration(true);
-#else
-	// Брать из http_proxy=http://nokes.nokia.com:8080/
-	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-	QString httpProxy = env.value("http_proxy");
-	if (httpProxy.isEmpty())
-	{
-		httpProxy = env.value("HTTP_PROXY");
-	}
-	if (!httpProxy.isEmpty())
-	{
-		qDebug() << Q_FUNC_INFO << httpProxy;
-		QUrl url(httpProxy);
-
-		QNetworkProxy proxy;
-		proxy.setType(QNetworkProxy::HttpProxy);
-		proxy.setHostName(url.host());
-		proxy.setPort(url.port());
-		proxy.setUser(url.userName());
-		proxy.setPassword(url.password());
-
-		QNetworkProxy::setApplicationProxy(proxy);
-	}
-#endif
 
 	m_network = new QNetworkAccessManager(this);
 	connect(m_network, SIGNAL(finished(QNetworkReply *)), this, SLOT(on_replyFinished(QNetworkReply *)));
@@ -52,6 +24,50 @@ Web::~Web()
 {
 	delete m_json_parser;
 	delete m_network;
+//TODO	qDeleteAll(m_reply);
+}
+
+void Web::setProxy(WebProxy p)
+{
+	switch(p.type)
+	{
+		case WebProxy::ManualProxy:
+		{
+			QNetworkProxy proxy;
+			proxy.setType(QNetworkProxy::HttpProxy);
+			proxy.setHostName(p.url.host());
+			proxy.setPort(p.url.port());
+			proxy.setUser(p.url.userName());
+			proxy.setPassword(p.url.password());
+			m_network->setProxy(proxy);
+		}
+		break;
+	case WebProxy::AutoProxy:
+#ifdef Q_WS_WIN
+		//TODO Только под Windows
+		QNetworkProxyFactory::setUseSystemConfiguration(true);
+		m_network->setProxy(QNetworkProxy(QNetworkProxy::DefaultProxy));
+#else
+		{
+			QUrl url = WebProxy::autoProxy();
+			if (url.isValid())
+			{
+				QNetworkProxy proxy;
+				proxy.setType(QNetworkProxy::HttpProxy);
+				proxy.setHostName(url.host());
+				proxy.setPort(url.port());
+				proxy.setUser(url.userName());
+				proxy.setPassword(url.password());
+				m_network->setProxy(proxy);
+			}
+		}
+#endif
+		break;
+	case WebProxy::NoProxy:
+		m_network->setProxy(QNetworkProxy(QNetworkProxy::NoProxy));
+		break;
+	}
+
 }
 
 void Web::requestCookies()

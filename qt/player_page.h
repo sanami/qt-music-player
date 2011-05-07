@@ -30,8 +30,14 @@ private slots:
 	//! Сообщения от плееров
 	void on_media_messages(QString str);
 
+	//! Значение громкости от плеера
+	void on_media_volume(int value);
+
+	//! Изменить громкость
+	void on_volume_valueChanged(int value);
+
 private:
 	Ui::PlayerPage *ui;
-	Media *m_media;
+	Media *m_media; //!< Плеер из App
 	Station m_station; //!< Текущая станция
 };

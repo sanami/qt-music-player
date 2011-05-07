@@ -22,7 +22,8 @@ public:
     void open(QString url = QString());
     void play(bool on);
     void mute(bool on);
-    void seek(int pos);
+	void volume(int value);
+	void seek(int pos);
     void cmd(QString str, bool show = true);
 
 	//! Остановить процесс плеера
@@ -33,6 +34,7 @@ signals:
 	void sig_videoLength(float length);
 	void sig_videoOutput(QString text);
 	void sig_urlStatus(QString url, bool ok);
+	void sig_volume(int value);
 
 private:
     void setPlayState(PlayState state);

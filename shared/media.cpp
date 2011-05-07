@@ -10,6 +10,7 @@ Media::Media(QObject *parent)
 	m_mplayer = new MPlayerControl(this);
 	connect(m_mplayer, SIGNAL(sig_videoOutput(QString)), SIGNAL(sig_messages(QString)));
 	connect(m_mplayer, SIGNAL(sig_urlStatus(QString, bool)), SLOT(on_mplayer_status(QString, bool)));
+	connect(m_mplayer, SIGNAL(sig_volume(int)), SIGNAL(sig_volume(int)));
 }
 
 Media::~Media()
@@ -44,4 +45,9 @@ void Media::close_player()
 void Media::on_mplayer_status(QString url, bool ok)
 {
 	emit sig_status(m_stations[url], url, ok);
+}
+
+void Media::set_volume(int value)
+{
+	m_mplayer->volume(value);
 }

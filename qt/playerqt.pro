@@ -44,7 +44,9 @@ SOURCES += main.cpp\
     filter_page.cpp \
     playlist_page.cpp \
     ../shared/playlist_manager.cpp \
-    app_window.cpp
+    app_window.cpp \
+    options_page.cpp \
+    ../shared/web_proxy.cpp
 
 HEADERS  += app.h \
     info_page.h \
@@ -77,7 +79,9 @@ HEADERS  += app.h \
     ../shared/data.h \
     ../shared/playlist_manager.h \
     ../shared/playlist.h \
-    app_window.h
+    app_window.h \
+    options_page.h \
+    ../shared/web_proxy.h
 
 FORMS    += \
     info_page.ui \
@@ -86,7 +90,8 @@ FORMS    += \
     stations_page.ui \
     filter_page.ui \
     playlist_page.ui \
-    app_window.ui
+    app_window.ui \
+    options_page.ui
 
 symbian {
     TARGET.UID3 = 0xe7928591

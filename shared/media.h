@@ -21,12 +21,18 @@ public:
 	//! Закрыть плеер
 	void close_player();
 
+	//! Изменить громкость
+	void set_volume(int value);
+
 signals:
 	//! Сообщения от плееров
 	void sig_messages(QString str);
 
 	//! Результат открытия аудиопотока
 	void sig_status(Station station, QString url, bool ok);
+
+	//! Громкость
+	void sig_volume(int value);
 
 private slots:
 	//! Обработка сообщений от плеера

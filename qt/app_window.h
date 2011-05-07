@@ -28,6 +28,7 @@ public slots:
 
 signals:
 	void sig_showLogPage();
+	void sig_showOptionsPage();
 
 protected:
 #ifdef Q_WS_WIN
@@ -46,6 +47,5 @@ private:
 
 	QSystemTrayIcon m_tray;
 	QMenu m_trayMenu;
-
-	QTimer *timer;
+	QTimer m_busy_timer;
 };
