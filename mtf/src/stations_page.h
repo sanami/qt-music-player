@@ -25,7 +25,9 @@ signals:
 private slots:
 	//! Поворот экрана
 	void on_orientationChanged(M::Orientation orientation);
+	//! Предыдущая страница
 	void on_prevPage_clicked();
+	//! Следующая страница
 	void on_nextPage_clicked();
 	//! Клик на элемент списка
 	void on_list_itemClicked(const QModelIndex &index);
@@ -40,8 +42,9 @@ private:
 	void requestPage();
 
 private:
+	struct StationsPageUi *ui;
+
 	StationsModel *m_model; //!< Модель для отображения
-	MList *m_list; //!< Список станций
 
 	int m_current_page;   //!< Текущая страница
 	int m_num_pages;      //!< Общее кол-во страниц

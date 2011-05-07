@@ -1,9 +1,9 @@
-#include "info_page.h"
-#include "ui_info_page.h"
+#include "station_page.h"
+#include "ui_station_page.h"
 
-InfoPage::InfoPage(QWidget *parent)
+StationPage::StationPage(QWidget *parent)
 	: QWidget(parent, Qt::Window)
-	, ui(new Ui::InfoPage)
+	, ui(new Ui::StationPage)
 {
     ui->setupUi(this);
 
@@ -14,12 +14,12 @@ InfoPage::InfoPage(QWidget *parent)
 	hide();
 }
 
-InfoPage::~InfoPage()
+StationPage::~StationPage()
 {
     delete ui;
 }
 
-void InfoPage::setStation(Station station)
+void StationPage::setStation(Station station)
 {
 	// Сохранить данные
 	m_station = station;
@@ -53,19 +53,19 @@ void InfoPage::setStation(Station station)
 	ui->label->setText(info.join("\n"));
 }
 
-void InfoPage::on_streams_itemDoubleClicked(QTreeWidgetItem* it)
+void StationPage::on_streams_itemDoubleClicked(QTreeWidgetItem* it)
 {
 	QString url = it->text(1); // URL в колонке
 	emit sig_openStream(m_station, url);
 }
 
-void InfoPage::on_media_messages(QString str)
+void StationPage::on_media_messages(QString str)
 {
 	ui->messages->appendPlainText(str);
 	ui->messages->ensureCursorVisible();
 }
 
-void InfoPage::on_addToFavorites_clicked()
+void StationPage::on_addToFavorites_clicked()
 {
 	emit sig_addToFavorites(m_station);
 }

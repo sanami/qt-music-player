@@ -54,7 +54,8 @@ void StationPage::setStation(Station station)
 	foreach(Stream stream, streams)
 	{
 		// Информация об аудиопотоке
-		MButton *btn = new MButton(stream.url());
+		MButton *btn = new MButton(stream.bitrate() + " " + stream.url());
+		btn->setProperty("url", stream.url());
 		m_streams->addButton(btn);
 		m_streams_layout->addItem(btn);
 	}
@@ -68,7 +69,8 @@ void StationPage::setStation(Station station)
 
 void StationPage::on_streams_clicked(MButton *btn)
 {
-	QString url = btn->text(); // URL текстом
+//	QString url = btn->text(); // URL текстом
+	QString url = btn->property("url").toString();
 	emit sig_openStream(m_station, url);
 }
 

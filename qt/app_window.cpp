@@ -4,9 +4,8 @@
 #include "app_window.h"
 #include "ui_app_window.h"
 
-AppWindow::AppWindow(QWidget *parent)
-	: QMainWindow(parent)
-	, ui(new Ui::AppWindow)
+AppWindow::AppWindow()
+	: ui(new Ui::AppWindow)
 {
 #ifdef Q_WS_MAEMO_5
 //	setAttribute(Qt::WA_Maemo5AutoOrientation, true);
@@ -18,6 +17,7 @@ AppWindow::AppWindow(QWidget *parent)
 #ifdef Q_WS_MAEMO_5
 	statusBar()->hide();
 #endif
+	// Пункты меню
 	menuBar()->addAction(ui->actionOptions);
 	menuBar()->addAction(ui->actionLog);
 

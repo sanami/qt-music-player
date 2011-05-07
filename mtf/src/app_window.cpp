@@ -13,6 +13,12 @@ AppWindow::AppWindow()
 
 	// Пункты меню
 	{
+		MAction *action = new MAction("Options", this);
+		action->setLocation(MAction::ApplicationMenuLocation);
+		connect(action, SIGNAL(triggered()), SIGNAL(sig_showOptionsPage()));
+		addAction(action);
+	}
+	{
 		MAction *action = new MAction("Log", this);
 		action->setLocation(MAction::ApplicationMenuLocation);
 		connect(action, SIGNAL(triggered()), SIGNAL(sig_showLogPage()));
@@ -24,6 +30,12 @@ AppWindow::AppWindow()
 		connect(action, SIGNAL(triggered()), SLOT(close()));
 		addAction(action);
 	}
+
+	show();
+}
+
+AppWindow::~AppWindow()
+{
 }
 
 void AppWindow::addPage(MApplicationPage *page)
@@ -35,6 +47,36 @@ void AppWindow::addPage(MApplicationPage *page)
 	addAction(action);
 
 	m_pages[action] = page;
+}
+
+void AppWindow::showPage(MApplicationPage *page)
+{
+	page->appear(this);
+}
+
+void AppWindow::showBusy(bool busy)
+{
+	Q_UNUSED(busy);
+	//TODO индикатор рабочих запросов
+	//MProgressIndicator *spinner = new MProgressIndicator(NULL, MProgressIndicator::spinnerType);
+	//spinner->setUnknownDuration(true);
+}
+
+void AppWindow::showMessage(QString msg, int timeout)
+{
+	Q_UNUSED(timeout);
+
+	MBanner *infoBanner = new MBanner();
+	infoBanner->setStyleName("InformationBanner");
+	infoBanner->setTitle(msg);
+	infoBanner->appear(this, MSceneWindow::DestroyWhenDone);
+	// Не работает, делается через CSS для #InformationBanner
+	//infoBanner->style()->setProperty("disappear-timeout", 100);
+}
+
+void AppWindow::clearMessage()
+{
+//	statusBar()->clearMessage();
 }
 
 void AppWindow::showPageForAction(QAction *action)

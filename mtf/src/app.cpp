@@ -3,102 +3,111 @@
 #include "web.h"
 #include "media.h"
 #include "logger.h"
-#include "log_page.h"
+#include "playlist_manager.h"
 #include "stations_page.h"
 #include "station_page.h"
 #include "filter_page.h"
 #include "player_page.h"
+#include "log_page.h"
+#include "options_page.h"
+#include "playlist_page.h"
 
-App::App(QObject *parent)
-	: QObject(parent)
+App::App()
 {
-	// Отладочные сообщения
-	m_log_page = new LogPage();
-	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
-
 	// Веб-запросы
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
-	connect(m_web, SIGNAL(sig_busy(bool)), SLOT(showBusy(bool)));
 
 	// Управление плеером
 	m_media = new Media(this);
 	connect(m_media, SIGNAL(sig_status(Station, QString, bool)), SLOT(on_media_status(Station, QString, bool)));
 
+	// Менеджер избранных
+	m_manager = new PlaylistManager();
+
 	// Окно приложения
 	m_app_window = new AppWindow();
-	connect(m_app_window, SIGNAL(sig_showLogPage()), SLOT(on_actionLog_triggered()));
+	connect(m_app_window, SIGNAL(sig_showLogPage()), SLOT(on_showLogPage()));
+	connect(m_app_window, SIGNAL(sig_showOptionsPage()), SLOT(on_showOptionsPage()));
+	connect(m_web, SIGNAL(sig_busy(bool)), m_app_window, SLOT(showBusy(bool)));
+
+	// Отладочные сообщения
+	m_log_page = new LogPage();
+	connect(Logger::logger(), SIGNAL(sig_debug(QString)), m_log_page, SLOT(addLog(QString)));
+
+	// Настройки
+	m_options_page = new OptionsPage(m_settings);
+	connect(m_options_page, SIGNAL(sig_applySettings()), SLOT(on_applySettings()));
 
 	// Добавить страницы
-	m_filter_page = new FilterPage();
-	connect(m_filter_page, SIGNAL(sig_setServer(QString)), SLOT(on_setServer(QString)));
-	connect(m_filter_page, SIGNAL(sig_requestCities(int)), m_web, SLOT(requestCities(int)));
-	connect(m_filter_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
-
 	m_stations_page = new StationsPage();
-	connect(m_app_window, SIGNAL(orientationChanged(M::Orientation)), m_stations_page, SLOT(on_orientationChanged(M::Orientation)));
 	connect(m_stations_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
 	connect(m_stations_page, SIGNAL(sig_showStation(Station)), SLOT(on_showStationPage(Station)));
+	connect(m_app_window, SIGNAL(orientationChanged(M::Orientation)), m_stations_page, SLOT(on_orientationChanged(M::Orientation)));
+	m_app_window->addPage(m_stations_page);
+
+	m_filter_page = new FilterPage();
+	connect(m_filter_page, SIGNAL(sig_requestCities(int)), m_web, SLOT(requestCities(int)));
+	connect(m_filter_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
+	m_app_window->addPage(m_filter_page);
 
 	m_station_page = new StationPage();
 	connect(m_station_page, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
-//	connect(m_station_page, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
+	connect(m_station_page, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
 	connect(m_media, SIGNAL(sig_messages(QString)), m_station_page, SLOT(on_media_messages(QString)));
 
 	m_player_page = new PlayerPage(m_media);
 	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
-
-	m_app_window->addPage(m_stations_page);
-	m_app_window->addPage(m_filter_page);
 	m_app_window->addPage(m_player_page);
-	//m_app_window->addPage(m_log_page); // В пункте меню
-	m_app_window->show();
 
-//	m_settings.server();
+	m_playlist_page = new PlaylistPage();
+	connect(m_playlist_page, SIGNAL(sig_openPlaylist(int)), SLOT(on_openPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_createPlaylist(int)), SLOT(on_createPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), SLOT(on_destroyPlaylist(int)));
+	connect(m_playlist_page, SIGNAL(sig_renamePlaylist(int)), SLOT(on_renamePlaylist(int)));
+	connect(m_manager, SIGNAL(sig_clear()), m_playlist_page, SLOT(clearItems()));
+	connect(m_manager, SIGNAL(sig_show(Playlist)), m_playlist_page, SLOT(showPlaylist(Playlist)));
+	connect(m_manager, SIGNAL(sig_add(Playlist)), m_playlist_page, SLOT(addItem(Playlist)));
+	connect(m_manager, SIGNAL(sig_remove(int)), m_playlist_page, SLOT(removeItem(int)));
+	connect(m_manager, SIGNAL(sig_update(Playlist)), m_playlist_page, SLOT(updateItem(Playlist)));
+	m_app_window->addPage(m_playlist_page);
+
+	// Показать FilterPage
+	m_app_window->showPage(m_filter_page);
+
 	// Сделать запрос на сервер
-//	on_setServer("http://localhost:3000");
-
-	m_filter_page->appear(m_app_window);
-	on_requestPage(1);
+	on_applySettings();
 }
 
 App::~App()
 {
 	delete m_web;
 	delete m_media;
+	delete m_manager;
 
-	delete m_log_page;
-	delete m_filter_page;
 	delete m_stations_page;
+	delete m_filter_page;
 	delete m_station_page;
 	delete m_player_page;
-
+	delete m_playlist_page;
+	delete m_log_page;
+	delete m_options_page;
 	delete m_app_window;
 }
 
-void App::showBusy(bool busy)
-{
-	Q_UNUSED(busy);
-	//TODO индикатор рабочих запросов
-	//MProgressIndicator *spinner = new MProgressIndicator(NULL, MProgressIndicator::spinnerType);
-	//spinner->setUnknownDuration(true);
-}
 
 void App::showMessage(QString msg, int timeout)
 {
-	Q_UNUSED(timeout);
-
-	MBanner *infoBanner = new MBanner();
-	infoBanner->setStyleName("InformationBanner");
-	infoBanner->setTitle(msg);
-	infoBanner->appear(m_app_window, MSceneWindow::DestroyWhenDone);
-	// Не работает, делается через CSS для #InformationBanner
-	//infoBanner->style()->setProperty("disappear-timeout", 100);
+	m_app_window->showMessage(msg, timeout);
 }
 
 void App::on_web_finished(Task *task)
 {
 	qDebug() << Q_FUNC_INFO << task->type << task->ok << task->json_ok;
+#ifdef _DEBUG
+	qDebug() << "*****************************************************************************";
+	qDebug() << task->result;
+#endif
 
 	if (task->ok)
 	{
@@ -106,8 +115,8 @@ void App::on_web_finished(Task *task)
 		{
 		case Task::Cookies:
 			{
-				QVariantMap playlist = task->json.toMap()["root"].toMap();
-//				m_playlist_page->showPlaylist(playlist);
+				QVariant root_playlist = task->json.toMap()["root"];
+				m_manager->process(root_playlist, Playlist::AllList);
 			}
 			// Список стран в фильтр
 			m_web->requestCountries();
@@ -115,23 +124,23 @@ void App::on_web_finished(Task *task)
 			m_web->requestGenres();
 			break;
 		case Task::Playlist:
-//			m_playlist_page->showPlaylist(task->json.toMap());
-			break;
 		case Task::PlaylistCreate:
+			m_manager->process(task->json, Playlist::Create);
+			showMessage("OK", 500);
+			break;
 		case Task::PlaylistDestroy:
-			qDebug() << "task->result" << task->result;
-//			if (task->result == "ok")
-//				showMessage("OK", 500);
-//			else
-//				showMessage("FAIL", 500);
-//			break;
+			m_manager->process(task->json, Playlist::Destroy);
+			showMessage("OK", 500);
+			break;
+		case Task::PlaylistRename:
+			m_manager->process(task->json, Playlist::Rename);
+			showMessage("OK", 500);
+			break;
 
 		case Task::Station:
 			// Данные одной станции
-			{
-				m_station_page->setStation(Station(task->json));
-				m_station_page->appear(m_app_window);
-			}
+			m_station_page->setStation(Station(task->json));
+			m_station_page->appear(m_app_window);
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
@@ -148,7 +157,7 @@ void App::on_web_finished(Task *task)
 			else
 			{
 				// Переключится на список станций
-				m_stations_page->appear(m_app_window);
+				m_app_window->showPage(m_stations_page);
 			}
 
 			break;
@@ -176,10 +185,11 @@ void App::on_web_finished(Task *task)
 		{
 		case Task::Cookies:
 			// Ошибка подключения к серверу
-			qDebug() << "Bad server:" << m_web->server();
+			showMessage(QString("Bad server: %1").arg(m_web->server()));
 			break;
 		default:
 			qDebug() << "Error code:" << task->error_code << "for task type:" << task->type;
+			showMessage("FAIL", 500);
 		}
 	}
 
@@ -211,9 +221,14 @@ void App::on_media_status(Station station, QString url, bool ok)
 	}
 }
 
-void App::on_actionLog_triggered()
+void App::on_showLogPage()
 {
 	m_log_page->appear(m_app_window);
+}
+
+void App::on_showOptionsPage()
+{
+	m_options_page->appear(m_app_window);
 }
 
 void App::on_requestPage(int page)
@@ -222,13 +237,109 @@ void App::on_requestPage(int page)
 	m_web->requestStations(page, m_filter_page->filter());
 }
 
-void App::on_setServer(QString server)
+void App::on_applySettings()
 {
-	m_web->setServer(server);
+	m_web->setProxy(m_settings.proxy());
+	if (m_web->server() != m_settings.server())
+	{
+		m_web->setServer(m_settings.server());
 
-	// Очистить список избранных
-//	m_playlist_page->reset();
+		// Очистить список избранных
+		m_manager->clear();
 
-	// Первый запрос установит cookies с сервера
-	m_web->requestCookies();
+		// Первый запрос установит cookies с сервера
+		m_web->requestCookies();
+	}
+}
+
+void App::on_addStationToFavorites(Station station)
+{
+	if (!m_manager->favorites().isEmpty())
+	{
+		// Список избранных
+		QStringList items;
+		foreach(int favorite_id, m_manager->favorites())
+		{
+			Playlist favorite = m_manager->playlist(favorite_id);
+			items << QString("%1 %2").arg(favorite.id()).arg(favorite.name());
+		}
+
+		bool ok;
+		QString parent = QInputDialog::getItem(m_app_window, "Add to Favorites", "Choose:", items, 0, false, &ok);
+		if (ok)
+		{
+			int parent_id = parent.section(' ', 0, 0).toInt();
+			m_web->addStationToPlaylist(station, parent_id);
+		}
+	}
+	else
+	{
+		showMessage("First create playlist");
+	}
+}
+
+void App::on_openPlaylist(int playlist_id)
+{
+	Playlist pl = m_manager->playlist(playlist_id);
+	switch (pl.type())
+	{
+	case Playlist::Item:
+		m_web->requestStation(pl.station_id());
+		break;
+	default:
+		if (m_manager->contains(playlist_id))
+			m_manager->show(playlist_id);
+		else
+			m_web->requestPlaylist(playlist_id);
+	}
+}
+
+void App::on_createPlaylist(int parent_id)
+{
+	QString name = QInputDialog::getText(m_app_window, "Create playlist", "Name:");
+	if (!name.isEmpty())
+	{
+		// Отправить запрос на создание
+		m_web->createPlaylist(name, parent_id);
+	}
+}
+
+void App::on_destroyPlaylist(int playlist_id)
+{
+	Playlist pl = m_manager->playlist(playlist_id);
+	switch (pl.type())
+	{
+	case Playlist::Item:
+		// Удалить станцию
+		m_web->destroyPlaylist(playlist_id);
+		break;
+	default:
+		// Каталог удалять с запросом
+		if (QMessageBox::question(m_app_window, "Delete playlist", "Are you sure?", QMessageBox::Ok|QMessageBox::Cancel) == QMessageBox::Ok)
+		{
+			m_web->destroyPlaylist(playlist_id);
+		}
+	}
+}
+
+void App::on_renamePlaylist(int playlist_id)
+{
+	Playlist pl = m_manager->playlist(playlist_id);
+	switch (pl.type())
+	{
+	case Playlist::Favorites:
+		{
+			// Имя каталога
+			QString name = QInputDialog::getText(m_app_window, "Rename playlist", "Name:", QLineEdit::Normal, pl.name());
+			if (!name.isEmpty())
+			{
+				// Отправить запрос на переименование
+				m_web->renamePlaylist(playlist_id, name);
+			}
+		}
+		break;
+	default:
+		// Нельзя
+		break;
+	}
 }

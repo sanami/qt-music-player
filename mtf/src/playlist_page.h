@@ -1,12 +1,8 @@
 #pragma once
 #include "playlist.h"
 
-namespace Ui {
-    class PlaylistPage;
-}
-
 //! Иерархический список станций
-class PlaylistPage : public QWidget
+class PlaylistPage : public MApplicationPage
 {
     Q_OBJECT
 
@@ -45,7 +41,7 @@ signals:
 
 private slots:
 	//! Двойной клик на запись в списке
-	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
+//	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
 
 	//! Удалить запись из списка
 	void on_actionDeletePlaylist_triggered();
@@ -60,13 +56,16 @@ private slots:
 
 private:
 	//! Найти запись или NULL
-	QListWidgetItem *findItem(int playlist_id) const;
+//	QListWidgetItem *findItem(int playlist_id) const;
 
 	//! Выбранный плейлист, или 0
 	int currentPlaylist() const;
 
+protected:
+	virtual void createContent();
+
 private:
-    Ui::PlaylistPage *ui;
+	struct PlaylistPageUi *ui;
 
 	int m_current_playlist_id; //!< Текущий список
 	int m_parent_playlist_id;

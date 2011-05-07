@@ -32,7 +32,7 @@ SOURCES += main.cpp\
     ../shared/qjson/parser.cpp \
     ../shared/qjson/json_scanner.cpp \
     ../shared/qjson/json_parser.cc \
-    info_page.cpp \
+	station_page.cpp \
     ../shared/media.cpp \
     ../shared/mplayer_control.cpp \
     ../shared/settings.cpp \
@@ -49,7 +49,7 @@ SOURCES += main.cpp\
     ../shared/web_proxy.cpp
 
 HEADERS  += app.h \
-    info_page.h \
+	station_page.h \
     player_page.h \
     log_page.h \
     stations_page.h \
@@ -84,7 +84,7 @@ HEADERS  += app.h \
     ../shared/web_proxy.h
 
 FORMS    += \
-    info_page.ui \
+	station_page.ui \
     player_page.ui \
     log_page.ui \
     stations_page.ui \

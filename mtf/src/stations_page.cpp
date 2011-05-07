@@ -14,8 +14,17 @@ public:
 	}
 };
 
+struct StationsPageUi
+{
+	MButton *prev;
+	MButton *next;
+	MLabel *page;
+	MList *stations;
+};
+
 StationsPage::StationsPage()
-	: m_model(NULL)
+	: ui(new StationsPageUi)
+	, m_model(NULL)
 	, m_current_page(0)
 	, m_num_pages(0)
 {
@@ -31,30 +40,38 @@ StationsPage::StationsPage()
 		MButton *btn = new MButton("<<");
 		connect(btn, SIGNAL(clicked()), SLOT(on_prevPage_clicked()));
 		layout2->addItem(btn);
+		ui->prev = btn;
 	}
 	{
 		MButton *btn = new MButton(">>");
 		connect(btn, SIGNAL(clicked()), SLOT(on_nextPage_clicked()));
 		layout2->addItem(btn);
+		ui->next = btn;
+	}
+	{
+		MLabel *lab = new MLabel("[page]");
+		layout2->addItem(lab);
+		ui->page = lab;
 	}
 	layout->addItem(layout2);
 
 	//layout->addItem(new MLabel("Stations:"));
-	m_list = new MList();
+	ui->stations = new MList();
 	MContentItemCreator *cellCreator = new MContentItemCreator();
-	m_list->setCellCreator(cellCreator);
+	ui->stations->setCellCreator(cellCreator);
 	m_model = new StationsModel;
-	m_list->setItemModel(m_model);
-	m_list->setColumns(2); //TODO
-	connect(m_list, SIGNAL(itemClicked(QModelIndex)), SLOT(on_list_itemClicked(QModelIndex)));
-	layout->addItem(m_list);
+	ui->stations->setItemModel(m_model);
+	ui->stations->setColumns(2); //TODO
+	connect(ui->stations, SIGNAL(itemClicked(QModelIndex)), SLOT(on_list_itemClicked(QModelIndex)));
+	layout->addItem(ui->stations);
 
-//	MAction * action = new MAction("Pictures", this);
-//	action->setLocation(MAction::ApplicationMenuLocation);
+	layout->addStretch(1);
 }
 
 StationsPage::~StationsPage()
 {
+	delete ui;
+	delete ui->stations;
 	delete m_model;
 }
 
@@ -73,7 +90,7 @@ void StationsPage::showStations(Station::List stations, QVariantMap result)
 
 	// Отобразить список
 	m_model->setStations(stations);
-	m_list->update();
+	ui->stations->update();
 }
 
 bool StationsPage::isEmpty() const
@@ -122,22 +139,22 @@ void StationsPage::requestPage()
 
 void StationsPage::updateControls(bool enable)
 {
-//	// Блокировать если занят
-//	ui->stations->setEnabled(enable);
+	// Блокировать если занят
+	ui->stations->setEnabled(enable);
 
-//	// Управление навигацией
-//	ui->pushButton->setEnabled(enable && (m_current_page > 1));
-//	ui->pushButton_2->setEnabled(enable && (m_current_page < m_num_pages));
+	// Управление навигацией
+	ui->prev->setEnabled(enable && (m_current_page > 1));
+	ui->next->setEnabled(enable && (m_current_page < m_num_pages));
 
-//	// Информация о страницах
-//	ui->page->setText(QString("%1 / %2").arg(m_current_page).arg(m_num_pages));
+	// Информация о страницах
+	ui->page->setText(QString("%1 / %2").arg(m_current_page).arg(m_num_pages));
 }
 
 void StationsPage::on_orientationChanged(M::Orientation orientation)
 {
 	qDebug() << Q_FUNC_INFO << orientation;
 	if (orientation == M::Landscape)
-		m_list->setColumns(2);
+		ui->stations->setColumns(2);
 	else
-		m_list->setColumns(1);
+		ui->stations->setColumns(1);
 }

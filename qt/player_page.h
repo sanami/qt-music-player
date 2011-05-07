@@ -1,5 +1,4 @@
 #pragma once
-#include <QWidget>
 #include "data.h"
 
 namespace Ui {
@@ -11,11 +10,11 @@ class Media;
 //! Страница плеера
 class PlayerPage : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	explicit PlayerPage(Media *media, QWidget *parent = 0);
-    ~PlayerPage();
+	~PlayerPage();
 
 	void showStationInfo(Station station);
 

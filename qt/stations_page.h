@@ -1,5 +1,4 @@
 #pragma once
-#include <QWidget>
 #include "data.h"
 
 namespace Ui {
@@ -9,11 +8,11 @@ namespace Ui {
 //! Список станций
 class StationsPage : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit StationsPage(QWidget *parent = 0);
-    ~StationsPage();
+	explicit StationsPage(QWidget *parent = 0);
+	~StationsPage();
 
 	//! Показать список с текущей страницы
 	void showStations(Station::List stations, QVariantMap result);
@@ -26,10 +25,10 @@ signals:
 	void sig_requestPage(int page);
 
 private slots:
-	//! Следующая страница
-	void on_pushButton_2_clicked();
 	//! Предыдущая страница
 	void on_pushButton_clicked();
+	//! Следующая страница
+	void on_pushButton_2_clicked();
 
 	//! Перейти на страницу станции
 	void on_stations_itemDoubleClicked(QListWidgetItem* item);

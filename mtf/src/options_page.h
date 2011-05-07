@@ -1,17 +1,13 @@
 #pragma once
 #include "settings.h"
 
-namespace Ui {
-    class OptionsPage;
-}
-
 //! Страница настроек
-class OptionsPage : public QWidget
+class OptionsPage : public MApplicationPage
 {
     Q_OBJECT
 
 public:
-	explicit OptionsPage(Settings &settings, QWidget *parent = 0);
+	explicit OptionsPage(Settings &settings);
     ~OptionsPage();
 
 signals:
@@ -19,13 +15,14 @@ signals:
 	void sig_applySettings();
 
 private slots:
-	void on_type_currentIndexChanged(int index);
-
 	//! Обновить настройки из контролов
 	void on_apply_clicked();
 
+protected:
+	virtual void createContent();
+
 private:
-    Ui::OptionsPage *ui;
+	struct OptionsPageUi *ui;
 
 	Settings &m_settings; //!< Настройки из App
 };

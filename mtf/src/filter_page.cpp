@@ -1,8 +1,7 @@
 #include "filter_page.h"
 
-struct Ui
+struct FilterPageUi
 {
-	MComboBox *comboBox_server;
 	MComboBox *comboBox_country;
 	QVector<QVariant> comboBox_country_itemData;
 	MComboBox *comboBox_city;
@@ -14,11 +13,17 @@ struct Ui
 };
 
 FilterPage::FilterPage()
-	: ui(new Ui)
+	: ui(new FilterPageUi)
 {
 	setObjectName("FilterPage");
 	setTitle("Filter");
 }
+
+FilterPage::~FilterPage()
+{
+	delete ui;
+}
+
 
 void FilterPage::createContent()
 {
@@ -27,26 +32,6 @@ void FilterPage::createContent()
 	layout->setSpacing(10);
 
 	int row = 0;
-	//layout->addItem(new MLabel("Server"), row, 0);
-	{
-		MComboBox *combobox = new MComboBox();
-		combobox->setTitle("Server");
-		connect(combobox, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboBox_server_currentIndexChanged(QString)));
-		QStringList stringList;
-		stringList << "http://localhost:3000" << "http://music.heroku.com";
-		combobox->addItems(stringList);
-		for(int i=0; combobox->count(); ++i)
-		{
-			if (combobox->itemText(i) == m_settings.server())
-			{
-				combobox->setCurrentIndex(i);
-				break;
-			}
-		}
-		layout->addItem(combobox, row, 0);
-		ui->comboBox_server = combobox;
-	}
-	++row;
 	//layout->addItem(new MLabel("Country"), row, 0);
 	{
 		MComboBox *combobox = new MComboBox();
@@ -75,6 +60,7 @@ void FilterPage::createContent()
 	//layout->addItem(new MLabel("Search"), row, 0);
 	{
 		MTextEdit *edit = new MTextEdit();
+		edit->setText("stac");
 		layout->addItem(edit, row, 0);
 		ui->search = edit;
 	}
@@ -143,12 +129,6 @@ void FilterPage::showGenres(Genre::List genres)
 		ui->comboBox_genre->addItem(g.name());
 		ui->comboBox_genre_itemData[i++] = g.id();
 	}
-}
-
-void FilterPage::on_comboBox_server_currentIndexChanged(const QString &server)
-{
-	m_settings.setServer(server);
-	emit sig_setServer(server);
 }
 
 void FilterPage::on_comboBox_country_currentIndexChanged(int index)

@@ -1,19 +1,17 @@
-#ifndef LOG_PAGE_H
-#define LOG_PAGE_H
-
-#include <QWidget>
+#pragma once
 
 namespace Ui {
     class LogPage;
 }
 
+//! Просмотр отладочных сообщений
 class LogPage : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit LogPage(QWidget *parent = 0);
-    ~LogPage();
+	explicit LogPage(QWidget *parent = 0);
+	~LogPage();
 
 public slots:
 	void addLog(QString text);
@@ -21,5 +19,3 @@ public slots:
 private:
     Ui::LogPage *ui;
 };
-
-#endif // LOG_PAGE_H

@@ -26,7 +26,7 @@ private slots:
 	void on_media_messages(QString str);
 
 private:
-	Media *m_media;
+	Media *m_media; //!< Плеер из App
 	Station m_station; //!< Текущая станция
 
 	MTextEdit *m_messages; //!< Лог плеера

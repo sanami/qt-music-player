@@ -7,7 +7,7 @@
 class AppWindow;
 class StationsPage;
 class FilterPage;
-class InfoPage;
+class StationPage;
 class PlayerPage;
 class PlaylistPage;
 class LogPage;
@@ -25,8 +25,6 @@ public:
 	~App();
 
 private:
-	//! Запросить текущую страницу
-	void requestPage();
 	//! Всплывающее сообщение
 	void showMessage(QString msg, int timeout = 3000);
 
@@ -74,7 +72,7 @@ private:
 	AppWindow *m_app_window; //! Окно приложения
 	StationsPage *m_stations_page; //!< Список станций
 	FilterPage *m_filter_page; //!< Фильтрация станций
-	InfoPage *m_station_view;  //!< Информация о станции
+	StationPage *m_station_page;  //!< Информация о станции
 	PlayerPage *m_player_page; //!< Страница плеера
 	PlaylistPage *m_playlist_page; //!< Списки
 	LogPage *m_log_page; //!< Страница сообщений

@@ -35,7 +35,11 @@ SOURCES += main.cpp \
     app_window.cpp \
     stations_model.cpp \
     station_page.cpp \
-    player_page.cpp
+	player_page.cpp \
+    playlist_page.cpp \
+    options_page.cpp \
+    ../../shared/web_proxy.cpp \
+    ../../shared/playlist_manager.cpp
 
 HEADERS += \
     app.h \
@@ -67,7 +71,12 @@ HEADERS += \
     ../../shared/data.h \
     stations_model.h \
     station_page.h \
-    player_page.h
+    player_page.h \
+    playlist_page.h \
+    options_page.h \
+    ../../shared/web_proxy.h \
+    ../../shared/playlist_manager.h \
+    ../../shared/playlist.h
 
 MAKE_CLEAN += $$OBJECTS_DIR/*.o
 MAKE_DISTCLEAN += \

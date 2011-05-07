@@ -1,23 +1,19 @@
-#ifndef INFO_PAGE_H
-#define INFO_PAGE_H
-
-#include <QWidget>
-#include <QVariant>
+#pragma once
 #include "data.h"
 
 namespace Ui {
-    class InfoPage;
+    class StationPage;
 }
 
 class QTreeWidgetItem;
 
-class InfoPage : public QWidget
+class StationPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit InfoPage(QWidget *parent = 0);
-    ~InfoPage();
+	explicit StationPage(QWidget *parent = 0);
+	~StationPage();
 
 	//! Показать данные станции
 	void setStation(Station station);
@@ -34,8 +30,7 @@ private slots:
 	void on_addToFavorites_clicked();
 
 private:
-	Ui::InfoPage *ui;
+	Ui::StationPage *ui;
 	Station m_station; //!< Текущая станция
 };
 
-#endif // INFO_PAGE_H

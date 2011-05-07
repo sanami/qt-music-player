@@ -1,18 +1,18 @@
 #pragma once
-#include <QWidget>
 #include "data.h"
 
 namespace Ui {
     class FilterPage;
 }
 
+//! Настройки поиска/фильтра станций
 class FilterPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit FilterPage(QWidget *parent = 0);
-    ~FilterPage();
+	explicit FilterPage(QWidget *parent = 0);
+	~FilterPage();
 
 	const QVariantMap &filter() const { return m_filter; }
 

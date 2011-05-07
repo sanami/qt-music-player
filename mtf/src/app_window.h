@@ -3,15 +3,26 @@
 class AppWindow : public MApplicationWindow
 {
     Q_OBJECT
+
 public:
-	AppWindow();
+    AppWindow();
+    ~AppWindow();
 
 	void addPage(MApplicationPage *page);
+	void showPage(MApplicationPage *page);
+
+public slots:
+	//! Индикатор загрузки
+	void showBusy(bool busy);
+	//! Всплывающее сообщение
+	void showMessage(QString msg, int timeout = 3000);
+	//! Удалить сообщение
+	void clearMessage();
 
 signals:
 	void sig_showLogPage();
+	void sig_showOptionsPage();
 
-public slots:
 
 private slots:
 	void showPageForAction(QAction *action);

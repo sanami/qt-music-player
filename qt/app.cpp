@@ -1,16 +1,16 @@
 #include "app.h"
 #include "app_window.h"
 #include "web.h"
+#include "media.h"
+#include "logger.h"
+#include "playlist_manager.h"
 #include "stations_page.h"
+#include "station_page.h"
 #include "filter_page.h"
-#include "info_page.h"
 #include "player_page.h"
 #include "log_page.h"
 #include "options_page.h"
-#include "media.h"
-#include "logger.h"
 #include "playlist_page.h"
-#include "playlist_manager.h"
 
 App::App()
 {
@@ -18,8 +18,8 @@ App::App()
 	m_web = new Web();
 	connect(m_web, SIGNAL(sig_finished(Task *)), SLOT(on_web_finished(Task *)));
 
-	// Плеер
-	m_media = new Media();
+	// Управление плеером
+	m_media = new Media(this);
 	connect(m_media, SIGNAL(sig_status(Station, QString, bool)), SLOT(on_media_status(Station, QString, bool)));
 
 	// Менеджер избранных
@@ -50,10 +50,10 @@ App::App()
 	connect(m_filter_page, SIGNAL(sig_requestPage(int)), SLOT(on_requestPage(int)));
 	m_app_window->addPage(m_filter_page);
 
-	m_station_view = new InfoPage(m_app_window);
-	connect(m_station_view, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
-	connect(m_station_view, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
-	connect(m_media, SIGNAL(sig_messages(QString)), m_station_view, SLOT(on_media_messages(QString)));
+	m_station_page = new StationPage(m_app_window);
+	connect(m_station_page, SIGNAL(sig_openStream(Station, QString)), SLOT(on_openStream(Station, QString)));
+	connect(m_station_page, SIGNAL(sig_addToFavorites(Station)), SLOT(on_addStationToFavorites(Station)));
+	connect(m_media, SIGNAL(sig_messages(QString)), m_station_page, SLOT(on_media_messages(QString)));
 
 	m_player_page = new PlayerPage(m_media);
 	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
@@ -80,11 +80,10 @@ App::App()
 #ifndef Q_WS_MAEMO_5
 	int x = 100, y = 100, w = 360;
 	m_app_window->move(x, y);
-	m_station_view->move(x+w, y);
+	m_station_page->move(x+w, y);
 	m_log_page->move(x+w, y);
 	m_options_page->move(x+w, y);
 #endif
-	m_app_window->show();
 }
 
 App::~App()
@@ -95,7 +94,7 @@ App::~App()
 
 	delete m_stations_page;
 	delete m_filter_page;
-	delete m_station_view;
+	delete m_station_page;
 	delete m_player_page;
 	delete m_playlist_page;
 	delete m_log_page;
@@ -145,8 +144,8 @@ void App::on_web_finished(Task *task)
 			break;
 		case Task::Station:
 			// Данные одной станции
-			m_station_view->setStation(Station(task->json));
-			m_station_view->show();
+			m_station_page->setStation(Station(task->json));
+			m_station_page->show();
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
@@ -206,8 +205,8 @@ void App::on_web_finished(Task *task)
 
 void App::on_showStationPage(Station station)
 {
-	m_station_view->setStation(station);
-	m_station_view->show();
+	m_station_page->setStation(station);
+	m_station_page->show();
 }
 
 void App::on_openStream(Station station, QString stream)
@@ -260,7 +259,6 @@ void App::on_applySettings()
 		m_web->requestCookies();
 	}
 }
-
 
 void App::on_addStationToFavorites(Station station)
 {
