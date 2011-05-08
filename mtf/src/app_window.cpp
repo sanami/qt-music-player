@@ -85,3 +85,32 @@ void AppWindow::showPageForAction(QAction *action)
 	m_pages[action]->appear(this);
 //	action->setChecked(true);
 }
+
+QString AppWindow::getText(QString title, QString prompt, QString text)
+{
+	MWidget *centralWidget = new MWidget;
+	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+
+	MLabel *label = new MLabel(prompt, centralWidget);
+	MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
+										text,
+										centralWidget);
+	centralWidget->setLayout(layout);
+
+	layout->addItem(label);
+	layout->addItem(textEdit);
+
+	MDialog* dialog = new MDialog(title, M::OkButton | M::CancelButton);
+	dialog->setCentralWidget(centralWidget);
+
+	connect(dialog, SIGNAL(disappeared()), SLOT(processDialogResult()));
+	if (dialog->exec(this) == M::OkButton)
+		return textEdit->text();
+	return "";
+}
+
+bool AppWindow::question(QString title, QString prompt)
+{
+	MMessageBox box(title, prompt, M::OkButton | M::CancelButton);
+	return box.exec(this) == M::OkButton;
+}

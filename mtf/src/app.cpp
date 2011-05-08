@@ -60,16 +60,12 @@ App::App()
 	connect(m_player_page, SIGNAL(sig_showStationPage(Station)), SLOT(on_showStationPage(Station)));
 	m_app_window->addPage(m_player_page);
 
-	m_playlist_page = new PlaylistPage();
+	m_playlist_page = new PlaylistPage(m_manager);
 	connect(m_playlist_page, SIGNAL(sig_openPlaylist(int)), SLOT(on_openPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_createPlaylist(int)), SLOT(on_createPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_destroyPlaylist(int)), SLOT(on_destroyPlaylist(int)));
 	connect(m_playlist_page, SIGNAL(sig_renamePlaylist(int)), SLOT(on_renamePlaylist(int)));
-	connect(m_manager, SIGNAL(sig_clear()), m_playlist_page, SLOT(clearItems()));
-	connect(m_manager, SIGNAL(sig_show(Playlist)), m_playlist_page, SLOT(showPlaylist(Playlist)));
-	connect(m_manager, SIGNAL(sig_add(Playlist)), m_playlist_page, SLOT(addItem(Playlist)));
-	connect(m_manager, SIGNAL(sig_remove(int)), m_playlist_page, SLOT(removeItem(int)));
-	connect(m_manager, SIGNAL(sig_update(Playlist)), m_playlist_page, SLOT(updateItem(Playlist)));
+	connect(m_app_window, SIGNAL(orientationChanged(M::Orientation)), m_playlist_page, SLOT(on_orientationChanged(M::Orientation)));
 	m_app_window->addPage(m_playlist_page);
 
 	// Показать FilterPage
@@ -296,7 +292,7 @@ void App::on_openPlaylist(int playlist_id)
 
 void App::on_createPlaylist(int parent_id)
 {
-	QString name = QInputDialog::getText(m_app_window, "Create playlist", "Name:");
+	QString name = m_app_window->getText("Create playlist", "Name:");
 	if (!name.isEmpty())
 	{
 		// Отправить запрос на создание
@@ -315,7 +311,7 @@ void App::on_destroyPlaylist(int playlist_id)
 		break;
 	default:
 		// Каталог удалять с запросом
-		if (QMessageBox::question(m_app_window, "Delete playlist", "Are you sure?", QMessageBox::Ok|QMessageBox::Cancel) == QMessageBox::Ok)
+		if (m_app_window->question("Delete playlist", "Are you sure?"))
 		{
 			m_web->destroyPlaylist(playlist_id);
 		}
@@ -330,7 +326,7 @@ void App::on_renamePlaylist(int playlist_id)
 	case Playlist::Favorites:
 		{
 			// Имя каталога
-			QString name = QInputDialog::getText(m_app_window, "Rename playlist", "Name:", QLineEdit::Normal, pl.name());
+			QString name = m_app_window->getText("Rename playlist", "Name:", pl.name());
 			if (!name.isEmpty())
 			{
 				// Отправить запрос на переименование

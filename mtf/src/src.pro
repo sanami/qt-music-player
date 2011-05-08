@@ -14,6 +14,8 @@ target.path = $$M_INSTALL_BIN
 
 INCLUDEPATH += ../../shared
 
+debug: DEFINES += _DEBUG
+
 SOURCES += main.cpp \
 	app.cpp \
     ../../shared/web.cpp \
@@ -39,7 +41,8 @@ SOURCES += main.cpp \
     playlist_page.cpp \
     options_page.cpp \
     ../../shared/web_proxy.cpp \
-    ../../shared/playlist_manager.cpp
+    ../../shared/playlist_manager.cpp \
+    id_list_model.cpp
 
 HEADERS += \
     app.h \
@@ -76,7 +79,8 @@ HEADERS += \
     options_page.h \
     ../../shared/web_proxy.h \
     ../../shared/playlist_manager.h \
-    ../../shared/playlist.h
+    ../../shared/playlist.h \
+    id_list_model.h
 
 MAKE_CLEAN += $$OBJECTS_DIR/*.o
 MAKE_DISTCLEAN += \

@@ -4,6 +4,7 @@
 class StationsModel : public QAbstractListModel
 {
     Q_OBJECT
+
 public:
 	StationsModel();
 	~StationsModel();

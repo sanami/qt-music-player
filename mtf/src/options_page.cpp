@@ -31,7 +31,7 @@ void OptionsPage::createContent()
 		combobox->setTitle("Server");
 //		connect(combobox, SIGNAL(currentIndexChanged(QString)), SLOT(on_comboBox_server_currentIndexChanged(QString)));
 		QStringList stringList;
-		stringList << "http://music.heroku.com" << "http://localhost:3000";
+		stringList << "http://music.heroku.com" << "http://192.168.1.128:3000" << "http://192.168.1.14:3000" << "http://localhost:3000";
 		combobox->addItems(stringList);
 		for(int i=0; combobox->count(); ++i)
 		{

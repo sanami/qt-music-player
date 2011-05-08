@@ -1,7 +1,7 @@
 #include "stations_page.h"
 #include "stations_model.h"
 
-class MContentItemCreator : public MAbstractCellCreator<MContentItem>
+class StationsItemCreator : public MAbstractCellCreator<MContentItem>
 {
 public:
 	void updateCell(const QModelIndex& index, MWidget *cell) const
@@ -16,13 +16,14 @@ public:
 
 struct StationsPageUi
 {
-	QSharedPointer<MButton> prev;
+	MButton *prev;
 	MButton *next;
 	MLabel *page;
 	MList *stations;
 
 	~StationsPageUi()
 	{
+		delete prev;
 		delete next;
 		delete page;
 		delete stations;
@@ -47,7 +48,7 @@ StationsPage::StationsPage()
 		MButton *btn = new MButton("<<");
 		connect(btn, SIGNAL(clicked()), SLOT(on_prevPage_clicked()));
 		layout2->addItem(btn);
-		ui->prev = QSharedPointer<MButton>(btn);
+		ui->prev = btn;
 	}
 	{
 		MButton *btn = new MButton(">>");
@@ -64,15 +65,14 @@ StationsPage::StationsPage()
 
 	//layout->addItem(new MLabel("Stations:"));
 	ui->stations = new MList();
-	MContentItemCreator *cellCreator = new MContentItemCreator();
+	StationsItemCreator *cellCreator = new StationsItemCreator();
 	ui->stations->setCellCreator(cellCreator);
 	m_model = new StationsModel;
 	ui->stations->setItemModel(m_model);
-	ui->stations->setColumns(2); //TODO
 	connect(ui->stations, SIGNAL(itemClicked(QModelIndex)), SLOT(on_list_itemClicked(QModelIndex)));
 	layout->addItem(ui->stations);
 
-	layout->addStretch(1);
+	layout->addStretch(100);
 }
 
 StationsPage::~StationsPage()

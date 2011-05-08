@@ -15,7 +15,6 @@
 #include <MLabel>
 #include <MButton>
 #include <MButtonGroup>
-#include <MSceneManager>
 #include <MToolBar>
 #include <MAction>
 #include <MComboBox>
@@ -23,4 +22,6 @@
 #include <MContentItem>
 #include <MList>
 #include <MBanner>
+#include <MDialog>
+#include <MMessageBox>
 #endif

@@ -13,6 +13,9 @@ QRegExp g_rxMethodParams("\\(.*\\)"); //!< Параметры метода
 //TODO показывать только названия функций, без описания параметров
 static void conMessageOutput(QtMsgType type, const char *raw_msg)
 {
+	if (strstr(raw_msg, "Themedaemon") != NULL)
+		return;
+
 //	QMutexLocker locker(&g_console_mutex);
 
 	static int line = 0;

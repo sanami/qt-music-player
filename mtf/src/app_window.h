@@ -11,6 +11,9 @@ public:
 	void addPage(MApplicationPage *page);
 	void showPage(MApplicationPage *page);
 
+	QString getText(QString title, QString prompt, QString text = "");
+	bool question(QString title, QString prompt);
+
 public slots:
 	//! Индикатор загрузки
 	void showBusy(bool busy);
@@ -22,7 +25,6 @@ public slots:
 signals:
 	void sig_showLogPage();
 	void sig_showOptionsPage();
-
 
 private slots:
 	void showPageForAction(QAction *action);

@@ -1,13 +1,16 @@
 #pragma once
 #include "playlist.h"
 
+class IdListModel;
+class PlaylistManager;
+
 //! Иерархический список станций
 class PlaylistPage : public MApplicationPage
 {
     Q_OBJECT
 
 public:
-	PlaylistPage();
+	PlaylistPage(PlaylistManager *manager);
     ~PlaylistPage();
 
 public slots:
@@ -40,8 +43,11 @@ signals:
 	void sig_renamePlaylist(int playlist_id);
 
 private slots:
-	//! Двойной клик на запись в списке
-//	void on_playlist_itemDoubleClicked(QListWidgetItem* item);
+	//! Поворот экрана
+	void on_orientationChanged(M::Orientation orientation);
+
+	//! Клик на запись в списке
+	void on_playlist_itemClicked(const QModelIndex &index);
 
 	//! Удалить запись из списка
 	void on_actionDeletePlaylist_triggered();
@@ -55,9 +61,6 @@ private slots:
 	void on_up_clicked();
 
 private:
-	//! Найти запись или NULL
-//	QListWidgetItem *findItem(int playlist_id) const;
-
 	//! Выбранный плейлист, или 0
 	int currentPlaylist() const;
 
@@ -66,6 +69,9 @@ protected:
 
 private:
 	struct PlaylistPageUi *ui;
+
+	IdListModel *m_model; //!< Модель для отображения
+	PlaylistManager *m_manager; //!< Менеджер списками из App
 
 	int m_current_playlist_id; //!< Текущий список
 	int m_parent_playlist_id;
