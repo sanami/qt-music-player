@@ -26,9 +26,8 @@ private slots:
 	void on_media_messages(QString str);
 
 private:
+	struct PlayerPageUi *ui;
+
 	Media *m_media; //!< Плеер из App
 	Station m_station; //!< Текущая станция
-
-	MTextEdit *m_messages; //!< Лог плеера
-	MButton *m_station_btn; //!< Кнопка перехода на страницу станции
 };

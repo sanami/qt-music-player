@@ -28,10 +28,7 @@ protected:
 	virtual void createContent();
 
 private:
-	Station m_station; //!< Текущая станция
+	struct StationPageUi *ui;
 
-	MLabel *m_label;
-	MTextEdit *m_messages;
-	MButtonGroup *m_streams;
-	QGraphicsLinearLayout *m_streams_layout;
+	Station m_station; //!< Текущая станция
 };

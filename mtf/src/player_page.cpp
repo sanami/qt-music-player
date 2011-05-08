@@ -1,8 +1,21 @@
 #include "player_page.h"
 #include "media.h"
 
+struct PlayerPageUi
+{
+	MTextEdit *messages; //!< Лог плеера
+	MButton *station_btn; //!< Кнопка перехода на страницу станции
+
+	~PlayerPageUi()
+	{
+		delete messages;
+		delete station_btn;
+	}
+};
+
 PlayerPage::PlayerPage(Media *media)
-	: m_media(media)
+	: ui(new PlayerPageUi)
+	, m_media(media)
 {
 	setObjectName("PlayerPage");
 	setTitle("Player");
@@ -26,22 +39,21 @@ PlayerPage::PlayerPage(Media *media)
 	}
 	layout->addItem(layout2);
 
-	m_station_btn = new MButton("[station]");
-	connect(m_station_btn, SIGNAL(clicked()), SLOT(on_station_clicked()));
-	layout->addItem(m_station_btn);
+	ui->station_btn = new MButton("[station]");
+	connect(ui->station_btn, SIGNAL(clicked()), SLOT(on_station_clicked()));
+	layout->addItem(ui->station_btn);
 
 	// Сообщение плеера
-	m_messages = new MTextEdit(MTextEditModel::MultiLine);
+	ui->messages = new MTextEdit(MTextEditModel::MultiLine);
 	setObjectName("messages");
-	m_messages->setReadOnly(true);
-	m_messages->setMaxLength(1000);
-	layout->addItem(m_messages);
+	ui->messages->setReadOnly(true);
+	ui->messages->setMaxLength(1000);
+	layout->addItem(ui->messages);
 }
 
 PlayerPage::~PlayerPage()
 {
-	delete m_messages;
-	delete m_station_btn;
+	delete ui;
 }
 
 void PlayerPage::showStationInfo(Station station)
@@ -49,12 +61,12 @@ void PlayerPage::showStationInfo(Station station)
 	m_station = station;
 
 	QString info = station.name();
-	m_station_btn->setText(info);
+	ui->station_btn->setText(info);
 }
 
 void PlayerPage::on_media_messages(QString text)
 {
-	m_messages->setText(text  + "\n" + m_messages->text());
+	ui->messages->setText(text  + "\n" + ui->messages->text());
 }
 
 void PlayerPage::on_play_clicked()

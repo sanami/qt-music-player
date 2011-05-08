@@ -1,6 +1,23 @@
 #include "station_page.h"
 
+struct StationPageUi
+{
+	MLabel *label;
+	MTextEdit *messages;
+	MButtonGroup *streams;
+	QGraphicsLinearLayout *streams_layout;
+
+	~StationPageUi()
+	{
+		delete label;
+		delete messages;
+		delete streams;
+		delete streams_layout;
+	}
+};
+
 StationPage::StationPage()
+	: ui(new StationPageUi)
 {
 	setObjectName("StationPage");
 	setTitle("Station");
@@ -9,29 +26,26 @@ StationPage::StationPage()
 	centralWidget()->setLayout(layout);
 
 	// Общая информация
-	m_label = new MLabel("[info]");
-	layout->addItem(m_label);
+	ui->label = new MLabel("[info]");
+	layout->addItem(ui->label);
 
 	// Кнопки
-	m_streams = new MButtonGroup();
-	connect(m_streams, SIGNAL(buttonClicked(MButton *)), SLOT(on_streams_clicked(MButton *)));
-	m_streams_layout = new QGraphicsLinearLayout(Qt::Vertical);
-	layout->addItem(m_streams_layout);
+	ui->streams = new MButtonGroup();
+	connect(ui->streams, SIGNAL(buttonClicked(MButton *)), SLOT(on_streams_clicked(MButton *)));
+	ui->streams_layout = new QGraphicsLinearLayout(Qt::Vertical);
+	layout->addItem(ui->streams_layout);
 
 	// Сообщение плеера
-	m_messages = new MTextEdit(MTextEditModel::MultiLine);
+	ui->messages = new MTextEdit(MTextEditModel::MultiLine);
 	setObjectName("messages");
-	m_messages->setReadOnly(true);
-	m_messages->setMaxLength(1000);
-	layout->addItem(m_messages);
+	ui->messages->setReadOnly(true);
+	ui->messages->setMaxLength(1000);
+	layout->addItem(ui->messages);
 }
 
 StationPage::~StationPage()
 {
-	delete m_label;
-	delete m_messages;
-	delete m_streams;
-	delete m_streams_layout;
+	delete ui;
 }
 
 void StationPage::createContent()
@@ -45,7 +59,7 @@ void StationPage::setStation(Station station)
 	m_station = station;
 
 	// Удалить предыдущие кнопки
-	qDeleteAll(m_streams->buttons());
+	qDeleteAll(ui->streams->buttons());
 
 	//Ошибка? foreach(Stream stream, m_station.streams())
 
@@ -56,31 +70,29 @@ void StationPage::setStation(Station station)
 		// Информация об аудиопотоке
 		MButton *btn = new MButton(stream.bitrate() + " " + stream.url());
 		btn->setProperty("url", stream.url());
-		m_streams->addButton(btn);
-		m_streams_layout->addItem(btn);
+		ui->streams->addButton(btn);
+		ui->streams_layout->addItem(btn);
 	}
 
 	// Текстом
 	QStringList info;
 	info << QString("Id: %1").arg(m_station.id());
 	info << QString("Name: %1").arg(m_station.name());
-	m_label->setText(info.join(". "));
+	ui->label->setText(info.join(". "));
 }
 
 void StationPage::on_streams_clicked(MButton *btn)
 {
-//	QString url = btn->text(); // URL текстом
 	QString url = btn->property("url").toString();
 	emit sig_openStream(m_station, url);
 }
 
 void StationPage::on_media_messages(QString text)
 {
-	m_messages->setText(text  + "\n" + m_messages->text());
+	ui->messages->setText(text  + "\n" + ui->messages->text());
 }
 
 //void StationPage::on_addToFavorites_clicked()
 //{
 //	emit sig_addToFavorites(m_station);
 //}
-

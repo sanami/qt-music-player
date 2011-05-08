@@ -16,10 +16,17 @@ public:
 
 struct StationsPageUi
 {
-	MButton *prev;
+	QSharedPointer<MButton> prev;
 	MButton *next;
 	MLabel *page;
 	MList *stations;
+
+	~StationsPageUi()
+	{
+		delete next;
+		delete page;
+		delete stations;
+	}
 };
 
 StationsPage::StationsPage()
@@ -40,7 +47,7 @@ StationsPage::StationsPage()
 		MButton *btn = new MButton("<<");
 		connect(btn, SIGNAL(clicked()), SLOT(on_prevPage_clicked()));
 		layout2->addItem(btn);
-		ui->prev = btn;
+		ui->prev = QSharedPointer<MButton>(btn);
 	}
 	{
 		MButton *btn = new MButton(">>");
@@ -71,7 +78,6 @@ StationsPage::StationsPage()
 StationsPage::~StationsPage()
 {
 	delete ui;
-	delete ui->stations;
 	delete m_model;
 }
 
