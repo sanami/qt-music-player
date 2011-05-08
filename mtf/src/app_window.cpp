@@ -86,16 +86,37 @@ void AppWindow::showPageForAction(QAction *action)
 //	action->setChecked(true);
 }
 
+QString AppWindow::getItem(QString title, QString prompt, QStringList items)
+{
+	MWidget *centralWidget = new MWidget;
+	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+	centralWidget->setLayout(layout);
+
+	MComboBox *combobox = new MComboBox(centralWidget);
+	combobox->setTitle(prompt);
+	combobox->addItems(items);
+
+	layout->addItem(combobox);
+
+	MDialog* dialog = new MDialog(title, M::OkButton | M::CancelButton);
+	dialog->setCentralWidget(centralWidget);
+
+	connect(dialog, SIGNAL(disappeared()), SLOT(processDialogResult()));
+	if (dialog->exec(this) == M::OkButton)
+		return combobox->currentText();
+	return "";
+}
+
 QString AppWindow::getText(QString title, QString prompt, QString text)
 {
 	MWidget *centralWidget = new MWidget;
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+	centralWidget->setLayout(layout);
 
 	MLabel *label = new MLabel(prompt, centralWidget);
-	MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
-										text,
-										centralWidget);
-	centralWidget->setLayout(layout);
+	label->setStyleName("CommonTitleInverted");
+
+	MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine, text, centralWidget);
 
 	layout->addItem(label);
 	layout->addItem(textEdit);

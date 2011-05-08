@@ -11,6 +11,7 @@
 #include <QtNetwork>
 #include <MApplicationWindow>
 #include <MApplicationPage>
+#include <MSceneManager>
 #include <MTextEdit>
 #include <MLabel>
 #include <MButton>
@@ -24,4 +25,5 @@
 #include <MBanner>
 #include <MDialog>
 #include <MMessageBox>
+#include <MObjectMenu>
 #endif

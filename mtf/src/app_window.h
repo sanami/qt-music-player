@@ -11,6 +11,7 @@ public:
 	void addPage(MApplicationPage *page);
 	void showPage(MApplicationPage *page);
 
+	QString getItem(QString title, QString prompt, QStringList items);
 	QString getText(QString title, QString prompt, QString text = "");
 	bool question(QString title, QString prompt);
 

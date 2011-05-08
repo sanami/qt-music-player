@@ -31,12 +31,13 @@ void IdListModel::remove(int id)
 {
 	Q_ASSERT( m_list.contains(id) );
 	m_list.removeAll(id);
+	emit layoutChanged();
 }
 
 void IdListModel::update(int id)
 {
 	if (m_list.contains(id))
-		emit layoutChanged(); //TODO index
+		emit layoutChanged(); //TODO dataChanged(index)
 }
 
 int IdListModel::id(const QModelIndex &index) const

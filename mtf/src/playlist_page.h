@@ -48,6 +48,8 @@ private slots:
 
 	//! Клик на запись в списке
 	void on_playlist_itemClicked(const QModelIndex &index);
+	//! Контекстное меню списка
+	void on_playlist_itemLongTapped(const QModelIndex &index);
 
 	//! Удалить запись из списка
 	void on_actionDeletePlaylist_triggered();
@@ -62,7 +64,7 @@ private slots:
 
 private:
 	//! Выбранный плейлист, или 0
-	int currentPlaylist() const;
+	int selectedPlaylist() const;
 
 protected:
 	virtual void createContent();
@@ -74,5 +76,6 @@ private:
 	PlaylistManager *m_manager; //!< Менеджер списками из App
 
 	int m_current_playlist_id; //!< Текущий список
+	int m_selected_playlist_id; //!< Выбранный список для меню
 	int m_parent_playlist_id;
 };

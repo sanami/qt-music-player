@@ -27,10 +27,13 @@ private slots:
 
 	//! Сообщения от плееров
 	void on_media_messages(QString str);
+
+	//! Добавить в избранное
 	void on_addToFavorites_clicked();
 
 private:
 	Ui::StationPage *ui;
+
 	Station m_station; //!< Текущая станция
 };
 

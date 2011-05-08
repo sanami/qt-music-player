@@ -229,7 +229,10 @@ void MPlayerControl::startProcess(QString url)
 //	arguments << "-cache" << "256" << "-cache-min" << "50"; # Медленно
 	arguments << "-identify";
 	arguments << "-novideo";
-//	arguments << "-ao" << "pulse";
+#ifndef Q_WS_WIN
+	arguments << "-ao" << "pulse";
+	arguments << "-softvol";
+#endif
 	arguments << "-loop" << "1"; // Пробовать только один раз
 
 	//arguments << "-wid" << m_winId;

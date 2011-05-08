@@ -25,6 +25,15 @@ StationPage::StationPage()
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
 	centralWidget()->setLayout(layout);
 
+	// Верхние кнопки
+	QGraphicsLinearLayout *layout2 = new QGraphicsLinearLayout(Qt::Horizontal);
+	{
+		MButton *btn = new MButton("Add to Favorites");
+		connect(btn, SIGNAL(clicked()), SLOT(on_addToFavorites_clicked()));
+		layout2->addItem(btn);
+	}
+	layout->addItem(layout2);
+
 	// Общая информация
 	ui->label = new MLabel("[info]");
 	layout->addItem(ui->label);
@@ -92,7 +101,7 @@ void StationPage::on_media_messages(QString text)
 	ui->messages->setText(text  + "\n" + ui->messages->text());
 }
 
-//void StationPage::on_addToFavorites_clicked()
-//{
-//	emit sig_addToFavorites(m_station);
-//}
+void StationPage::on_addToFavorites_clicked()
+{
+	emit sig_addToFavorites(m_station);
+}

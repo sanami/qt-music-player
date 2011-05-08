@@ -1,13 +1,17 @@
 #MainPage {
     horizontal-align: center;
     vertical-align: center;
-    text-color: white;
+	text-color: red;
 }
-#MainMessage {
-    background-image: none;
-    text-color: white;
-    preferred-size: 80% -1;
-    minimum-size:   80% -1;
+
+#messages {
+padding-top: 0;
+/*cliping: true;*/
+/*	font: "sans" 10;*/
+/*	background-image: none;*/
+/*	text-color: green;*/
+/*	preferred-size: 50% -1;*/
+/*    minimum-size:   80% -1;
     maximum-size:  100% 100%;
     margin-left: 0;
     margin-right: 0;
@@ -16,5 +20,9 @@
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
-    padding-bottom: 0;
+	padding-bottom: 0;*/
+}
+
+#InformationBanner {
+	disappear-timeout: 500;
 }

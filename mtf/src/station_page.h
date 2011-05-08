@@ -16,13 +16,14 @@ signals:
 	void sig_openStream(Station station, QString stream);
 	void sig_addToFavorites(Station station);
 
-public slots:
-
 private slots:
+	void on_streams_clicked(MButton *btn);
+
 	//! Сообщения от плееров
 	void on_media_messages(QString str);
 
-	void on_streams_clicked(MButton *btn);
+	//! Добавить в избранное
+	void on_addToFavorites_clicked();
 
 protected:
 	virtual void createContent();

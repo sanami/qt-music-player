@@ -260,9 +260,8 @@ void App::on_addStationToFavorites(Station station)
 			items << QString("%1 %2").arg(favorite.id()).arg(favorite.name());
 		}
 
-		bool ok;
-		QString parent = QInputDialog::getItem(m_app_window, "Add to Favorites", "Choose:", items, 0, false, &ok);
-		if (ok)
+		QString parent = m_app_window->getItem("Add to Favorites", "Choose:", items);
+		if (!parent.isEmpty())
 		{
 			int parent_id = parent.section(' ', 0, 0).toInt();
 			m_web->addStationToPlaylist(station, parent_id);

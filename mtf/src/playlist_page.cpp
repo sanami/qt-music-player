@@ -50,11 +50,13 @@ struct PlaylistPageUi
 	MButton *up;
 	MButton *create;
 	MList *playlist;
+	MObjectMenu *playlist_menu;
 };
 
 PlaylistPage::PlaylistPage(PlaylistManager *manager)
 	: ui(new PlaylistPageUi)
 	, m_manager(manager)
+	, m_selected_playlist_id(0)
 {
 	setObjectName("PlaylistPage");
 	setTitle("Playlist");
@@ -64,11 +66,6 @@ PlaylistPage::PlaylistPage(PlaylistManager *manager)
 	connect(m_manager, SIGNAL(sig_add(Playlist)), this, SLOT(addItem(Playlist)));
 	connect(m_manager, SIGNAL(sig_remove(int)), this, SLOT(removeItem(int)));
 	connect(m_manager, SIGNAL(sig_update(Playlist)), this, SLOT(updateItem(Playlist)));
-
-//	// Контекстное меню списка
-//	ui->playlist->addAction(ui->actionDeletePlaylist);
-//	ui->playlist->addAction(ui->actionCreatePlaylist);
-//	ui->playlist->addAction(ui->actionRenamePlaylist);
 
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
 	centralWidget()->setLayout(layout);
@@ -103,9 +100,28 @@ PlaylistPage::PlaylistPage(PlaylistManager *manager)
 	ui->playlist->setItemModel(m_model);
 
 	connect(ui->playlist, SIGNAL(itemClicked(QModelIndex)), SLOT(on_playlist_itemClicked(QModelIndex)));
+	connect(ui->playlist, SIGNAL(itemLongTapped(QModelIndex)), SLOT(on_playlist_itemLongTapped(QModelIndex)));
 	layout->addItem(ui->playlist);
 
 	layout->addStretch(100);
+
+	// Контекстное меню списка
+	ui->playlist_menu = new MObjectMenu(this);
+	{
+		MAction *action = new MAction("Delete", this);
+		ui->playlist_menu->addAction(action);
+		connect(action, SIGNAL(triggered()), SLOT(on_actionDeletePlaylist_triggered()));
+	}
+	{
+		MAction *action = new MAction("Create", this);
+		ui->playlist_menu->addAction(action);
+		connect(action, SIGNAL(triggered()), SLOT(on_actionCreatePlaylist_triggered()));
+	}
+	{
+		MAction *action = new MAction("Rename", this);
+		ui->playlist_menu->addAction(action);
+		connect(action, SIGNAL(triggered()), SLOT(on_actionRenamePlaylist_triggered()));
+	}
 
 	clearItems();
 }
@@ -133,6 +149,7 @@ void PlaylistPage::clearItems()
 {
 	m_model->clear();
 	m_current_playlist_id = 0;
+	m_selected_playlist_id = 0;
 
 	ui->name->setText("");
 	ui->up->setEnabled(false);
@@ -172,19 +189,22 @@ void PlaylistPage::removeItem(int playlist_id)
 	m_model->remove(playlist_id);
 }
 
-int PlaylistPage::currentPlaylist() const
+int PlaylistPage::selectedPlaylist() const
 {
-	QModelIndex index = ui->playlist->selectionModel()->currentIndex();
-	if (index.isValid())
-	{
-		return m_model->id(index);
-	}
-	return 0;
+	return m_selected_playlist_id;
 }
 
 void PlaylistPage::on_playlist_itemClicked(const QModelIndex &index)
 {
 	emit sig_openPlaylist(m_model->id(index));
+}
+
+void PlaylistPage::on_playlist_itemLongTapped(const QModelIndex &index)
+{
+	Playlist &pl = m_manager->playlist(m_model->id(index));
+	ui->playlist_menu->setTitle(pl.name());
+	m_selected_playlist_id = pl.id();
+	sceneManager()->appearSceneWindow(ui->playlist_menu);
 }
 
 void PlaylistPage::on_actionCreatePlaylist_triggered()
@@ -196,7 +216,7 @@ void PlaylistPage::on_actionCreatePlaylist_triggered()
 
 void PlaylistPage::on_actionDeletePlaylist_triggered()
 {
-	int playlist_id = currentPlaylist();
+	int playlist_id = selectedPlaylist();
 	if (playlist_id > 0)
 	{
 		emit sig_destroyPlaylist(playlist_id);
@@ -205,7 +225,7 @@ void PlaylistPage::on_actionDeletePlaylist_triggered()
 
 void PlaylistPage::on_actionRenamePlaylist_triggered()
 {
-	int playlist_id = currentPlaylist();
+	int playlist_id = selectedPlaylist();
 	if (playlist_id > 0)
 	{
 		emit sig_renamePlaylist(playlist_id);
