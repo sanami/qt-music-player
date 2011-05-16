@@ -1,5 +1,6 @@
 [Desktop Entry]
 Type=Application
 Name=playermtf
-Icon=icons-Applications-music
-Exec=playermtf -show-fps
+#Icon=icons-Applications-music
+#Exec=playermtf -software -target n900 -show-fps
+Exec=playermtf

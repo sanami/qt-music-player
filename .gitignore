@@ -5,3 +5,10 @@ Makefile
 .obj
 .ui
 *.qm
+builddir/
+build-stamp
+*.changes
+*.deb
+**/debian/playermtf*
+**/debian/files
+
