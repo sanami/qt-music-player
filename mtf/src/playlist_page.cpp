@@ -12,6 +12,13 @@ public:
 	{
 	}
 
+	virtual MWidget *createCell(const QModelIndex &index, MWidgetRecycler &recycler) const
+	{
+		MContentItem *contentItem = new MContentItem(MContentItem::SingleTextLabel);
+		updateCell(index, contentItem);
+		return contentItem;
+	}
+
 	void updateCell(const QModelIndex& index, MWidget *cell) const
 	{
 		MContentItem *contentItem = qobject_cast<MContentItem *>(cell);

@@ -76,11 +76,14 @@ void StationPage::setStation(Station station)
 	Stream::List streams = m_station.streams();
 	foreach(Stream stream, streams)
 	{
-		// Информация об аудиопотоке
-		MButton *btn = new MButton(stream.bitrate() + " " + stream.url());
-		btn->setProperty("url", stream.url());
-		ui->streams->addButton(btn);
-		ui->streams_layout->addItem(btn);
+		if (stream.status() == 1) // Активный
+		{
+			// Информация об аудиопотоке
+			MButton *btn = new MButton(stream.bitrate() + " " + stream.url());
+			btn->setProperty("url", stream.url());
+			ui->streams->addButton(btn);
+			ui->streams_layout->addItem(btn);
+		}
 	}
 
 	// Текстом

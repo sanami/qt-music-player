@@ -1,5 +1,6 @@
 #pragma once
 
+//! Управляет всеми страницами
 class AppWindow : public MApplicationWindow
 {
     Q_OBJECT
@@ -37,4 +38,7 @@ private:
 	QAction *currentAction;
 	QActionGroup *actionGroup;
 	QMap<QAction *, MApplicationPage *> m_pages;
+
+	MApplicationPage *m_current_page; //!< Текущая активная страница
+	bool m_busy; //!< Показывать индикатор загрузки
 };

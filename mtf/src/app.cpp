@@ -136,7 +136,7 @@ void App::on_web_finished(Task *task)
 		case Task::Station:
 			// Данные одной станции
 			m_station_page->setStation(Station(task->json));
-			m_station_page->appear(m_app_window);
+			m_app_window->showPage(m_station_page);
 			break;
 		case Task::Stations:
 			// Получены данные о списке станций
@@ -195,7 +195,7 @@ void App::on_web_finished(Task *task)
 void App::on_showStationPage(Station station)
 {
 	m_station_page->setStation(station);
-	m_station_page->appear(m_app_window);
+	m_app_window->showPage(m_station_page);
 }
 
 void App::on_openStream(Station station, QString stream)
@@ -219,12 +219,12 @@ void App::on_media_status(Station station, QString url, bool ok)
 
 void App::on_showLogPage()
 {
-	m_log_page->appear(m_app_window);
+	m_app_window->showPage(m_log_page);
 }
 
 void App::on_showOptionsPage()
 {
-	m_options_page->appear(m_app_window);
+	m_app_window->showPage(m_options_page);
 }
 
 void App::on_requestPage(int page)

@@ -80,6 +80,7 @@ struct Stream
 
 	//! Определения рабочих полей
 	FIELD_INT(id);
+	FIELD_INT(status);
 	FIELD_STRING(url);
 	FIELD_STRING(bitrate);
 	FIELD_STRING(codec);
@@ -108,6 +109,11 @@ struct Station
 	Genre::List genres() const
 	{
 		return Genre::List(data["genres"]);
+	}
+
+	Location::List locations() const
+	{
+		return Location::List(data["locations"]);
 	}
 
 	//! Определения рабочих полей

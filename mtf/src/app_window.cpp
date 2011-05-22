@@ -1,6 +1,8 @@
 #include "app_window.h"
 
 AppWindow::AppWindow()
+	: m_current_page(NULL)
+	, m_busy(false)
 {
 	setObjectName("AppWindow");
 
@@ -52,14 +54,24 @@ void AppWindow::addPage(MApplicationPage *page)
 void AppWindow::showPage(MApplicationPage *page)
 {
 	page->appear(this);
+
+	// Показать индикатор
+	m_current_page = page;
+	m_current_page->setProgressIndicatorVisible(m_busy);
 }
 
 void AppWindow::showBusy(bool busy)
 {
-	Q_UNUSED(busy);
+//	Q_UNUSED(busy);
 	//TODO индикатор рабочих запросов
 	//MProgressIndicator *spinner = new MProgressIndicator(NULL, MProgressIndicator::spinnerType);
 	//spinner->setUnknownDuration(true);
+
+	if (m_current_page)
+	{
+		m_current_page->setProgressIndicatorVisible(busy);
+	}
+	m_busy = busy;
 }
 
 void AppWindow::showMessage(QString msg, int timeout)
@@ -67,10 +79,10 @@ void AppWindow::showMessage(QString msg, int timeout)
 	Q_UNUSED(timeout);
 
 	MBanner *infoBanner = new MBanner();
-	infoBanner->setStyleName("InformationBanner");
+	infoBanner->setStyleName("ShortEventBanner");
 	infoBanner->setTitle(msg);
 	infoBanner->appear(this, MSceneWindow::DestroyWhenDone);
-	// Не работает, делается через CSS для #InformationBanner
+	// Не работает, делается через CSS для #ShortEventBanner
 	//infoBanner->style()->setProperty("disappear-timeout", 100);
 }
 
@@ -82,7 +94,7 @@ void AppWindow::clearMessage()
 void AppWindow::showPageForAction(QAction *action)
 {
 	qDebug() << Q_FUNC_INFO << action->isChecked();
-	m_pages[action]->appear(this);
+	showPage(m_pages[action]);
 //	action->setChecked(true);
 }
 

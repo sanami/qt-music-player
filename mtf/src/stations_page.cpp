@@ -4,13 +4,20 @@
 class StationsItemCreator : public MAbstractCellCreator<MContentItem>
 {
 public:
-	void updateCell(const QModelIndex& index, MWidget *cell) const
+	virtual MWidget *createCell(const QModelIndex &index, MWidgetRecycler &recycler) const
+	{
+		MContentItem *contentItem = new MContentItem(MContentItem::TwoTextLabels);
+		updateCell(index, contentItem);
+		return contentItem;
+	}
+
+	virtual void updateCell(const QModelIndex& index, MWidget *cell) const
 	{
 		MContentItem *contentItem = qobject_cast<MContentItem *>(cell);
 		QVariant data = index.data(Qt::DisplayRole);
 		QStringList rowData = data.value<QStringList>();
 		contentItem->setTitle(rowData[0]);
-//		contentItem->setSubtitle(rowData[1]);
+		contentItem->setSubtitle(rowData[1]);
 	}
 };
 

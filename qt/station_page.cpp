@@ -35,6 +35,8 @@ void StationPage::setStation(Station station)
 		columns << stream.url();
 
 		QTreeWidgetItem *it = new QTreeWidgetItem(columns);
+		if (stream.status() != 1)
+			it->setFlags(Qt::NoItemFlags);
 		ui->streams->addTopLevelItem(it);
 	}
 

@@ -7,6 +7,8 @@ FilterPage::FilterPage(QWidget *parent)
 {
     ui->setupUi(this);
 
+	connect(ui->comboBox_search->lineEdit(), SIGNAL(returnPressed()), SLOT(on_pushButton_filter_apply_clicked()));
+
 	ui->comboBox_search->addItem("stac");
 }
 

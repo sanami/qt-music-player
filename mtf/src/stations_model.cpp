@@ -63,11 +63,16 @@ QVariant StationsModel::data(const QModelIndex &index, int role) const
 
 			QStringList rowData;
 			rowData << station.name();
+
+			QStringList all;
+			foreach(Location loc, station.locations())
+				all << loc.name();
+			rowData << all.join(", ");
 			return QVariant(rowData);
 		}
 
 		// Пустой список
-		return QVariant(QStringList(m_message));
+		return QVariant(QStringList(m_message) << "");
 	}
 	return QVariant();
 }
